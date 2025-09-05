@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Trip to Map Lite</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="anonymous"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js" crossorigin="anonymous"></script>
+
+  <style>
+    :root{ --bg:#f6f7fb; --panel:#fff; --line:#e5e7eb; --text:#111827; --primary:#2563eb; --header-h:52px; }
+    html,body{height:100%}
+    body{margin:0;background:var(--bg);color:var(--text);font:16px/1.4 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans TC","PingFang TC","Hiragino Sans","Microsoft JhengHei",Arial,sans-serif}
+    .site-header{position:fixed;top:0;left:0;right:0;background:rgba(255,255,255,.92);backdrop-filter:saturate(150%) blur(6px);border-bottom:1px solid var(--line);z-index:1000}
+    .site-header .wrap{display:flex;align-items:center;gap:12px;padding:max(6px,env(safe-area-inset-top)) 12px 6px}
+    .brand{font-weight:800;letter-spacing:.2px}
+    .brand small{opacity:.6;font-weight:700;margin-left:6px}
+    .grow{flex:1;min-width:0}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:36px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:#fff;cursor:pointer;font-weight:700}
+    .btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+    .btn-home{display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 12px;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.06);color:rgba(17,24,39,.85);font-weight:600;text-decoration:none;cursor:pointer}
+    .btn-home:hover{background:#f9fafb;border-color:#d1d5db}
+    .btn-home:active{transform:scale(.98);box-shadow:0 2px 10px rgba(0,0,0,.05)}
+    .btn-home:focus{outline:2px solid #3b82f6;outline-offset:2px}
+    .page{padding-top:var(--header-h);height:calc(100dvh - var(--header-h));display:flex;flex-direction:column}
+    .tabs{display:flex;gap:8px;padding:8px 12px 0}
+    .tab{flex:1;display:inline-flex;align-items:center;justify-content:center;height:36px;border-radius:999px;border:1px solid var(--line);background:#fff;color:#374151;cursor:pointer;font-weight:700}
+    .tab.active{background:#111827;color:#fff;border-color:#111827}
+    .content{flex:1;min-height:0;padding:12px;display:flex;flex-direction:column;gap:12px}
+    .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.05);padding:12px}
+    .grid{display:none;gap:12px;flex:1;min-height:0;height:100%}
+    .col{display:flex;flex-direction:column;gap:12px;min-height:0}
+    @media (min-width:900px){
+      .tabs{display:none}
+      .grid{display:grid;grid-template-columns:2fr 3fr;grid-auto-rows:1fr}
+      #stackList, #stackMap{display:none !important}
+      .content{padding:12px}
+    }
+    .add-box{display:flex;flex-direction:column;gap:8px}
+    .row{display:flex;gap:8px}
+    .row .select,.row .text,.row .note{flex:1}
+    select,input[type="text"],textarea{width:100%;border:1px solid var(--line);border-radius:10px;background:#fff;padding:10px 12px;font:inherit}
+    textarea{min-height:40px;max-height:120px;resize:vertical}
+    .list{flex:1;min-height:0;overflow:auto}
+    .item{display:flex;align-items:flex-start;gap:10px;padding:10px;border:1px solid #eef0f3;border-radius:12px;background:#fff}
+    .item + .item{margin-top:8px}
+    .badge{min-width:22px;height:22px;border-radius:999px;background:#111827;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin-top:2px}
+    .meta{flex:1;display:flex;flex-direction:column;gap:4px;min-width:0}
+    .title{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .note{color:#6b7280;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .actions{display:flex;gap:6px}
+    .iconbtn{height:32px;min-width:32px;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:#fff;cursor:pointer}
+    .iconbtn.danger{border-color:#fecaca;background:#fff1f2;color:#b91c1c}
+    .filters{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+    .chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid var(--line);border-radius:999px;background:#fff;font-size:14px}
+
+ 
+.map-wrap {
+  position: relative; /* 讓內部子元素（像 Leaflet 的控制元件）可以用絕對定位 */
+  flex: 1;            /* 在 flex 容器中，佔據剩餘的可用空間 */
+  min-height: 0;      /* 避免 flex 子元素在某些瀏覽器下無法縮小 */
+}   
+/* 地圖容器：桌面版與行動版共用樣式 */
+#map,
+#m_map {
+  height: 55dvh;                 /* 高度 = 螢幕高度的 60%（可調整，例如 55dvh） */
+  border: 1px solid var(--line); /* 外框線條 */
+  border-radius: 12px;           /* 圓角 */
+  overflow: hidden;              /* 超出隱藏，避免 tile 溢出 */
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.02); /* 內框陰影（微妙的立體感） */
+}
+
+/* 桌面版（寬度 >= 900px）：地圖自動填滿父容器高度 */
+@media (min-width: 900px) {
+  #map {
+    height: 75%; /* 在桌面佈局裡，讓地圖撐滿整個右側欄位 */
+  }
+}
+ 
+    .summary{margin-top:8px;border:1px dashed #e5e7eb;border-radius:10px;padding:8px;background:#fff}
+    .summary h3{margin:0 0 6px;font-size:15px}
+    .summary ol{margin:0;padding-left:20px}
+    .summary li{padding:2px 0}
+    .tip{color:#6b7280;font-size:13px}
+    
+  /* 1) 盒模型統一，避免 padding/border 把寬度撐爆 */
+*, *::before, *::after { box-sizing: border-box; }
+
+/* 2) 右側地圖+清單容器不准在 X 軸外溢（避免出現水平捲軸） */
+.map-wrap,
+.summary { 
+  max-width: 100%;
+  overflow-x: hidden;       /* 或用 clip；Safari 也 OK */
+}
+
+/* 3) ordered list 的縮排保守一點，避免邊界計算誤差 */
+.summary ol {
+  padding-left: 16px;       /* 原本 20px → 16px，更保守 */
+  margin-right: 0;          /* 保證不往右撐 */
+}
+
+/* 如果仍偶發看到 1px 的水平捲軸（某些裝置 sub-pixel）：
+   可以保險一點在主要容器層級關掉 X 捲軸 */
+.content { overflow-x: hidden; }  
+ 
+/* 拖拉時的半透明影像（Sortable 會套用） */
+.drag-ghost { opacity: .5; }
+
+/* 讓列表正常直向捲動 */
+.list { overscroll-behavior: contain; }
+
+/* 拖曳把手 */
+.grip {
+  width: 18px;
+  align-self: stretch;
+  display: grid; place-items: center;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;       /* 只有把手禁止手勢，避免與捲動打架 */
+  opacity: .6;
+}
+.grip:active { cursor: grabbing; opacity: .9; }
+
+/* Sortable 的視覺狀態 */
+.sort-chosen { opacity: .9; }
+.sort-ghost  { opacity: .5; }
+.sort-drag   { opacity: .8; }
+
+  
+    
+  </style>
+</head>
+<body>
+  <header class="site-header" role="banner">
+    <div class="wrap">
+      <div class="brand">Trip to Map <small>Lite</small></div>
+      <div class="grow"></div>
+      <button class="btn" id="btnPrint">列印</button>
+      <a href="/" class="btn-home" id="homeBtn" aria-label="回首頁"><span>🧭</span><span>回首頁</span></a>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="tabs" role="tablist">
+      <button class="tab active" data-tab="list">清單</button>
+      <button class="tab" data-tab="map">地圖</button>
+    </div>
+
+    <div class="content">
+      <div class="grid">
+        <section class="col">
+          <div class="panel">
+            <div class="add-box">
+              <div class="row">
+                <select class="select" id="type">
+                  <option value="sight">🗺 sight</option>
+                  <option value="food">🍜 food</option>
+                  <option value="cafe">☕️ cafe</option>
+                  <option value="sweet">🍰 sweet</option>
+                  <option value="hotel">🏨 hotel</option>
+                  <option value="transit">🚇 transit</option>
+                  <option value="shop">🛍 shop</option>
+                  <option value="other">⭐️ other</option>
+                </select>
+                <input class="text" type="text" id="input" placeholder="名稱或地址…" />
+                <button class="btn primary" id="btnAdd">加入</button>
+              </div>
+              <!-- 新增：顯示名稱（選填，預設跟上面同步） -->
+              <div class="row">
+                <input class="text" type="text" id="disp" placeholder="顯示名稱（可選，預設用上方）" />
+              </div>
+              <div class="row">
+                <textarea class="note" id="note" placeholder="備註（可選）"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel" style="display:flex;flex-direction:column;min-height:0;">
+            <div class="list" id="list"></div>
+            <div class="tip" style="padding:8px 4px;">提示：可拖拉項目排序或用箭頭調整；排序會更新路線。</div>
+          </div>
+        </section>
+
+        <section class="col">
+          <div class="panel" style="display:flex;flex-direction:column;min-height:0;flex:1 1 auto;">
+            <div class="filters" id="filters"></div>
+            <label class="chip"><input type="checkbox" id="routeToggle" checked> 顯示路線</label>
+            <div class="map-wrap" id="mapWrap">
+              <div id="map" aria-label="地圖"></div>
+              <div class="summary" id="summary">
+                <h3>今日清單</h3>
+                <ol id="summaryList"></ol>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <section class="panel" id="stackList">
+        <div class="add-box">
+          <div class="row">
+            <select class="select" id="m_type">
+              <option value="sight">🗺 sight</option>
+              <option value="food">🍜 food</option>
+              <option value="cafe">☕️ cafe</option>
+              <option value="sweet">🍰 sweet</option>
+              <option value="hotel">🏨 hotel</option>
+              <option value="transit">🚇 transit</option>
+              <option value="shop">🛍 shop</option>
+              <option value="other">⭐️ other</option>
+            </select>
+            <input class="text" type="text" id="m_input" placeholder="名稱或地址…" />
+            <button class="btn primary" id="m_btnAdd">加入</button>
+          </div>
+          <!-- 新增：行動版顯示名稱 -->
+          <div class="row">
+            <input class="text" type="text" id="m_disp" placeholder="顯示名稱（可選，預設用上方）" />
+          </div>
+          <div class="row">
+            <textarea class="note" id="m_note" placeholder="備註（可選）"></textarea>
+          </div>
+        </div>
+        <div class="list" id="m_list" style="margin-top:12px;"></div>
+      </section>
+
+      <section class="panel" id="stackMap" style="display:none;">
+        <div class="filters" id="m_filters"></div>
+        <label class="chip"><input type="checkbox" id="m_routeToggle" checked> 顯示路線</label>
+        <div class="map-wrap">
+          <div id="m_map"></div>
+          <div class="summary" id="m_summary">
+            <h3>今日清單</h3>
+            <ol id="m_summaryList"></ol>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+(function(){
+  const $ = (sel, el=document) => el.querySelector(sel);
+  const $$ = (sel, el=document) => [...el.querySelectorAll(sel)];
+  const uid = () => Math.random().toString(36).slice(2,9);
+  const EMOJI = { sight:"🗺", food:"🍜", cafe:"☕️", sweet:"🍰", hotel:"🏨", transit:"🚇", shop:"🛍", other:"⭐️" };
+  const TYPES = Object.keys(EMOJI);
+
+  function setHeaderHeightVar(){
+    const h = $('.site-header').getBoundingClientRect().height;
+    document.documentElement.style.setProperty('--header-h', h + 'px');
+  }
+  window.addEventListener('resize', setHeaderHeightVar);
+  window.visualViewport && window.visualViewport.addEventListener('resize', setHeaderHeightVar);
+  setHeaderHeightVar();
+
+  const STORAGE_KEY = 'trip-lite-v3';
+  const CACHE_KEY = 'geo-cache-v1';
+  let model = { route:true, places:[], filters: new Set(TYPES) };
+  try{
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    if(saved && Array.isArray(saved.places)){
+      model = { ...model, ...saved, filters: new Set(saved.filters || TYPES) };
+    }
+  }catch(e){}
+  function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...model, filters:[...model.filters] })); }
+
+  const cache = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}');
+  function saveCache(){ localStorage.setItem(CACHE_KEY, JSON.stringify(cache)); }
+  let geocodeQueue = Promise.resolve();
+  function geocode(q){
+    if(!q) return Promise.resolve(null);
+    const key = q.trim().toLowerCase();
+    if(cache[key]) return Promise.resolve(cache[key]);
+    geocodeQueue = geocodeQueue.then(() => new Promise((resolve) => {
+      setTimeout(async () => {
+        try{
+          const url = 'https://nominatim.openstreetmap.org/search?format=json&accept-language=zh-TW&q=' + encodeURIComponent(q);
+        const res = await fetch(url, { headers:{'Accept':'application/json'} });
+        const data = await res.json();
+        const item = data && data[0] ? { lat:+data[0].lat, lng:+data[0].lon, display:data[0].display_name } : null;
+        cache[key] = item; saveCache(); resolve(item);
+        }catch(e){ resolve(null); }
+      }, 700);
+    }));
+    return geocodeQueue;
+  }
+
+  // Leaflet map init
+  function createMap(elId){
+    const map = L.map(elId, { zoomControl:true, tap:false });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      crossOrigin: 'anonymous',
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+    map.setView([25.033,121.5654], 12);
+    return map;
+  }
+  const mapMain = createMap('map');
+  const mapMobile = createMap('m_map');
+
+  let markersMain=[], lineMain=null, markersM=[], lineM=null;
+  function markerIcon(n){
+    const el = document.createElement('div');
+    el.style.cssText='width:28px;height:28px;border-radius:50%;border:2px solid #111;background:#fff;display:grid;place-items:center;box-shadow:0 2px 6px rgba(0,0,0,.25);font:700 13px/1 system-ui';
+    el.textContent=n; return L.divIcon({html:el,iconSize:[28,28],className:'num-pin'});
+  }
+  function clearMap(isMobile){
+    const mk = isMobile?markersM:markersMain; mk.forEach(m=>m.remove()); mk.length=0;
+    const ln = isMobile?lineM:lineMain; if(ln){ ln.remove(); if(isMobile) lineM=null; else lineMain=null; }
+  }
+  function renderMap(isMobile){
+    const map = isMobile?mapMobile:mapMain;
+    const mkArr = isMobile?markersM:markersMain;
+    clearMap(isMobile);
+    const visible = model.places.filter(p=>model.filters.has(p.type));
+    const latlngs=[];
+    visible.forEach((p,i)=>{
+      if(p.lat && p.lng){
+        const m=L.marker([p.lat,p.lng],{icon:markerIcon(i+1)}).addTo(map);
+        const title=`${EMOJI[p.type]} ${p.name || p.input || '未命名'}`;
+        const note=p.note?`<div style="color:#6b7280;margin-top:4px;">${escapeHtml(p.note)}</div>`:'';
+        m.bindPopup(`<div style="font-weight:700;margin-bottom:4px;">${title}</div>${note}`);
+        mkArr.push(m); latlngs.push([p.lat,p.lng]);
+      }
+    });
+    const routeOn = isMobile ? $('#m_routeToggle').checked : $('#routeToggle').checked;
+    if(routeOn && latlngs.length>=2){
+      const ln=L.polyline(latlngs,{color:'#2563eb',weight:4,opacity:.9}).addTo(map);
+      if(isMobile) lineM=ln; else lineMain=ln;
+    }
+    if(latlngs.length){ try{ map.fitBounds(latlngs,{padding:[40,40]}); }catch(e){} }
+    setTimeout(()=> map.invalidateSize(), 150);
+  }
+
+// 兩點直線距離（公尺，Haversine）
+function haversineMeters(a, b){
+  if(!a || !b || !a.lat || !a.lng || !b.lat || !b.lng) return null;
+  const R = 6371000;
+  const toRad = d => d * Math.PI / 180;
+  const dLat = toRad(b.lat - a.lat);
+  const dLng = toRad(b.lng - a.lng);
+  const lat1 = toRad(a.lat), lat2 = toRad(b.lat);
+  const s = Math.sin(dLat/2)**2 + Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLng/2)**2;
+  return 2 * R * Math.asin(Math.sqrt(s));
+}
+
+// 公里、至少 0.1、1 位小數；回傳例如 "↘︎0.4km"
+function formatKm(meters){
+  if(meters == null) return '';
+  const km = meters / 1000;
+  const shown = Math.max(0.1, Math.round(km * 10) / 10);
+  return '↘︎' + shown.toFixed(1) + 'km';
+}
+
+
+function renderSummary(){
+  const build = el=>{
+    el.innerHTML='';
+
+    // 只取被勾選的項目，且保留順序
+    const visible = model.places.filter(p => model.filters.has(p.type));
+
+    visible.forEach((p, idx) => {
+      const li = document.createElement('li');
+      const name = p.name || p.input || '未命名';
+
+      // 距離：到下一點（最後一個沒有）
+      let distText = '';
+      if(idx < visible.length - 1){
+        const next = visible[idx + 1];
+        const m = haversineMeters(p, next);
+        if(m != null) distText = `（${formatKm(m)}）`; // 全形括號 + 全形箭頭
+      }
+
+      // 備註（如有）
+      const noteText = p.note ? `（${p.note}）` : '';
+
+      // 最終組合：emoji 名稱 + 距離 + 備註
+      li.textContent = `${EMOJI[p.type]} ${name}${distText}${noteText}`;
+      el.appendChild(li);
+    });
+  };
+  build($('#summaryList'));
+  build($('#m_summaryList'));
+}
+
+
+
+  function renderFilters(){
+    function build(container){
+      container.innerHTML='';
+      TYPES.forEach(t=>{
+        const chip=document.createElement('label'); chip.className='chip';
+        const cb=document.createElement('input'); cb.type='checkbox'; cb.checked=model.filters.has(t);
+        const span=document.createElement('span'); span.textContent=`${EMOJI[t]} ${t}`;
+        chip.append(cb,span);
+        cb.addEventListener('change',()=>{
+          if(cb.checked) model.filters.add(t); else model.filters.delete(t);
+          save(); renderMap(container.id.startsWith('m_')); renderSummary();
+        });
+        container.appendChild(chip);
+      });
+    }
+    build($('#filters')); build($('#m_filters'));
+  }
+
+function itemTemplate(p,i){
+  const el = document.createElement('div');
+  el.className = 'item';
+  el.dataset.id = p.id;
+  el.innerHTML = `
+    <div class="grip" aria-label="拖曳調整順序">⋮⋮</div>
+    <div class="badge">${i+1}</div>
+    <div class="meta">
+      <div class="title">${EMOJI[p.type]} ${escapeHtml(p.name||p.input||'未命名')}</div>
+      ${p.note?`<div class="note">${escapeHtml(p.note)}</div>`:''}
+    </div>
+    <div class="actions">
+      <button class="iconbtn" data-act="up" title="上移">↑</button>
+      <button class="iconbtn" data-act="down" title="下移">↓</button>
+      <button class="iconbtn" data-act="loc" title="定位">🎯</button>
+      <button class="iconbtn danger" data-act="del" title="刪除">刪</button>
+    </div>`;
+  return el;
+}
+
+function renderList(){
+  function build(container){
+    // 1) 重新渲染清單
+    container.innerHTML = '';
+    model.places.forEach((p,i)=>container.appendChild(itemTemplate(p,i)));
+
+    // 2) 若已有舊的 Sortable，先砍掉避免多實例衝突
+    if (container._sortable) {
+      try { container._sortable.destroy(); } catch(e){}
+      container._sortable = null;
+    }
+
+    // 3) 啟用 Sortable（只用把手拖、避免影響捲動）
+    container._sortable = new Sortable(container, {
+      handle: '.grip',
+      animation: 150,
+      direction: 'vertical',
+      delay: 160,                 // 觸控長按啟動（避免和捲動打架）
+      delayOnTouchOnly: true,
+      forceFallback: true,        // 行動裝置更穩
+      fallbackOnBody: true,
+      scroll: true,
+      scrollSensitivity: 60,
+      scrollSpeed: 12,
+      touchStartThreshold: 4,     // 手指微移不算拖
+      filter: 'button',
+      preventOnFilter: false,
+      chosenClass: 'sort-chosen',
+      ghostClass: 'sort-ghost',
+      dragClass: 'sort-drag',
+      onEnd: () => {
+        // 4) 依 DOM 順序重排資料
+        const ids = [...container.querySelectorAll('.item')].map(el=>el.dataset.id);
+        model.places.sort((a,b)=> ids.indexOf(a.id) - ids.indexOf(b.id));
+        save();
+
+        // 5) 輕量更新（避免再重建 Sortable）：只更新右側地圖與 summary，和左側編號
+        renderMap(false); renderMap(true); renderSummary();
+        // 更新編號圓點
+        [...container.querySelectorAll('.badge')].forEach((b,i)=> b.textContent = i+1);
+      }
+    });
+
+    // 6) 其餘按鈕、雙擊帶回表單照舊
+    container.onclick = ev => {
+      const btn = ev.target.closest('button'); if(!btn) return;
+      const block = ev.target.closest('.item'); if(!block) return;
+      const id  = block.dataset.id;
+      const idx = model.places.findIndex(p=>p.id===id);
+      const act = btn.dataset.act;
+
+      if(act === 'del'){ if(idx>=0){ model.places.splice(idx,1); save(); renderAll(); } return; }
+      if(act === 'up' && idx>0){ const [x]=model.places.splice(idx,1); model.places.splice(idx-1,0,x); save(); renderAll(); return; }
+      if(act === 'down' && idx<model.places.length-1){ const [x]=model.places.splice(idx,1); model.places.splice(idx+1,0,x); save(); renderAll(); return; }
+      if(act === 'loc'){
+        const p=model.places[idx];
+        if(p && p.lat && p.lng){ (container.id.startsWith('m_')? mapMobile: mapMain).setView([p.lat,p.lng],16,{animate:true}); }
+        else { toast('尚未定位，正在嘗試…'); p && locatePlace(p,true); }
+      }
+    };
+
+    container.ondblclick = ev => {
+      const block = ev.target.closest('.item'); if(!block) return;
+      const id = block.dataset.id;
+      const p  = model.places.find(x=>x.id===id);
+      fillInputs(p, container.id.startsWith('m_'));
+    };
+  }
+
+  build(document.getElementById('list'));
+  build(document.getElementById('m_list'));
+}
+
+
+
+
+
+
+  /* ====== 這裡開始是顯示名稱的加強 ====== */
+  // 讀取目前輸入
+  function currentInputs(isMobile){
+    return {
+      type:  $(isMobile?'#m_type':'#type').value,
+      input: $(isMobile?'#m_input':'#input').value.trim(),
+      disp:  $(isMobile?'#m_disp':'#disp').value.trim(),  // 新增
+      note:  $(isMobile?'#m_note':'#note').value.trim()
+    };
+  }
+  // 清空表單
+  function clearInputs(isMobile){
+    $(isMobile?'#m_input':'#input').value = '';
+    $(isMobile?'#m_disp':'#disp').value   = '';          // 新增
+    $(isMobile?'#m_note':'#note').value   = '';
+    $(isMobile?'#m_input':'#input').focus();
+  }
+  // 將項目帶回表單（雙擊列表）
+  function fillInputs(p,isMobile){
+    $(isMobile?'#m_type':'#type').value   = p.type;
+    $(isMobile?'#m_input':'#input').value = p.input || '';
+    $(isMobile?'#m_disp':'#disp').value   = p.name  || p.input || ''; // 新增
+    $(isMobile?'#m_note':'#note').value   = p.note  || '';
+    $(isMobile?'#m_input':'#input').focus();
+  }
+
+  // 新增項目：顯示名稱用 disp || input
+  function addPlace(isMobile){
+    const {type,input,disp,note}=currentInputs(isMobile);
+    if(!input){ toast('請輸入名稱或地址'); return; }
+    const place={ id:uid(), type, name:(disp || input), input, note, lat:null, lng:null };
+    model.places.push(place); save(); renderAll(); clearInputs(isMobile); locatePlace(place);
+  }
+
+  // 自動同步「顯示名稱」：除非你改過
+  ['','m_'].forEach(prefix=>{
+    const inputEl = document.getElementById(prefix+'input');
+    const dispEl  = document.getElementById(prefix+'disp');
+    if(!inputEl || !dispEl) return;
+    dispEl.addEventListener('input', ()=> dispEl.dataset.dirty = '1'); // 你動過就標記
+    inputEl.addEventListener('input', ()=>{ if(!dispEl.dataset.dirty){ dispEl.value = inputEl.value; } });
+  });
+  /* ====== 顯示名稱加強到此 ====== */
+
+  async function locatePlace(place, notify=false){
+    const res=await geocode(place.input);
+    if(res){place.lat=res.lat; place.lng=res.lng; save(); renderAll();}
+    else if(notify){toast('定位失敗，換個關鍵字試試');}
+  }
+  $('#btnAdd').addEventListener('click',()=>addPlace(false));
+  $('#m_btnAdd').addEventListener('click',()=>addPlace(true));
+  $('#input').addEventListener('keydown',e=>{if(e.key==='Enter') addPlace(false);});
+  $('#m_input').addEventListener('keydown',e=>{if(e.key==='Enter') addPlace(true);});
+
+  $$('.tab').forEach(tab=>tab.addEventListener('click',()=>{
+    $$('.tab').forEach(t=>t.classList.toggle('active',t===tab));
+    const isMap=tab.dataset.tab==='map';
+    $('#stackList').style.display=isMap?'none':'';
+    $('#stackMap').style.display=isMap?'':'none';
+    setTimeout(()=> mapMobile.invalidateSize(), 200);
+  }));
+
+  $('#routeToggle').addEventListener('change',()=>renderAll());
+  $('#m_routeToggle').addEventListener('change',()=>renderAll());
+
+  $('#homeBtn').addEventListener('click',e=>{
+    if(window.history.length>1){e.preventDefault(); history.back(); setTimeout(()=>{ location.href='/' }, 300);}
+  });
+
+
+
+
+  // 列印修正：把目前 DOM 複製到新視窗並帶 Leaflet CSS
+  document.getElementById('btnPrint').addEventListener('click', ()=>{
+    const isWide = window.matchMedia('(min-width:900px)').matches;
+    const wrap = isWide ? document.getElementById('mapWrap') : document.querySelector('#stackMap .map-wrap');
+    const clone = wrap.cloneNode(true);
+    const wrapRect = wrap.getBoundingClientRect();
+    clone.style.width  = wrapRect.width + 'px'; clone.style.height = 'auto';
+    const srcMapEl = wrap.querySelector(isWide ? '#map' : '#m_map');
+    const dstMapEl = clone.querySelector(isWide ? '#map' : '#m_map');
+    const mapRect  = srcMapEl.getBoundingClientRect();
+    dstMapEl.style.width = mapRect.width + 'px';
+    dstMapEl.style.height= mapRect.height + 'px';
+    dstMapEl.style.borderRadius='0'; dstMapEl.style.boxShadow='none'; dstMapEl.style.border='0';
+    const w = window.open('', '_blank');
+    w.document.write(`<!doctype html><html lang="zh-Hant"><head>
+      <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+      <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="anonymous" />
+      <style>@page{size:A4;margin:10mm} html,body{height:auto} body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC","PingFang TC","Microsoft JhengHei",Arial,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+      .map-wrap{width:${wrapRect.width}px} .summary{margin-top:8px;border:1px dashed #e5e7eb;padding:8px} img{image-rendering:-webkit-optimize-contrast}</style>
+    </head><body></body></html>`);
+    w.document.close(); w.document.body.appendChild(clone);
+    const waitImages = (doc)=>{
+      const imgs = Array.from(doc.images || []); if (!imgs.length) return Promise.resolve();
+      return Promise.allSettled(imgs.map(img => new Promise(res=>{
+        if (img.complete) return res(); img.addEventListener('load', res, {once:true}); img.addEventListener('error', res, {once:true});
+      })));
+    };
+    setTimeout(async ()=>{ try{ await waitImages(w.document); } finally{ w.focus(); w.print(); } }, 150);
+  });
+
+  function toast(msg){
+    let t=$('#toast');
+    if(!t){ t=document.body.appendChild(document.createElement('div')); t.id='toast';
+      Object.assign(t.style,{position:'fixed',left:'50%',bottom:'16px',transform:'translateX(-50%)',background:'#111827',color:'#fff',padding:'8px 12px',borderRadius:'10px',fontWeight:'600',zIndex:2500,transition:'opacity .2s'});
+    }
+    t.textContent=msg; t.style.opacity='1'; setTimeout(()=> t.style.opacity='0', 1800);
+  }
+  function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+
+  function renderAll(){ renderList(); renderFilters(); renderMap(false); renderMap(true); renderSummary(); }
+  renderAll();
+})();
+</script>
+</body>
+</html>
