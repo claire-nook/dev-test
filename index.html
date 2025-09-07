@@ -139,9 +139,11 @@ body[data-mode="preview"] #previewCard { display:flex; }
 body[data-mode="preview"] #previewCard .body iframe {
   height: calc(100vh - 64px - 42px); /* 扣掉 header 和卡片標題 */
 }
+
+[hidden] { display: none !important; }
 </style>
 </head>
-<body>
+<body data-mode="edit">
 
 <header>
   <div class="h-left">
@@ -173,7 +175,7 @@ body[data-mode="preview"] #previewCard .body iframe {
   </section>
 
   <!-- 右：圖片工具 -->
-  <aside class="card">
+  <aside class="card" id="imagesCard">
     <h3>圖片區（壓縮、命名、勾選、ZIP）</h3>
     <div class="body">
       <div class="toolbar sticky">
