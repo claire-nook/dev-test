@@ -825,26 +825,38 @@ blockquote::before{content:"“";position:absolute;top:-6px;left:8px;font-size:4
 }
 
 /* ===== 綁定預覽按鈕：先開空白頁，再寫整份 HTML 進去（iPad 安心版） ===== */
-document.getElementById('previewBtn').addEventListener('click', function () {
-  try {
-    const md = document.getElementById('md').value || '';
-    const html = buildPreviewHTML(md);
+  document.getElementById('previewBtn').addEventListener('click', function () {
+    // 1) 先開 about:blank，確保屬於同一個使用者手勢
+    const win = window.open('about:blank', '_blank');
+    if (!win) { toast('彈出視窗被封鎖，請允許本頁開新視窗'); return; }
 
-    // 使用者手勢內，同步開分頁，不會被阻擋
-    const win = window.open('', '_blank');
-    if (!win) {
-      toast('彈出視窗被封鎖，請允許本頁開新視窗'); 
-      return;
+    try {
+      // 先給個輕量占位，避免白屏
+      win.document.write('<!doctype html><title>預覽</title><meta name="viewport" content="width=device-width, initial-scale=1"><p style="font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Noto Sans TC,sans-serif;padding:16px">載入中…</p>');
+      win.document.close();
+
+      // 2) 再去組大字串（這步驟可能比較花時間，跟彈窗就分手了）
+      const md = document.getElementById('md').value || '';
+      const html = buildPreviewHTML(md);
+
+      // 3A) 方案 A：覆寫整份文件（多數瀏覽器 OK）
+      try {
+        win.document.open();
+        win.document.write(html);
+        win.document.close();
+      } catch {
+        // 3B) 方案 B：iOS 偶爾對 document.write 臉臭，就改用 Blob URL
+        const blob = new Blob([html], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        win.location.replace(url);
+        // 記得之後在新頁 unload 時自己 revoke（這裡就算了）
+      }
+    } catch (err) {
+      console.error(err);
+      toast('預覽失敗：腳本錯誤');
     }
-    // 同步把整份 HTML 寫進去
-    win.document.open();
-    win.document.write(html);
-    win.document.close();
-  } catch (err) {
-    console.error(err);
-    toast('預覽失敗：腳本錯誤');
-  }
-});
+  });
+
 
 
 
