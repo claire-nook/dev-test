@@ -1,1469 +1,436 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>Markdown 預覽</title>
-        <!-- 嘗試載入 marked；若失敗改用內建 fallback -->
-        <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-        <!-- 嘗試載入 mermaid圖表支援 -->
-        <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
-        <!-- 主題色系統一放在這裡 -->
-        <style id="themes-css">
-            /* 原風格：表頭底色 */
-            :root {
-                --bg: #f6f7fb;
-                --panel: #ffffff;
-                --line: #e5e7eb;
-                --text: #111827;
-                --muted: #6b7280;
-                --btn: #111827;
-                --btn-hover: #000000;
-                --link: #2563eb;
-
-                --bq-border: #d1d5db;
-                --bq-bg: #f9fafb;
-                --bq-quote: rgba(17, 24, 39, 0.12);
-                --bq-text-muted: #6b7280;
-
-                --thumb-w: 320px;
-                --thumb-h: 200px;
-
-                --table-head-bg: #f8fafc;
-            }
-            /* 奶茶系 */
-            :root[data-theme="milktea"] {
-                --bg: #fdfaf6; /* 淡奶油米色 */
-                --panel: #ffffff; /* 純白襯托 */
-                --line: #e2c9b7; /* 奶茶邊框色 */
-                --text: #4b3621; /* 深咖啡字色 */
-                --muted: #7a5f4b; /* 次要文字：焦糖色 */
-                --btn: #d7a86e; /* 奶茶拿鐵色按鈕 */
-                --btn-hover: #c08552; /* 焦糖 hover */
-                --bq-border: #e6d0c1; /* 奶油米邊框 */
-                --bq-bg: #f9f3ef; /* 引用背景：淡拿鐵 */
-                --bq-quote: rgba(160, 115, 85, 0.2);
-                --bq-text-muted: #7a5f4b;
-                --link: #a47148; /* 可可連結色 */
-                --table-head-bg: #f3e7df; /* 柔和米灰 */
-            }
-
-            /* 森林系 */
-            :root[data-theme="forest"] {
-                --bg: #ffffff; /* 白底，乾淨 */
-                --panel: #ffffff; /* 面板白 */
-                --line: #cfd8d3; /* 淡灰綠邊線 */
-                --text: #1b2d1b; /* 深墨綠字體，穩重 */
-                --muted: #4a5d4a; /* 次要字色：暗苔綠 */
-
-                --btn: #3b6b3b; /* 主按鈕：森林綠 */
-                --btn-hover: #2f4f2f; /* hover：更暗一階的綠 */
-                --link: #2e6f4f; /* 深藍綠連結 */
-
-                --bq-border: #7a8f7a; /* 引用邊框：灰綠 */
-                --bq-bg: #f4f7f4; /* 引用背景：很淺的灰綠 */
-                --bq-quote: rgba(59, 107, 59, 0.2); /* 引用裝飾 */
-                --bq-text-muted: #4a5d4a;
-
-                --table-head-bg: #e9f0eb; /* 表頭：淡灰綠 */
-            }
-            /* 穩重藍系 */
-            :root[data-theme="navy"] {
-                --bg: #f8fafc; /* 淡霧藍灰背景 */
-                --panel: #ffffff; /* 白色面板 */
-                --line: #cbd5e1; /* 淡灰藍邊線 */
-                --text: #1e293b; /* 深藍灰字體，沉穩 */
-                --muted: #475569; /* 次要字色：石板藍灰 */
-                --btn: #3b82f6; /* 主按鈕：亮藍 */
-                --btn-hover: #1d4ed8; /* hover：深藍 */
-                --bq-border: #93c5fd; /* 引用框邊：淡藍 */
-                --bq-bg: #eff6ff; /* 引用背景：淺藍霧 */
-                --bq-quote: rgba(59, 130, 246, 0.15);
-                --bq-text-muted: #475569;
-                --link: #2563eb; /* 藍色連結 */
-                --table-head-bg: #e0f2fe; /* 表頭：淺湖藍 */
-            }
-            /* 粉紅玻瑰系 */
-            :root[data-theme="rose"] {
-                --bg: #fff7fa; /* 淺粉背景 */
-                --panel: #ffffff;
-                --line: #f7cad0; /* 粉邊框 */
-                --text: #5a2a36; /* 酒紅字體，穩重 */
-                --muted: #915c6c; /* 粉棕次要字色 */
-                --btn: #e66b8c; /* 玫瑰粉按鈕 */
-                --btn-hover: #d13f66; /* 深櫻 hover */
-                --bq-border: #f9b5c3; /* 引用邊框：淺玫瑰 */
-                --bq-bg: #fff0f5; /* 引用背景：蜜桃粉 */
-                --bq-quote: rgba(230, 107, 140, 0.2);
-                --bq-text-muted: #915c6c;
-                --link: #c63c67; /* 玫瑰紅連結 */
-                --table-head-bg: #fbe4eb;
-            }
-
-            /* 粉嫩橘黃系 */
-            :root[data-theme="peach"] {
-                --bg: #fffaf5;
-                --panel: #ffffff;
-                --line: #ffd9b5;
-                --text: #6b3a22;
-                --muted: #8c5a3f;
-                --btn: #ff8b3d;
-                --btn-hover: #f97316;
-                --bq-border: #ffcc99;
-                --bq-bg: #fff1e6;
-                --bq-quote: rgba(247, 127, 0, 0.15);
-                --bq-text-muted: #8c5a3f;
-                --link: #d97706;
-                --table-head-bg: #fff1e6;
-            }
-            /* 青蘋果系 */
-            :root[data-theme="apple"] {
-                --bg: #f8fff5;
-                --panel: #ffffff;
-                --line: #c6f6d5;
-                --text: #1a3c1a;
-                --muted: #4a6f4a;
-                --btn: #34d399;
-                --btn-hover: #059669;
-                --bq-border: #bbf7d0;
-                --bq-bg: #ecfdf5;
-                --bq-quote: rgba(16, 185, 129, 0.15);
-                --bq-text-muted: #2f6d54;
-                --link: #047857;
-                --table-head-bg: #d1fae5;
-            }
-            /* 清新藍綠系 */
-            :root[data-theme="mint"] {
-                --bg: #f0fffd;
-                --panel: #ffffff;
-                --line: #a7f3d0;
-                --text: #0f5132;
-                --muted: #1f6f54;
-                --btn: #10b981;
-                --btn-hover: #059669;
-                --bq-border: #99f6e4;
-                --bq-bg: #ecfeff;
-                --bq-quote: rgba(13, 148, 136, 0.15);
-                --bq-text-muted: #1f6f54;
-                --link: #0ea5e9;
-                --table-head-bg: #ecfeff;
-            }
-            /* 要再加其他主題，就在這裡繼續往下貼 */
-        </style>
-        <!-- 其他的CSS統一放在這裡 -->
-        <style>
-            html,
-            body {
-                height: 100%;
-            }
-            body {
-                margin: 0;
-                font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", "Noto Sans", "Hiragino Sans", "PingFang TC", "Microsoft JhengHei", Arial, Helvetica, sans-serif;
-                color: var(--text);
-                background: var(--bg);
-                display: flex;
-                flex-direction: column;
-            }
-
-            header {
-                position: fixed;
-                inset: 0 0 auto 0;
-                z-index: 1000;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                padding: 12px 16px;
-                background: #fff;
-                border-bottom: 1px solid var(--line);
-                gap: 12px;
-            }
-            header .title {
-                font-weight: 700;
-                letter-spacing: 0.5px;
-            }
-            header .actions {
-                display: flex;
-                gap: 8px;
-                align-items: center;
-                flex-wrap: wrap;
-            }
-            .theme-wrap {
-                display: inline-flex;
-                align-items: center;
-                gap: 6px;
-                font-size: 14px;
-                color: var(--muted);
-                border: 1px solid var(--line);
-                border-radius: 8px;
-                padding: 6px 10px;
-                background: #fff;
-            }
-            select#themeSelect {
-                border: 0;
-                outline: none;
-                background: transparent;
-                font-size: 14px;
-                color: var(--text);
-                padding: 2px 4px;
-                cursor: pointer;
-            }
-
-            .btn {
-                appearance: none;
-                border: 1px solid var(--line);
-                background: var(--btn);
-                color: #fff;
-                padding: 6px 12px;
-                border-radius: 8px;
-                cursor: pointer;
-                font-size: 14px;
-                line-height: 1;
-                white-space: nowrap;
-            }
-            .btn.secondary {
-                background: #fff;
-                color: var(--text);
-            }
-            .btn:hover {
-                background: var(--btn-hover);
-            }
-            .btn.secondary:hover {
-                background: #f3f4f6;
-            }
-
-            .wrap {
-                flex: 1;
-                padding: 16px;
-                box-sizing: border-box;
-                margin-top: var(--header-h, 60px);
-            }
-            .panel {
-                background: var(--panel);
-                border: 1px solid var(--line);
-                border-radius: 12px;
-                overflow: hidden;
-                display: flex;
-                flex-direction: column;
-                min-height: 0;
-            }
-            .panel h3 {
-                margin: 0;
-                padding: 12px 14px;
-                border-bottom: 1px solid var(--line);
-                font-size: 14px;
-                color: var(--muted);
-                font-weight: 600;
-                display: flex;
-                align-items: center;
-                gap: 6px;
-            }
-            .panel .body {
-                padding: 16px;
-                overflow: hidden;
-                min-height: 0;
-                flex: 1;
-                background: #fff;
-            }
-            #preview {
-                max-height: 100%;
-                overflow: auto;
-            }
-
-            textarea {
-                width: 100%;
-                height: 100%;
-                border: 0;
-                outline: none;
-                resize: none;
-                font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-                font-size: 14px;
-                line-height: 1.6;
-            }
-
-            /* 預覽樣式 */
-            .preview-box {
-                max-width: 100%;
-                margin: 0 auto;
-                color: var(--text);
-            }
-            .preview-box h1 {
-                font-size: 1.75rem;
-                margin: 0.2rem 0 1rem;
-            }
-            .preview-box h2 {
-                font-size: 1.35rem;
-                margin: 1.25rem 0 0.75rem;
-            }
-            .preview-box h3 {
-                font-size: 1.1rem;
-                margin: 1rem 0 0.5rem;
-            }
-            .preview-box p {
-                margin: 0.5rem 0;
-            }
-            .preview-box code {
-                background: #f3f4f6;
-                padding: 0 0.35rem;
-                border-radius: 4px;
-                font-size: 0.95em;
-            }
-            .preview-box pre {
-                background: #f3f4f6;
-                padding: 12px;
-                border-radius: 8px;
-                overflow: auto;
-                border: 1px solid var(--line);
-            }
-            .preview-box a {
-                color: var(--link);
-                text-decoration: none;
-            }
-            .preview-box a:hover {
-                text-decoration: underline;
-            }
-
-            /* 表格 */
-            .preview-box table {
-                width: 100%;
-                border-collapse: collapse;
-                margin: 1rem 0;
-                font-size: 0.95rem;
-            }
-            .preview-box th,
-            .preview-box td {
-                border: 1px solid var(--line);
-                padding: 0.6rem 0.75rem;
-                vertical-align: top;
-                text-align: left;
-            }
-            .preview-box thead th {
-                background: var(--table-head-bg);
-                font-weight: 700;
-            }
-
-            /* 引言與 callout */
-            blockquote {
-                position: relative;
-                margin: 1rem 0;
-                padding: 12px 16px 12px 18px;
-                border-left: 4px solid var(--bq-border);
-                background: var(--bq-bg);
-                border-radius: 8px;
-            }
-            blockquote p {
-                margin: 0.5rem 0;
-            }
-            blockquote cite,
-            blockquote .attribution {
-                display: block;
-                margin-top: 0.5em;
-                color: var(--bq-text-muted);
-                font-style: italic;
-                font-size: 0.95em;
-            }
-            blockquote::before {
-                content: "“";
-                position: absolute;
-                top: -6px;
-                left: 8px;
-                font-size: 40px;
-                line-height: 1;
-                color: var(--bq-quote);
-                pointer-events: none;
-            }
-            blockquote blockquote {
-                margin: 0.75rem 0 0.25rem 8px;
-                border-left-color: color-mix(in srgb, var(--bq-border) 60%, white);
-                background: color-mix(in srgb, var(--bq-bg) 70%, white);
-            }
-            blockquote {
-                white-space: pre-wrap; /* 保留換行 + 自動換行 */
-                word-wrap: break-word; /* 長字斷行 */
-                overflow-wrap: break-word; /* 新標準寫法，確保長字斷行 */
-            }
-
-            .callout {
-                padding: 0;
-                border-left: 4px solid var(--bq-border);
-                border-radius: 8px;
-                background: var(--bq-bg);
-                margin: 1rem 0;
-            }
-            .callout > .callout-head {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                padding: 10px 12px;
-                font-weight: 700;
-                border-bottom: 1px solid var(--bq-border);
-            }
-            .callout > .callout-body {
-                padding: 12px 14px;
-            }
-
-            /* 圖片區塊 */
-            .gallery-block {
-                border: 1px solid var(--line);
-                border-radius: 12px;
-                padding: 12px;
-                background: #fff;
-                margin: 1rem 0;
-                box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02);
-            }
-            .gallery-head {
-                font-size: 13px;
-                color: var(--muted);
-                font-weight: 600;
-                display: flex;
-                align-items: center;
-                gap: 6px;
-                margin-bottom: 10px;
-            }
-            .gallery-head::before {
-                content: "🖼️";
-            }
-            .gallery-grid {
-                display: grid;
-                grid-template-columns: repeat(3, var(--thumb-w)); /* 圖片區塊一行顯示幾張, 若有調整要記得同時改匯出html的css */
-                gap: 12px;
-                justify-content: start;
-            }
-            .gallery-item {
-                width: var(--thumb-w);
-                height: var(--thumb-h);
-                border: 1px solid var(--line);
-                border-radius: 10px;
-                overflow: hidden;
-                background: #fff;
-            }
-            .gallery-link {
-                display: block;
-                width: 100%;
-                height: 100%;
-            }
-            .gallery-item img.thumb {
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-                display: block;
-            }
-            .gallery-item .caption {
-                padding: 6px 8px;
-                font-size: 12px;
-                color: var(--muted);
-                border-top: 1px solid var(--line);
-                background: #fafafa;
-                display: none;
-            }
-
-            /* Lightbox */
-            .lightbox {
-                position: fixed;
-                inset: 0;
-                background: rgba(0, 0, 0, 0.8);
-                display: none;
-                align-items: center;
-                justify-content: center;
-                z-index: 2000;
-            }
-            .lightbox.show {
-                display: flex;
-            }
-            .lightbox img {
-                max-width: 95vw;
-                max-height: 90vh;
-                border-radius: 8px;
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-            }
-            .lightbox .lb-close {
-                position: absolute;
-                top: 16px;
-                right: 16px;
-                background: rgba(255, 255, 255, 0.9);
-                border: 0;
-                padding: 8px 10px;
-                border-radius: 8px;
-                cursor: pointer;
-                font-weight: 700;
-            }
-
-            /* 提示 */
-            .toast {
-                position: fixed;
-                bottom: 16px;
-                right: 16px;
-                background: #111827;
-                color: #fff;
-                padding: 10px 14px;
-                border-radius: 10px;
-                font-size: 13px;
-                opacity: 0;
-                transform: translateY(10px);
-                transition: opacity 0.2s, transform 0.2s;
-                pointer-events: none;
-                z-index: 2100;
-            }
-            .toast.show {
-                opacity: 1;
-                transform: translateY(0);
-            }
-
-            /* RWD */
-            @media (max-width: 980px) {
-                .wrap {
-                    grid-template-columns: 1fr;
-                }
-            }
-            @media (max-width: 767px) {
-                header {
-                    flex-wrap: wrap;
-                    row-gap: 8px;
-                }
-                header .title {
-                    flex: 1 0 100%;
-                }
-                header .actions {
-                    width: 100%;
-                    overflow-x: auto;
-                    white-space: nowrap;
-                    padding-bottom: 4px;
-                }
-                .wrap {
-                    grid-template-columns: 1fr;
-                }
-                :root {
-                    --thumb-w: 100%;
-                    --thumb-h: 220px;
-                }
-                .gallery-grid {
-                    grid-template-columns: 1fr;
-                }
-                #markdown-input {
-                    min-height: 25vh;
-                }
-            }
-
-            /* 外層用 Grid 控三種寬度 */
-            #workbench {
-                display: grid;
-                grid-template-columns: 1fr 1fr; /* split 預設兩欄 */
-                gap: 0;
-                height: calc(100vh - 120px); /* 自行調整，扣掉你的工具列高度 */
-            }
-
-            /* 三種模式：並排 / 只左 / 只右 */
-            #workbench[data-layout="split"] {
-                grid-template-columns: 1fr 1fr;
-            }
-            #workbench[data-layout="left"] {
-                grid-template-columns: 1fr 0;
-            }
-            #workbench[data-layout="right"] {
-                grid-template-columns: 0 1fr;
-            }
-
-            /* 被收起的那欄完全不可點、也不佔可視 */
-            #workbench[data-layout="left"] #previewPane,
-            #workbench[data-layout="right"] #editorPane {
-                visibility: hidden;
-                pointer-events: none;
-                overflow: hidden;
-            }
-
-            /* 工具列三鍵的選中態，別做 hover，平板不需要 */
-            .view-toggle button[aria-pressed="true"] {
-                font-weight: 700;
-                border: 1px solid var(--line);
-                background: #fff;
-            }
-            .view-toggle button {
-                padding: 6px 10px;
-                border: 1px solid var(--line);
-                background: var(--panel);
-                border-radius: 6px;
-                margin-right: 6px;
-            }
-            #workbench {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 16px; /* ←加這個，左右中間就不會靠到陰陽兩隔 */
-                height: calc(100vh - 120px);
-            }
-            #workbench[data-layout="left"],
-            #workbench[data-layout="right"] {
-                gap: 0;
-            }
-
-            /* === Mobile split 修正：給容器高度 + 明確兩列比例 === */
-            @media (max-width: 768px) {
-                /* 共用：一欄上下堆疊 + 固定可分配的容器高度 */
-                #workbench {
-                    grid-template-columns: 1fr;
-                    gap: 12px;
-                    /* 扣掉表頭與外邊距，讓 fr 有依據可分配 */
-                    height: calc(100vh - var(--header-h, 60px) - 24px);
-                }
-
-                /* 並排：上 40% 編輯，下 60% 預覽（或改成 40vh/1fr 也行） */
-                #workbench[data-layout="split"] {
-                    grid-template-rows: 0.4fr 0.6fr;
-                }
-                /* 讓 grid 列決定高度，不用再鎖 min-height */
-                #workbench[data-layout="split"] #editorPane,
-                #workbench[data-layout="split"] #previewPane {
-                    min-height: 0;
-                    height: auto;
-                }
-
-                /* 只左：滿高；只右：滿高（維持你先前的行為） */
-                #workbench[data-layout="left"] {
-                    grid-template-rows: 1fr 0;
-                }
-                #workbench[data-layout="left"] #editorPane {
-                    min-height: calc(100vh - var(--header-h, 60px) - 24px);
-                }
-                #workbench[data-layout="left"] #previewPane {
-                    display: none;
-                }
-
-                #workbench[data-layout="right"] {
-                    grid-template-rows: 0 1fr;
-                }
-                #workbench[data-layout="right"] #previewPane {
-                    min-height: calc(100vh - var(--header-h, 60px) - 24px);
-                }
-                #workbench[data-layout="right"] #editorPane {
-                    display: none;
-                }
-            }
-
-            /* === Mobile layout: 強制把 split 改成上下 40/60，避免桌面兩欄吃進來 === */
-            @media (max-width: 768px) {
-                /* 共同：一欄，讓列來控高 */
-                #workbench {
-                    grid-template-columns: 1fr;
-                    height: calc(100vh - var(--header-h, 60px) - 24px);
-                    gap: 12px;
-                }
-
-                /* 並排：一定要用相同權重覆蓋 columns，否則會被 #workbench[data-layout="split"] 壓過 */
-                #workbench[data-layout="split"] {
-                    grid-template-columns: 1fr; /* ← 這行是關鍵 */
-                    grid-template-rows: 0.4fr 0.6fr; /* 上 40% 編輯，下 60% 預覽 */
-                }
-                #workbench[data-layout="split"] #editorPane,
-                #workbench[data-layout="split"] #previewPane {
-                    min-height: 0; /* 交給 grid-row 分配高度，不要讓 min-height 搗亂 */
-                    height: auto;
-                }
-
-                /* 只編輯：滿高，預覽不佔版面 */
-                #workbench[data-layout="left"] {
-                    grid-template-columns: 1fr;
-                    grid-template-rows: 1fr 0;
-                }
-                #workbench[data-layout="left"] #previewPane {
-                    display: none;
-                }
-
-                /* 只預覽：滿高，編輯不佔版面 */
-                #workbench[data-layout="right"] {
-                    grid-template-columns: 1fr;
-                    grid-template-rows: 0 1fr;
-                }
-                #workbench[data-layout="right"] #editorPane {
-                    display: none;
-                }
-            }
-
-            /* 共用：未選取 */
-            .mode-btn {
-                background: #f7f9fc;
-                color: #8a5200; /* 你現在那種琥珀字色 */
-                border: 1px solid #d5deff;
-            }
-
-            /* 套組 A：深藍底 + 白字（對比最高） */
-            .mode-btn[aria-pressed="true"].theme-blue {
-                background: #3b5bdb; /* 深藍 */
-                color: #ffffff;
-                border-color: #3b5bdb;
-            }
-
-            /* 套組 B：琥珀淺底 + 深字（暖色系但仍有對比） */
-            .mode-btn[aria-pressed="true"].theme-amber {
-                background: #fff1cc; /* 很淺的琥珀 */
-                color: #7a3e00; /* 比未選取再深一階 */
-                border-color: #e6b980;
-            }
-
-            /* 套組 C：石墨灰底 + 白字（中性） */
-            .mode-btn[aria-pressed="true"].theme-gray {
-                background: #4a4a4a;
-                color: #ffffff;
-                border-color: #4a4a4a;
-            }
-
-            /* 可選：hover 提示，也別讓字色消失 */
-            .mode-btn:hover {
-                filter: brightness(0.97);
-            }
-        </style>
-    </head>
-    <body>
-        <header>
-            <div class="title">MD 2 Html</div>
-            <div class="actions">
-                <div class="theme-wrap" title="調整渲染後的字體與表格線條色">
-                    <select id="themeSelect" aria-label="選擇外觀主題">
-                        <option value="default">原風格</option>
-                        <option value="milktea">奶茶</option>
-                        <option value="navy">沉穩藍</option>
-                        <option value="forest">森林</option>
-                        <option value="rose">粉紅玫瑰</option>
-                        <option value="peach">橘黃</option>
-                        <option value="mint">藍綠</option>
-                        <option value="apple">青蘋果</option>
-                    </select>
-                </div>
-                <div class="view-toggle" role="group" aria-label="檢視模式">
-                    <button class="mode-btn theme-amber" data-layout="split" aria-pressed="true">並排</button>
-                    <button class="mode-btn theme-amber" data-layout="left" aria-pressed="false">只編輯</button>
-                    <button class="mode-btn theme-amber" data-layout="right" aria-pressed="false">只預覽</button>
-                </div>
-                <button class="btn secondary" onclick="location.href='index.html'">🧭回首頁</button>
-            </div>
-        </header>
-
-        <div class="wrap">
-            <div id="workbench" data-layout="split">
-                <section id="editorPane" class="panel">
-                    <h3>
-                        ✍️ 編輯
-                        <button class="btn secondary" onclick="clearMarkdown()">清空</button>
-                        <button class="btn secondary" onclick="document.getElementById('openMd').click()">開啟MD</button>
-                        <input id="openMd" type="file" accept=".md,.markdown,text/markdown,text/plain" style="display: none;" />
-                        <button class="btn secondary" onclick="copyMarkdown()">複製MD</button>
-                        <button class="btn" id="saveMdBtn">儲存MD</button>
-                    </h3>
-                    <div class="body">
-                        <textarea id="markdown-input">
-# 測試文件-大標題
-## 中標題
-### 小標題
-
-粗體字 **Markdown**
-
-斜體字 *Markdown*
-
-~~刪除線~~
-
----
-這個是線條
-
-> 這是引言
- 
-階層用「*或-」都可以
-
-- 階層一
-  - 階層二
-    - 階層三
-
-1. 序號階層1
-2. 序號階層2
-3. 序號階層3
-
-程式碼 `code ~ hello world!`
-
-區塊程式碼 
-```
-code ~ hello world ! 
-test1
-test 2
-```
-
-**支援mermaid圖表**
-```mermaid
-flowchart LR
-  A((開始)) --> B{條件判斷?}
-  B -- 是 --> C[執行流程1]
-  B -- 否 --> D[執行流程2]
-  C --> E((結束))
-  D --> E((結束))
-```
-
-| 項目 | 說明 |
-| ---- | ---- |
-| 航司 | 長榮 |
-| 目的地 | 峇里島 |
-| 住宿 | Hilton, Intercontinental Jimbaran, W, Grand Hyatt |
-           
-
-![圖片1](logo.png)
-![圖片1](logo.png)
-![圖片1](logo.png)
-
-
-                        </textarea>
-                    </div>
-                </section>
-
-                <section id="previewPane" class="panel">
-                    <h3>
-                        🖼️ 預覽
-                        <button class="btn secondary" id="btn-copy" onclick="copyOutputHTML()">複製HTML</button>
-                        <button class="btn" onclick="triggerDownload()">下載HTML</button>
-                    </h3>
-                    <div class="body"><div id="preview" class="preview-box"></div></div>
-                </section>
-            </div>
-        </div>
-        <div id="toast" class="toast"></div>
-
-        <div id="lightbox" class="lightbox" aria-hidden="true">
-            <button class="lb-close" aria-label="Close" onclick="closeLightbox()">✕</button>
-            <img id="lightbox-img" alt="" />
-        </div>
-
-
-<script>
-// 把 <pre><code class="language-mermaid">...</code></pre> 轉成 <div class="mermaid">...</div>
-// 然後呼叫 mermaid 去畫圖。給「一個容器」跑就好，比如 #preview。
-function upgradeMermaidIn(el){
-  if(!el) return;
-  const blocks = el.querySelectorAll('pre > code.language-mermaid, pre > code.lang-mermaid, pre > code.mermaid');
-  blocks.forEach(code => {
-    const pre = code.parentElement;           // <pre>
-    const div = document.createElement('div');
-    div.className = 'mermaid';
-    div.textContent = code.textContent;       // 把原本的 mermaid 文字放進去
-    pre.replaceWith(div);                      // 用 <div class="mermaid"> 取代
-  });
-  if (blocks.length && window.mermaid) {
-    try {
-      mermaid.initialize({ startOnLoad: false });
-      // 新版 mermaid 推薦 run；舊版用 init 也行
-      if (typeof mermaid.run === 'function') {
-        mermaid.run({ nodes: el.querySelectorAll('.mermaid') });
-      } else {
-        mermaid.init(undefined, el.querySelectorAll('.mermaid'));
-      }
-    } catch (_) {}
-  }
-}
-</script>
-
-        <script>
-            "use strict";
-
-            // ====== 安全：若 CDN 失敗，用 fallback 解析 Markdown ======
-
-            function escapeHtml(str) {
-                return str.replace(/[&<>"]/g, (s) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[s]));
-            }
-
-            function mdFallback(md) {
-                // 程式碼區塊 ``` ... ```
-                md = md.replace(/```([\s\S]*?)```/g, (_, code) => "<pre><code>" + escapeHtml(code) + "</code></pre>");
-
-                // 標題
-                md = md.replace(/^###\s+(.*)$/gm, "<h3>$1</h3>");
-                md = md.replace(/^##\s+(.*)$/gm, "<h2>$1</h2>");
-                md = md.replace(/^#\s+(.*)$/gm, "<h1>$1</h1>");
-
-                // 圖片與連結
-                md = md.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<p><img alt="$1" src="$2"></p>');
-                md = md.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
-
-                // 強調、行內程式
-                md = md.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
-                md = md.replace(/\*([^*]+)\*/g, "<em>$1</em>");
-                md = md.replace(/`([^`]+)`/g, "<code>$1</code>");
-
-                // 表格（最陽春版）
-                md = md.replace(/(?:^|\n)(\|.*\|)\n(\|[\-:\s\|]+\|)\n((?:\|.*\|\n?)*)/g, function (_, header, sep, body) {
-                    function rowToCells(r) {
-                        return r
-                            .trim()
-                            .slice(1, -1)
-                            .split("|")
-                            .map((s) => s.trim());
-                    }
-                    const headTds = rowToCells(header)
-                        .map((h) => "<th>" + escapeHtml(h) + "</th>")
-                        .join("");
-                    const bodyHtml = body
-                        .trim()
-                        .split(/\n/)
-                        .filter(Boolean)
-                        .map(
-                            (r) =>
-                                "<tr>" +
-                                rowToCells(r)
-                                    .map((c) => "<td>" + escapeHtml(c) + "</td>")
-                                    .join("") +
-                                "</tr>"
-                        )
-                        .join("");
-                    return "\n<table><thead><tr>" + headTds + "</tr></thead><tbody>" + bodyHtml + "</tbody></table>\n";
-                });
-
-                // 段落
-                md = md.replace(/(^|\n)([^<\n][^\n]*)/g, function (_, br, line) {
-                    if (/^\s*$/.test(line)) return br + line;
-                    if (/^\s*<(h\d|pre|table|blockquote|ul|ol|img)/i.test(line)) return br + line;
-                    return br + "<p>" + line.trim() + "</p>";
-                });
-                return md;
-            }
-
-            function renderMarkdown(md) {
-                if (window.marked && typeof marked.parse === "function") return marked.parse(md);
-                return mdFallback(md);
-            }
-
-            // ====== Header 尺寸變數 ======
-            function setHeaderHeightVar() {
-                const h = document.querySelector("header")?.offsetHeight || 60;
-                document.documentElement.style.setProperty("--header-h", h + "px");
-            }
-            window.addEventListener("load", setHeaderHeightVar);
-            window.addEventListener("resize", setHeaderHeightVar);
-
-            // ====== 主題：初始化與切換 ======
-            const THEME_KEY = "md2html_theme";
-            function applyTheme(theme) {
-                const root = document.documentElement;
-                if (!theme || theme === "default") root.removeAttribute("data-theme");
-                else root.setAttribute("data-theme", theme);
-                const sel = document.getElementById("themeSelect");
-                if (sel && sel.value !== theme) sel.value = theme || "default";
-            }
-            function initTheme() {
-                const saved = localStorage.getItem(THEME_KEY) || "default";
-                applyTheme(saved);
-                const sel = document.getElementById("themeSelect");
-                sel.value = saved;
-                sel.addEventListener("change", () => {
-                    const v = sel.value;
-                    localStorage.setItem(THEME_KEY, v);
-                    applyTheme(v);
-                });
-            }
-
-            // ====== Callout 預處理 ======
-            function preprocessCallouts(md) {
-                const lines = md.split(/\\r?\\n/);
-                const out = [];
-                const defaultTitle = { NOTE: "Note", TIP: "Tip", WARNING: "Warning", INFO: "Info" };
-                let i = 0;
-                while (i < lines.length) {
-                    const m = lines[i].match(/^\\s*>\\s*\\[\\!(NOTE|TIP|WARNING|INFO)\\]\\s*(.*)$/i);
-                    if (m) {
-                        const kind = m[1].toUpperCase();
-                        const titleText = m[2] && m[2].trim() ? m[2].trim() : defaultTitle[kind];
-                        const body = [];
-                        i += 1;
-                        while (i < lines.length) {
-                            const l = lines[i];
-                            if (/^\\s*>/.test(l)) {
-                                body.push(l.replace(/^\\s*>\\s?/, ""));
-                                i += 1;
-                            } else if (/^\\s*$/.test(l)) {
-                                body.push("");
-                                i += 1;
-                            } else {
-                                break;
-                            }
-                        }
-                        const bodyMd = body.join("\\n");
-                        const head = '<div class="callout-head"><strong>' + titleText + "</strong></div>";
-                        const bodyHtml = renderMarkdown(bodyMd);
-                        out.push('<blockquote class="callout">' + head + '<div class="callout-body">' + bodyHtml + "</div></blockquote>");
-                        continue;
-                    }
-                    out.push(lines[i]);
-                    i += 1;
-                }
-                return out.join("\\n");
-            }
-
-            // ====== 連續圖片合併區塊 ======
-            function isImageOnlyParagraph(node) {
-                if (!(node && node.nodeType === 1 && node.tagName === "P")) return false;
-                const kids = Array.from(node.childNodes);
-                if (kids.length === 0) return false;
-                return kids.every((n) => (n.nodeType === 1 && n.tagName === "IMG") || (n.nodeType === 3 && !n.nodeValue.trim()));
-            }
-            function wrapConsecutiveImages(root) {
-                const nodes = Array.from(root.childNodes);
-                let run = [];
-                function flush() {
-                    if (!run.length) return;
-                    const gallery = document.createElement("div");
-                    gallery.className = "gallery-block";
-                    const head = document.createElement("div");
-                    head.className = "gallery-head";
-                    head.textContent = "圖片";
-                    const grid = document.createElement("div");
-                    grid.className = "gallery-grid";
-                    gallery.appendChild(head);
-                    gallery.appendChild(grid);
-                    run.forEach((p) => {
-                        Array.from(p.querySelectorAll("img")).forEach((img) => {
-                            const item = document.createElement("div");
-                            item.className = "gallery-item";
-                            const a = document.createElement("a");
-                            a.className = "gallery-link";
-                            const src = img.getAttribute("src");
-                            a.href = src;
-                            a.target = "_blank";
-                            const thumb = img.cloneNode(true);
-                            thumb.classList.add("thumb");
-                            a.appendChild(thumb);
-                            item.appendChild(a);
-                            if (img.alt) {
-                                const cap = document.createElement("div");
-                                cap.className = "caption";
-                                cap.textContent = img.alt;
-                                item.appendChild(cap);
-                            }
-                            grid.appendChild(item);
-                        });
-                    });
-                    root.insertBefore(gallery, run[0]);
-                    run.forEach((n) => root.removeChild(n));
-                    run = [];
-                }
-                for (const node of nodes) {
-                    if (isImageOnlyParagraph(node)) run.push(node);
-                    else flush();
-                }
-                flush();
-            }
-
-            // ====== 渲染 ======
-            const input = document.getElementById("markdown-input");
-            const preview = document.getElementById("preview");
-            function buildContentHTMLFromMarkdown(md) {
-                const container = document.createElement("div");
-                container.className = "preview-box";
-                try {
-                    container.innerHTML = renderMarkdown(preprocessCallouts(md));
-                } catch (e) {
-                    container.innerHTML = "<p style='color:#b91c1c'>解析錯誤：" + (e.message || e) + "</p><pre>" + escapeHtml(md) + "</pre>";
-                    console.error(e);
-                }
-                wrapConsecutiveImages(container);
-                return container.outerHTML;
-            }
-            function render() {
-                // 1) 先把 Markdown 轉成 HTML 丟進預覽
-                preview.innerHTML = buildContentHTMLFromMarkdown(input.value);
-                // 2) 把 mermaid 程式碼框換成 .mermaid，然後畫圖
-                upgradeMermaidIn(preview);
-
-            }
-
-            // ====== Lightbox ======
-            const lb = document.getElementById("lightbox");
-            const lbImg = document.getElementById("lightbox-img");
-            function openLightbox(src, alt) {
-                lbImg.src = src;
-                lbImg.alt = alt || "";
-                lb.classList.add("show");
-                lb.setAttribute("aria-hidden", "false");
-            }
-            function closeLightbox() {
-                lb.classList.remove("show");
-                lb.setAttribute("aria-hidden", "true");
-                lbImg.src = "";
-            }
-            window.closeLightbox = closeLightbox;
-            document.addEventListener("click", (e) => {
-                const a = e.target.closest(".gallery-link");
-                if (a) {
-                    e.preventDefault();
-                    openLightbox(a.href, a.querySelector("img")?.alt);
-                }
-                if (e.target === lb) closeLightbox();
-            });
-            document.addEventListener("keydown", (e) => {
-                if (e.key === "Escape") closeLightbox();
-            });
-
-            // ====== 匯出：將目前主題變數帶入輸出檔 ======
-            function getOutputHTML() {
-                const content = buildContentHTMLFromMarkdown(document.getElementById("markdown-input").value);
-
-                // 取得目前主題；default 代表不要加 data-theme
-                const themeName = document.documentElement.getAttribute("data-theme") || "default";
-
-                // 1) 先保底：若 THEME_BLOCKS 還沒建好，就直接序列化 #themes-css 的內容
-                const themesStyleEl = document.getElementById("themes-css");
-                const rawThemesText = themesStyleEl ? themesStyleEl.textContent : "";
-
-                // 2) 從快取拿片段
-                const baseRoot = (window.THEME_BLOCKS && window.THEME_BLOCKS.default) || ""; // 基底 :root
-                const themeBlock =
-                    themeName === "default"
-                        ? "" // default 就不加 data-theme 區塊
-                        : (window.THEME_BLOCKS && window.THEME_BLOCKS[themeName]) || "";
-
-                // 3) 若擷取失敗（例如時間點太早），退回整包原始 style 文字，確保不會空白
-                const finalThemeCSS = baseRoot || themeBlock ? baseRoot + "\n" + themeBlock : rawThemesText;
-
-                // 4) 只有在非 default 時才加 data-theme 屬性
-                const htmlAttr = themeName === "default" ? "" : ` data-theme="${themeName}"`;
-
-                // 5) 用變數去吃背景色，不要硬寫白底
-                return `<!DOCTYPE html>
-<html lang="zh-Hant"${htmlAttr}>
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>輸出文件</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Writer + Images (合併版)</title>
+
+<!-- ===== 外觀：簡潔到不會礙事 ===== -->
 <style>
-${finalThemeCSS}
-body{ font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans TC","Noto Sans","Microsoft JhengHei",Arial,Helvetica,sans-serif; padding:2rem; line-height:1.6; color:var(--text); background:#fff; }
-h1,h2,h3{ color:var(--text) }
-a{ color:var(--link); text-decoration:none } a:hover{text-decoration:underline}
-code{ background:#f3f4f6; padding:0 .35rem; border-radius:4px }
-pre{ background:#f3f4f6; padding:12px; border-radius:8px; overflow:auto; border:1px solid var(--line) }
-table{ width:100%; border-collapse:collapse; margin:1rem 0; font-size:.95rem }
-th,td{ border:1px solid var(--line); padding:.6rem .75rem; vertical-align:top; text-align:left }
-thead th{ background:var(--table-head-bg); font-weight:700 }
-blockquote{ position:relative; margin:1rem 0; padding:12px 16px 12px 18px; border-left:4px solid var(--bq-border); background:var(--bq-bg); border-radius:8px }
-blockquote::before{ content:"“"; position:absolute; top:-6px; left:8px; font-size:40px; line-height:1; color:var(--bq-quote); pointer-events:none }
-blockquote { white-space: pre-wrap; word-wrap: break-word; overflow-wrap: break-word; }
+  :root{
+    --bg:#f6f7fb; --card:#fff; --text:#111827; --muted:#6b7280; --line:#e5e7eb; --brand:#4f46e5;
+    --radius:12px; --shadow:0 6px 18px rgba(17,24,39,.06);
+  }
+  *{ box-sizing:border-box }
+  html,body{ height:100% }
+  body{ margin:0; background:var(--bg); color:var(--text); font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans TC",sans-serif; }
 
-.gallery-block{ border:1px solid var(--line); border-radius:12px; padding:12px; background:#fff; margin:1rem 0; box-shadow:0 1px 0 rgba(0,0,0,.02) }
-.gallery-head{ font-size:13px; color:var(--muted); font-weight:600; display:flex; align-items:center; gap:6px; margin-bottom:10px }
-.gallery-head::before{ content:"🖼️" }
-.gallery-grid{ display:grid; grid-template-columns: repeat(3, var(--thumb-w)); gap:12px; justify-content:start }
-.gallery-item{ width:var(--thumb-w); height:var(--thumb-h); border:1px solid var(--line); border-radius:10px; overflow:hidden; background:#fff }
-.gallery-link{ display:block; width:100%; height:100% }
-.gallery-item img.thumb{ width:100%; height:100%; object-fit:cover; display:block }
-@media (max-width:767px){ :root{ --thumb-w:100%; --thumb-h:220px } .gallery-grid{ grid-template-columns:1fr } }
+  header{
+    position:sticky; top:0; z-index:10;
+    display:flex; align-items:center; gap:8px; justify-content:space-between;
+    padding:10px 12px; background:#fff; border-bottom:1px solid var(--line);
+  }
+  .h-left{ display:flex; align-items:center; gap:8px }
+  .title{ font-weight:800; letter-spacing:.2px }
+  .btn{
+    appearance:none; border:1px solid var(--line); background:#fff; color:#111; padding:.5rem .8rem;
+    border-radius:10px; cursor:pointer; font-weight:600; box-shadow:0 1px 4px rgba(0,0,0,.05);
+  }
+  .btn.primary{ background:var(--brand); color:#fff; border-color:transparent }
+  .btn.ghost{ background:#fff }
+  .btn:disabled{ opacity:.5; cursor:not-allowed }
+  .btn:hover{ transform:translateY(-1px); box-shadow:0 3px 10px rgba(0,0,0,.08) }
 
-.lightbox{ position:fixed; inset:0; background:rgba(0,0,0,.8); display:none; align-items:center; justify-content:center; z-index:2000 }
-.lightbox.show{ display:flex }
-.lightbox img{ max-width:95vw; max-height:90vh; border-radius:8px; box-shadow:0 10px 30px rgba(0,0,0,.35) }
-.lb-close{ position:absolute; top:16px; right:16px; background:rgba(255,255,255,.9); border:0; padding:8px 10px; border-radius:8px; cursor:pointer; font-weight:700 }
+  .wrap{ display:grid; grid-template-columns: 1.2fr .8fr; gap:12px; padding:12px; height:calc(100vh - 64px); }
+  @media (max-width: 980px){ .wrap{ grid-template-columns:1fr; height:auto; } }
+
+  .card{
+    background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+    box-shadow:var(--shadow); display:flex; flex-direction:column; min-height:0;
+  }
+  .card h3{
+    margin:0; padding:10px 12px; border-bottom:1px solid var(--line);
+    font-size:14px; color:var(--muted); display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+  }
+  .card .body{ padding:12px; min-height:0; overflow:auto; }
+
+  /* 編輯器 */
+  textarea#md{
+    width:100%; height:60vh; border:1px solid var(--line); border-radius:10px; padding:12px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:14px; resize:vertical;
+  }
+  @media (max-width:980px){ textarea#md{ height:40vh } }
+
+  /* 圖片區 */
+  .toolbar{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px }
+  .grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap:10px }
+  @media (max-width:600px){ .grid{ grid-template-columns: repeat(2, 1fr) } }
+  .thumb{
+    position:relative; border:1px solid var(--line); border-radius:10px; overflow:hidden; background:#fff;
+  }
+  .thumb img{ width:100%; height:140px; object-fit:cover; display:block }
+  .thumb .meta{
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+    padding:6px; background:#fafafa; border-top:1px solid var(--line); font-size:12px;
+  }
+  .thumb .name{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#374151 }
+  .thumb .chk{ display:inline-flex; align-items:center; gap:6px }
+  .thumb .x{
+    position:absolute; top:6px; right:6px; width:28px; height:28px; display:grid; place-items:center;
+    background:rgba(255,255,255,.85); border:1px solid #fecaca; color:#b91c1c; border-radius:8px; cursor:pointer;
+  }
+
+  /* 小提示 */
+  .tip{ font-size:13px; color:var(--muted) }
+
+  /* Toast */
+  .toast{
+    position:fixed; bottom:16px; right:16px; background:#111827; color:#fff;
+    padding:10px 14px; border-radius:10px; font-size:13px; opacity:0; transform:translateY(10px);
+    transition:opacity .2s, transform .2s; pointer-events:none; z-index:99;
+  }
+  .toast.show{ opacity:1; transform:translateY(0) }
 </style>
-<!-- 匯出檔也要能畫 Mermaid：帶腳本 -->
-<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"><\/script>
 </head>
 <body>
-${content}
-<div id="lightbox" class="lightbox" aria-hidden="true"><button class="lb-close" onclick="closeLightbox()">✕</button><img id="lightbox-img" alt=""/></div>
+
+<header>
+  <div class="h-left">
+    <div class="title">✍️ Writer + 🖼 Images</div>
+    <!-- 編輯器功能列：開啟 / 儲存 / 複製 / 清空 / 插入圖片語法 -->
+    <button class="btn" id="openMdBtn">開啟</button>
+    <button class="btn" id="saveMdBtn">儲存</button>
+    <button class="btn" id="copyMdBtn">複製</button>
+    <button class="btn" id="clearMdBtn">清空</button>
+    <button class="btn primary" id="insertFromImageBtn" title="請先在右側產生並複製勾選圖片的 MD">插入圖片語法</button>
+    <input id="openMdFile" type="file" accept=".md,.markdown,text/markdown,text/plain" hidden />
+  </div>
+  <a class="btn ghost" href="index.html">🏠 回首頁</a>
+</header>
+
+<main class="wrap">
+  <!-- 左：編輯器 -->
+  <section class="card">
+    <h3>Markdown 編輯</h3>
+    <div class="body">
+      <textarea id="md" placeholder="在這裡寫文章。插入圖片語法的來源：先到右邊圖片區『產生 MD 語法』並『複製勾選圖片MD』，再按上方『插入圖片語法』。"></textarea>
+      <p class="tip" style="margin-top:8px">儲存與下載會優先使用系統存檔對話框（File System Access）。不支援時改用瀏覽器下載。</p>
+    </div>
+  </section>
+
+  <!-- 右：圖片工具 -->
+  <aside class="card">
+    <h3>圖片區（壓縮、命名、勾選、ZIP）</h3>
+    <div class="body">
+      <div class="toolbar">
+        <button class="btn" id="pickBtn">選擇照片</button>
+        <input id="file" type="file" accept="image/*" multiple hidden />
+        <button class="btn" id="genMdBtn">產生MD語法（鎖檔名）</button>
+        <button class="btn ghost" id="clearBatchBtn">清空此批</button>
+      </div>
+      <div class="toolbar">
+        <button class="btn ghost" id="checkAllBtn">全部勾選</button>
+        <button class="btn ghost" id="uncheckAllBtn">取消勾選</button>
+        <button class="btn" id="copySelectedBtn">複製勾選圖片MD</button>
+        <button class="btn" id="saveZipBtn">下載ZIP圖片</button>
+      </div>
+      <div class="toolbar">
+        <label class="tip">圖片最長邊（px）
+          <input id="maxDim" type="number" value="1200" min="640" step="80" style="width:120px; margin-left:6px; padding:6px; border:1px solid var(--line); border-radius:8px" />
+        </label>
+        <span class="tip">ZIP 目錄固定為 <code>images/</code>，圖檔格式 <code>{prefix}-nnn.jpg</code>，去 EXIF。</span>
+      </div>
+
+      <div id="grid" class="grid"></div>
+    </div>
+  </aside>
+</main>
+
+<div id="toast" class="toast"></div>
+
+<!-- 依賴套件（CDN） -->
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+
 <script>
-// 匯出檔內部也做一次「code → .mermaid」並畫圖
-(function(){
-  function upgrade(el){
-    if(!el) return;
-    var list = el.querySelectorAll('pre > code.language-mermaid, pre > code.lang-mermaid, pre > code.mermaid');
-    list.forEach(function(code){
-      var pre = code.parentElement;
-      var div = document.createElement('div');
-      div.className = 'mermaid';
-      div.textContent = code.textContent;
-      pre.replaceWith(div);
-    });
-    if(list.length && window.mermaid){
-      try{
-        mermaid.initialize({ startOnLoad:false });
-        if (typeof mermaid.run === 'function') { mermaid.run(); }
-        else { mermaid.init(undefined, document.querySelectorAll('.mermaid')); }
-      }catch(e){}
+/* ===========================================================
+   合併版核心邏輯
+   - 編輯器：開啟 / 儲存 / 複製 / 清空 / 插入圖片語法
+   - 圖片區：選圖(壓縮去EXIF) / 產生MD(鎖檔名) / 勾選管理 / ZIP / 清空
+   =========================================================== */
+
+/* ---------- 小工具：提示 ---------- */
+const toastEl = document.getElementById('toast');
+function toast(msg){
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  setTimeout(()=>toastEl.classList.remove('show'), 1600);
+}
+
+/* ---------- 編輯器 DOM ---------- */
+const mdEl = document.getElementById('md');
+const openMdBtn = document.getElementById('openMdBtn');
+const openMdFile = document.getElementById('openMdFile');
+const saveMdBtn = document.getElementById('saveMdBtn');
+const copyMdBtn = document.getElementById('copyMdBtn');
+const clearMdBtn = document.getElementById('clearMdBtn');
+const insertFromImageBtn = document.getElementById('insertFromImageBtn');
+
+/* ---------- 圖片區 DOM ---------- */
+const pickBtn = document.getElementById('pickBtn');
+const fileEl = document.getElementById('file');
+const genMdBtn = document.getElementById('genMdBtn');
+const clearBatchBtn = document.getElementById('clearBatchBtn');
+const gridEl = document.getElementById('grid');
+const checkAllBtn = document.getElementById('checkAllBtn');
+const uncheckAllBtn = document.getElementById('uncheckAllBtn');
+const copySelectedBtn = document.getElementById('copySelectedBtn');
+const saveZipBtn = document.getElementById('saveZipBtn');
+const maxDimEl = document.getElementById('maxDim');
+
+/* ---------- 狀態 ---------- */
+let items = []; // { file, blob, url, w, h, _finalName?, _selected }
+let namePrefix = null; // 一批唯一前綴
+let mdCache = '';      // 使用者剛剛在圖片區「複製勾選圖片MD」時，同步快取到這裡，供「插入圖片語法」使用
+
+function makePrefix(){
+  const t = Date.now().toString(36);
+  const r = Math.floor(Math.random()*1e6).toString(36);
+  return (t.slice(-3) + r).slice(0,5);
+}
+function pad3(n){ return String(n).padStart(3,'0'); }
+
+/* ===========================================================
+   編輯器功能
+   =========================================================== */
+
+/* 開啟（iCloud 可用系統對話框） */
+openMdBtn.addEventListener('click', ()=> openMdFile.click());
+openMdFile.addEventListener('change', async e=>{
+  const f = e.target.files[0]; if(!f) return;
+  const txt = await f.text();
+  mdEl.value = txt;
+  toast('已載入 Markdown');
+});
+
+/* 儲存（優先使用 File System Access，否則使用 FileSaver 備援） */
+saveMdBtn.addEventListener('click', async ()=>{
+  try{
+    const blob = new Blob([mdEl.value], {type:'text/markdown;charset=utf-8'});
+    if(window.showSaveFilePicker){
+      const handle = await showSaveFilePicker({
+        suggestedName: 'note.md',
+        types: [{ description: 'Markdown', accept: { 'text/markdown':['.md','.markdown'], 'text/plain':['.md'] } }]
+      });
+      const writable = await handle.createWritable();
+      await writable.write(blob);
+      await writable.close();
+    }else{
+      saveAs(blob, 'note.md');
+    }
+    toast('MD 已儲存');
+  }catch(e){
+    console.error(e);
+    toast('儲存失敗或取消');
+  }
+});
+
+/* 複製整份 MD */
+copyMdBtn.addEventListener('click', async ()=>{
+  try{
+    await navigator.clipboard.writeText(mdEl.value);
+    toast('已複製 MD');
+  }catch{
+    toast('無法存取剪貼簿');
+  }
+});
+
+/* 清空 */
+clearMdBtn.addEventListener('click', ()=>{
+  mdEl.value = '';
+  toast('已清空編輯器');
+});
+
+/* 從圖片區插入（用快取，不強制要剪貼簿權限） */
+insertFromImageBtn.addEventListener('click', async ()=>{
+  let text = mdCache;
+  if(!text){
+    // 次選：嘗試從剪貼簿讀
+    try{ text = await navigator.clipboard.readText(); }catch(_){}
+  }
+  if(!text){
+    toast('沒有可插入的圖片 Markdown。請先在右側「複製勾選圖片MD」。');
+    return;
+  }
+  insertAtCursor(mdEl, text.endsWith('\n') ? text : text + '\n');
+  toast('已插入圖片 Markdown');
+});
+function insertAtCursor(textarea, text){
+  const start = textarea.selectionStart ?? textarea.value.length;
+  const end   = textarea.selectionEnd ?? textarea.value.length;
+  const before = textarea.value.slice(0, start);
+  const after  = textarea.value.slice(end);
+  textarea.value = before + text + after;
+  const pos = (before + text).length;
+  textarea.setSelectionRange(pos, pos);
+  textarea.focus();
+}
+
+/* ===========================================================
+   圖片區：選圖→壓縮去EXIF→顯示縮圖
+   =========================================================== */
+
+pickBtn.addEventListener('click', ()=> fileEl.click());
+fileEl.addEventListener('change', async e=>{
+  const files = Array.from(e.target.files || []).filter(f=>f.type.startsWith('image/'));
+  if(!files.length) return;
+  const maxDim = Math.max(640, Number(maxDimEl.value || 1200));
+  for(const f of files){
+    const it = await readAndCompress(f, maxDim);
+    items.push(it);
+    addThumb(it);
+  }
+  toast(`已載入 ${files.length} 張圖片`);
+});
+
+/* 讀檔 + re-encode 去 EXIF */
+function readFileAsDataURL(file){
+  return new Promise((res, rej)=>{
+    const fr = new FileReader();
+    fr.onload = ()=> res(fr.result);
+    fr.onerror = rej;
+    fr.readAsDataURL(file);
+  });
+}
+function loadImage(src){
+  return new Promise((res, rej)=>{
+    const img = new Image();
+    img.onload = ()=> res(img);
+    img.onerror = rej;
+    img.src = src;
+  });
+}
+async function readAndCompress(file, maxDim){
+  const dataURL = await readFileAsDataURL(file);
+  const img = await loadImage(dataURL);
+  let w = img.width, h = img.height;
+  const r = w / h;
+  if(w > h && w > maxDim){ w = maxDim; h = Math.round(maxDim / r); }
+  else if(h >= w && h > maxDim){ h = maxDim; w = Math.round(maxDim * r); }
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  const ctx = c.getContext('2d');
+  ctx.drawImage(img, 0, 0, w, h);
+  const blob = await new Promise(res => c.toBlob(res, 'image/jpeg', 0.7));
+  const url = URL.createObjectURL(blob);
+  return { file, blob, url, w, h, _selected:false };
+}
+
+/* 縮圖元件（刪除在右上角 / 勾選分開） */
+function addThumb(it){
+  const div = document.createElement('div'); div.className = 'thumb';
+  const img = document.createElement('img'); img.src = it.url;
+  const close = document.createElement('button'); close.className = 'x'; close.type='button'; close.textContent = '✕';
+  close.title = '刪除此張';
+  close.addEventListener('click', ()=>{
+    const i = items.indexOf(it);
+    if(i >= 0){ items.splice(i,1); }
+    URL.revokeObjectURL(it.url);
+    div.remove();
+  });
+
+  const meta = document.createElement('div'); meta.className = 'meta';
+  const name = document.createElement('span'); name.className = 'name';
+  name.textContent = it._finalName || '(未命名)';
+  const chkWrap = document.createElement('label'); chkWrap.className = 'chk';
+  const chk = document.createElement('input'); chk.type = 'checkbox';
+  chk.addEventListener('change', ()=> it._selected = chk.checked);
+  chkWrap.append(chk);
+
+  meta.append(name, chkWrap);
+  div.append(img, close, meta);
+  gridEl.append(div);
+  it._el = div;
+  it._nameEl = name;
+  it._chkEl = chk;
+}
+
+/* 一鍵清空此批 */
+clearBatchBtn.addEventListener('click', ()=>{
+  items.forEach(it=> URL.revokeObjectURL(it.url));
+  items = [];
+  gridEl.innerHTML = '';
+  namePrefix = null;
+  mdCache = '';
+  toast('已清空此批圖片');
+});
+
+/* 產生 MD 語法：此刻固定檔名，不再因順序變動（這版沒有拖曳） */
+genMdBtn.addEventListener('click', ()=>{
+  if(!items.length){ toast('沒有圖片可以命名'); return; }
+  if(!namePrefix) namePrefix = makePrefix();
+  let n = 1;
+  for(const it of items){
+    if(!it._finalName){
+      it._finalName = `${namePrefix}-${pad3(n++)}.jpg`;
+      it._path = `images/${it._finalName}`;
+      if(it._nameEl) it._nameEl.textContent = it._finalName;
     }
   }
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function(){ upgrade(document.body); });
-  } else {
-    upgrade(document.body);
+  toast('檔名已固定，可勾選並複製 MD');
+});
+
+/* 勾選管理 */
+checkAllBtn.addEventListener('click', ()=>{
+  items.forEach(it=>{ it._selected = true; it._chkEl && (it._chkEl.checked = true); });
+});
+uncheckAllBtn.addEventListener('click', ()=>{
+  items.forEach(it=>{ it._selected = false; it._chkEl && (it._chkEl.checked = false); });
+});
+
+/* 複製勾選圖片的 MD（並快取，供左側「插入圖片語法」用） */
+copySelectedBtn.addEventListener('click', async ()=>{
+  const hadName = items.every(it=> !!it._finalName);
+  if(!hadName){ toast('請先按「產生MD語法」鎖定檔名'); return; }
+  const picked = items.filter(it=> it._selected);
+  if(!picked.length){ toast('請先勾選要插入的圖片'); return; }
+
+  // 逐張獨立行，中間空一行，觸發你的自動圖牆規則
+  const lines = [];
+  for(const it of picked){
+    lines.push(`![](${it._path})`, '');
   }
-})();
-<\/script>
+  const out = lines.join('\n');
+
+  try{
+    await navigator.clipboard.writeText(out);
+    mdCache = out;
+    toast('已複製勾選圖片的 Markdown');
+  }catch{
+    mdCache = out; // 就算沒有權限，還是保留在快取供「插入圖片語法」
+    toast('已準備 MD（剪貼簿權限被擋，請用「插入圖片語法」貼入）');
+  }
+});
+
+/* 下載 ZIP（images/ 裡面塞固定檔名的 blob） */
+saveZipBtn.addEventListener('click', async ()=>{
+  const named = items.filter(it=> it._finalName);
+  if(!named.length){ toast('請先「產生MD語法」固定檔名'); return; }
+  const zip = new JSZip();
+  const folder = zip.folder('images');
+  for(const it of named){
+    const arrbuf = await it.blob.arrayBuffer();
+    folder.file(it._finalName, arrbuf);
+  }
+  const blob = await zip.generateAsync({type:'blob'});
+  try{
+    if(window.showSaveFilePicker){
+      const handle = await showSaveFilePicker({
+        suggestedName: 'images.zip',
+        types: [{ description:'ZIP 檔', accept:{ 'application/zip':['.zip'] } }]
+      });
+      const w = await handle.createWritable();
+      await w.write(blob); await w.close();
+    }else{
+      saveAs(blob, 'images.zip');
+    }
+    toast('ZIP 已下載/儲存');
+  }catch(e){
+    console.error(e);
+    toast('已取消或失敗');
+  }
+});
+</script>
+
 </body>
-</html>`;
-            }
-
-            // ====== 按鈕動作 ======
-            function triggerDownload() {
-                const html = getOutputHTML();
-                const blob = new Blob([html], { type: "text/html" });
-                const a = document.createElement("a");
-                a.href = URL.createObjectURL(blob);
-                a.download = "output.html";
-                a.click();
-            }
-            async function copyOutputHTML() {
-                const btn = document.getElementById("btn-copy");
-                const html = getOutputHTML();
-                try {
-                    if (navigator.clipboard && window.isSecureContext) {
-                        await navigator.clipboard.writeText(html);
-                    } else {
-                        const ta = document.createElement("textarea");
-                        ta.value = html;
-                        ta.style.position = "fixed";
-                        ta.style.left = "-9999px";
-                        document.body.appendChild(ta);
-                        ta.focus();
-                        ta.select();
-                        document.execCommand("copy");
-                        document.body.removeChild(ta);
-                    }
-                    showToast("HTML 已複製到剪貼簿");
-                    btn.textContent = "已複製";
-                    setTimeout(() => (btn.textContent = "複製 HTML"), 1500);
-                } catch (e) {
-                    showToast("複製失敗");
-                    console.error(e);
-                }
-            }
-            function clearMarkdown() {
-                const input = document.getElementById("markdown-input");
-                input.value = "";
-                render();
-            }
-            function copyMarkdown() {
-                const ta = document.getElementById("markdown-input");
-                try {
-                    if (navigator.clipboard && window.isSecureContext) {
-                        navigator.clipboard.writeText(ta.value);
-                    } else {
-                        const helper = document.createElement("textarea");
-                        helper.value = ta.value;
-                        helper.style.position = "fixed";
-                        helper.style.left = "-9999px";
-                        document.body.appendChild(helper);
-                        helper.focus();
-                        helper.select();
-                        document.execCommand("copy");
-                        document.body.removeChild(helper);
-                    }
-                    showToast("Markdown 已複製到剪貼簿");
-                } catch (e) {
-                    showToast("複製 Markdown 失敗");
-                    console.error(e);
-                }
-            }
-            function showToast(msg) {
-                const t = document.getElementById("toast");
-                t.textContent = msg;
-                t.classList.add("show");
-                setTimeout(() => t.classList.remove("show"), 1600);
-            }
-
-            // 綁定與初始化
-            window.triggerDownload = triggerDownload;
-            window.copyOutputHTML = copyOutputHTML;
-            window.clearMarkdown = clearMarkdown;
-            window.copyMarkdown = copyMarkdown;
-
-            window.addEventListener("DOMContentLoaded", () => {
-                try {
-                    initTheme();
-                    const input = document.getElementById("markdown-input");
-                    if (input) {
-                        input.addEventListener("input", render);
-                        render();
-                    }
-                } catch (e) {
-                    console.error("初始化錯誤", e);
-                }
-            });
-
-            document.getElementById("openMd").addEventListener("change", async (e) => {
-                const f = e.target.files?.[0];
-                if (!f) return;
-                const text = await f.text();
-                const ta = document.getElementById("markdown-input");
-                ta.value = text;
-                render();
-                localStorage.setItem("md2html_current_doc", text);
-                showToast("已載入 " + f.name);
-            });
-
-            // 儲存MD
-            const saveBtn = document.getElementById("saveMdBtn");
-            if (saveBtn && !saveBtn.dataset.bound) {
-                saveBtn.addEventListener("click", () => saveMd());
-                saveBtn.dataset.bound = "1";
-            }
-
-            let saving = false;
-
-            function getMdText() {
-                const ta = document.getElementById("markdown-input");
-                if (!ta) {
-                    throw new Error("找不到 #markdown-input");
-                }
-                return ta.value;
-            }
-
-            function makeFileName(base = "note") {
-                const iso = new Date().toISOString().replace(/[:.]/g, "-");
-                return `${base}-${iso}.md`;
-            }
-
-            function isIOS() {
-                return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-            }
-
-            async function saveMd(filename = makeFileName("note")) {
-                if (saving) return; // 重入鎖
-                saving = true;
-                try {
-                    const mdText = getMdText();
-                    const blob = new Blob([mdText], { type: 'text/markdown;charset=utf-8' });
-                    const file = new File([blob], filename, { type: "text/markdown" });
-
-                    // 桌面 Chromium：真正「存回檔案」
-                    if ("showSaveFilePicker" in window && !isIOS()) {
-                        const handle = await window.showSaveFilePicker({
-                            suggestedName: filename,
-                            types: [{ description: "Markdown", accept: { "text/markdown": [".md"] } }],
-                        });
-                        const writable = await handle.createWritable();
-                        await writable.write(blob);
-                        await writable.close();
-                        return;
-                    }
-
-                    // iOS / Android：用分享面板（含「存入檔案」）
-                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                        try {
-                            await navigator.share({ files: [file], title: filename, text: "Markdown 檔" });
-                            // 重要：在 iOS 上即便 share 成功有時也會 throw
-                            // 我們把它當「已嘗試分享」就結束，不再觸發下載備援，避免雙檔
-                            return;
-                        } catch (err) {
-                            if (isIOS()) {
-                                // iOS：不備援下載，避免雙檔。最多提醒一下使用者。
-                                console.debug("iOS share 被取消或怪錯，略過備援下載以避免重複檔案。", err);
-                                return;
-                            }
-                            // 其他平台才落到下載備援
-                        }
-                    }
-
-                    // 通用備援：下載 .md（PC 就是這條）
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement("a");
-                    a.href = url;
-                    a.download = filename; // 盡量保住 .md
-                    document.body.appendChild(a);
-                    a.click();
-                    a.remove();
-                    URL.revokeObjectURL(url);
-                } catch (e) {
-                    console.error(e);
-                    alert("儲存失敗：" + (e.message || e));
-                } finally {
-                    saving = false;
-                }
-            }
-        </script>
-        <script>
-            // 盡量只掃放主題的那份樣式，避免撈到別的東西
-            function getThemeStyleSheet() {
-                for (const sheet of Array.from(document.styleSheets)) {
-                    try {
-                        // 如果用 <style id="themes-css">，用 ownerNode 快速鎖定
-                        if (sheet.ownerNode && sheet.ownerNode.id === "themes-css") return sheet;
-                        // 或者如果用同源的 themes.css，也可以用 href 判斷
-                        if (sheet.href && sheet.href.endsWith("themes.css")) return sheet;
-                    } catch (e) {
-                        // 非同源會丟 SecurityError，略過
-                    }
-                }
-                return null;
-            }
-
-            function extractThemeBlocksFromSheet(sheet) {
-                const themes = {};
-                if (!sheet) return themes;
-
-                function pushBlock(name, rule, wrapper) {
-                    const cssText = `${wrapper}${rule.selectorText} { ${rule.style.cssText} }${wrapper ? " }" : ""}`;
-                    if (!themes[name]) themes[name] = [];
-                    themes[name].push(cssText);
-                }
-
-                function walk(rules, wrapper = "") {
-                    for (const rule of Array.from(rules || [])) {
-                        if (rule.type === CSSRule.STYLE_RULE && rule.selectorText) {
-                            // 1) 抓裸 :root 當 default
-                            if (rule.selectorText.trim() === ":root") {
-                                pushBlock("default", rule, wrapper);
-                            }
-                            // 2) 抓 :root[data-theme="xxx"]
-                            const m = rule.selectorText.match(/^:root\[data-theme="([^"]+)"\]$/);
-                            if (m) {
-                                pushBlock(m[1], rule, wrapper);
-                            }
-                        }
-                        if (rule.type === CSSRule.MEDIA_RULE) {
-                            walk(rule.cssRules, `@media ${rule.media.mediaText} { `);
-                        }
-                    }
-                }
-
-                try {
-                    walk(sheet.cssRules);
-                } catch (_) {}
-
-                // 合併同名片段
-                const out = {};
-                for (const [k, arr] of Object.entries(themes)) out[k] = arr.join("\n");
-                return out;
-            }
-
-            // 在頁面載入後做一次快取
-            let THEME_BLOCKS = {};
-            document.addEventListener("DOMContentLoaded", () => {
-                const sheet = getThemeStyleSheet();
-                THEME_BLOCKS = extractThemeBlocksFromSheet(sheet);
-            });
-
-            (function () {
-                const root = document.getElementById("workbench");
-                const group = document.querySelector(".view-toggle");
-                const STORAGE_KEY = "mdtool_layout";
-
-                function setLayout(mode) {
-                    if (!root) return;
-                    if (!["split", "left", "right"].includes(mode)) mode = "split";
-                    root.setAttribute("data-layout", mode);
-                    // 更新按鈕 pressed 狀態
-                    group?.querySelectorAll("button[data-layout]").forEach((btn) => {
-                        btn.setAttribute("aria-pressed", btn.getAttribute("data-layout") === mode ? "true" : "false");
-                    });
-                    // 記住使用者選擇
-                    try {
-                        localStorage.setItem(STORAGE_KEY, mode);
-                    } catch (e) {}
-                }
-
-                // 事件綁定：一律點按鈕切模式
-                group?.addEventListener("click", (e) => {
-                    const btn = e.target.closest("button[data-layout]");
-                    if (!btn) return;
-                    setLayout(btn.getAttribute("data-layout"));
-                });
-
-                // 還原上次模式，沒有就用 split
-                const saved = (() => {
-                    try {
-                        return localStorage.getItem(STORAGE_KEY);
-                    } catch (e) {
-                        return null;
-                    }
-                })();
-                setLayout(saved || "split");
-            })();
-        </script>
-    </body>
 </html>
