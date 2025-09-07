@@ -80,6 +80,31 @@
     transition:opacity .2s, transform .2s; pointer-events:none; z-index:99;
   }
   .toast.show{ opacity:1; transform:translateY(0) }
+
+/* 左上角大顆勾選框（更好戳） */
+.thumb .chk {
+  position: absolute;
+  left: 8px; top: 8px;
+  z-index: 2;
+  background: rgba(255,255,255,.95);
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  padding: 4px;
+}
+.thumb .chk input[type="checkbox"]{
+  width: 22px; height: 22px;
+  accent-color: #2563eb;
+}
+
+/* 被選中時，整張卡片有高對比外框與淡藍遮罩 */
+.thumb.selected { box-shadow: 0 0 0 3px #2563eb inset; }
+.thumb.selected::after{
+  content:"";
+  position:absolute; inset:0;
+  background: rgba(37,99,235,.08);
+  pointer-events:none;
+}
+
 </style>
 </head>
 <body>
@@ -316,34 +341,91 @@ async function readAndCompress(file, maxDim){
   return { file, blob, url, w, h, _selected:false };
 }
 
+function bindSelectable(div, it){
+  // 讓整張縮圖能切換勾選，同時避免滑動誤觸
+  const THRESHOLD_PX = 8;     // 位移門檻
+  const THRESHOLD_MS = 250;   // 時長門檻
+  let startX=0, startY=0, startT=0, moved=false, pointer=-1;
+
+  const onDown = (e) => {
+    if (pointer !== -1) return; // 已有指標
+    const p = e.touches ? e.touches[0] : e;
+    if (!p) return;
+    pointer = p.identifier ?? p.pointerId ?? 0;
+    startX = p.clientX; startY = p.clientY; startT = Date.now();
+    moved  = false;
+  };
+
+  const onMove = (e) => {
+    if (pointer === -1) return;
+    const p = e.touches ? e.touches[0] : e;
+    if (!p) return;
+    const dx = p.clientX - startX, dy = p.clientY - startY;
+    if (dx*dx + dy*dy > THRESHOLD_PX*THRESHOLD_PX) moved = true;
+  };
+
+  const onUp = (e) => {
+    // 重置指標
+    pointer = -1;
+    const dur = Date.now() - startT;
+
+    // 只在「短且沒移動」時當作點擊
+    const isTap = !moved && dur < THRESHOLD_MS;
+    if (!isTap) return;
+
+    // 切換勾選狀態
+    it._selected = !it._selected;
+    if (it._chkEl) it._chkEl.checked = it._selected;
+    div.classList.toggle('selected', it._selected);
+  };
+
+  // 綁定 Pointer/Touch/Mouse（被動監聽避免卡捲動）
+  div.addEventListener('pointerdown', onDown, { passive: true });
+  div.addEventListener('pointermove', onMove, { passive: true });
+  div.addEventListener('pointerup',   onUp,   { passive: true });
+  div.addEventListener('pointercancel', ()=> { pointer = -1; });
+
+  // 鍵盤可用性（Tab 到縮圖按空白/Enter 也能切換）
+  div.tabIndex = 0;
+  div.setAttribute('role', 'checkbox');
+  div.setAttribute('aria-checked', 'false');
+  div.addEventListener('keydown', (e)=>{
+    if (e.key === ' ' || e.key === 'Enter'){
+      e.preventDefault();
+      it._selected = !it._selected;
+      if (it._chkEl) it._chkEl.checked = it._selected;
+      div.classList.toggle('selected', it._selected);
+      div.setAttribute('aria-checked', it._selected ? 'true' : 'false');
+    }
+  });
+}
+
+
 /* 縮圖元件（刪除在右上角 / 勾選分開） */
 function addThumb(it){
   const div = document.createElement('div'); div.className = 'thumb';
   const img = document.createElement('img'); img.src = it.url;
-  const close = document.createElement('button'); close.className = 'x'; close.type='button'; close.textContent = '✕';
-  close.title = '刪除此張';
-  close.addEventListener('click', ()=>{
-    const i = items.indexOf(it);
-    if(i >= 0){ items.splice(i,1); }
-    URL.revokeObjectURL(it.url);
-    div.remove();
-  });
-
-  const meta = document.createElement('div'); meta.className = 'meta';
-  const name = document.createElement('span'); name.className = 'name';
-  name.textContent = it._finalName || '(未命名)';
+  const close = document.createElement('button'); /* ...你的 ❌ 刪除程式略... */
+  const meta = document.createElement('div');     /* ...顯示檔名區... */
   const chkWrap = document.createElement('label'); chkWrap.className = 'chk';
   const chk = document.createElement('input'); chk.type = 'checkbox';
-  chk.addEventListener('change', ()=> it._selected = chk.checked);
+  chk.addEventListener('change', ()=>{
+    it._selected = chk.checked;
+    div.classList.toggle('selected', it._selected);
+    div.setAttribute('aria-checked', it._selected ? 'true' : 'false');
+  });
   chkWrap.append(chk);
 
-  meta.append(name, chkWrap);
-  div.append(img, close, meta);
+  meta.append(/* name ... */);
+  div.append(img, close, chkWrap, meta);
   gridEl.append(div);
-  it._el = div;
-  it._nameEl = name;
-  it._chkEl = chk;
+
+  it._el = div; it._chkEl = chk; it._nameEl = /*...*/;
+
+  // 讓整張縮圖可點選，但滑動不會誤觸
+  bindSelectable(div, it);
 }
+
 
 /* 一鍵清空此批 */
 clearBatchBtn.addEventListener('click', ()=>{
