@@ -139,6 +139,7 @@
     <button class="btn" id="copyMdBtn">複製</button>
     <button class="btn" id="clearMdBtn">清空</button>
     <button class="btn primary" id="insertFromImageBtn" title="請先在右側產生並複製勾選圖片的 MD">插入圖片語法</button>
+    <button class="btn primary" id="previewBtn">預覽</button>
     <input id="openMdFile" type="file" accept=".md,.markdown,text/markdown,text/plain" hidden />
   </div>
   <a class="btn ghost" href="index.html">🏠 回首頁</a>
@@ -567,6 +568,180 @@ saveZipBtn.addEventListener('click', async ()=>{
   }
 });
 </script>
+<script>
+/* ===== Markdown 解析：有 CDN 就用 marked，沒載到就用 fallback ===== */
+function escapeHtml(str){return String(str).replace(/[&<>"]/g,s=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[s]));}
+function mdFallback(md){
+  md = md.replace(/```([\s\S]*?)```/g,(_,c)=>"<pre><code>"+escapeHtml(c)+"</code></pre>");
+  md = md.replace(/^###\s+(.*)$/gm,"<h3>$1</h3>").replace(/^##\s+(.*)$/gm,"<h2>$1</h2>").replace(/^#\s+(.*)$/gm,"<h1>$1</h1>");
+  md = md.replace(/!\[([^\]]*)\]\(([^)]+)\)/g,'<p><img alt="$1" src="$2"></p>');
+  md = md.replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>');
+  md = md.replace(/\*\*([^*]+)\*\*/g,"<strong>$1</strong>").replace(/\*([^*]+)\*/g,"<em>$1</em>").replace(/`([^`]+)`/g,"<code>$1</code>");
+  md = md.replace(/(?:^|\n)(\|.*\|)\n(\|[\-:\s\|]+\|)\n((?:\|.*\|\n?)*)/g,function(_,h,sep,body){
+    function row(r){return r.trim().slice(1,-1).split("|").map(s=>s.trim());}
+    const head=row(h).map(x=>"<th>"+escapeHtml(x)+"</th>").join("");
+    const bodyHtml=body.trim().split(/\n/).filter(Boolean).map(r=>"<tr>"+row(r).map(c=>"<td>"+escapeHtml(c)+"</td>").join("")+"</tr>").join("");
+    return "\n<table><thead><tr>"+head+"</tr></thead><tbody>"+bodyHtml+"</tbody></table>\n";
+  });
+  md = md.replace(/(^|\n)([^<\n][^\n]*)/g,(m,br,line)=>{
+    if(/^\s*$/.test(line)) return br+line;
+    if(/^\s*<(h\d|pre|table|blockquote|ul|ol|img)/i.test(line)) return br+line;
+    return br+"<p>"+line.trim()+"</p>";
+  });
+  return md;
+}
+function renderMarkdown(md){ return (window.marked && typeof marked.parse==="function") ? marked.parse(md) : mdFallback(md); }
 
+/* ===== Obsidian callout 轉漂亮盒 ===== */
+function preprocessCallouts(md){
+  const lines=String(md).split(/\r?\n/), out=[]; let i=0;
+  const titleMap={NOTE:"Note",TIP:"Tip",WARNING:"Warning",INFO:"Info"};
+  while(i<lines.length){
+    const m = lines[i].match(/^\s*>\s*$begin:math:display$!(NOTE|TIP|WARNING|INFO)$end:math:display$\s*(.*)$/i);
+    if(m){
+      const kind=m[1].toUpperCase(), title=(m[2]||"").trim()||titleMap[kind];
+      const body=[]; i++;
+      while(i<lines.length){
+        const l=lines[i];
+        if(/^\s*>/.test(l)){ body.push(l.replace(/^\s*>\s?/, "")); i++; }
+        else if(/^\s*$/.test(l)){ body.push(""); i++; }
+        else break;
+      }
+      out.push(`<blockquote class="callout"><div class="callout-head"><strong>${title}</strong></div><div class="callout-body">${renderMarkdown(body.join("\n"))}</div></blockquote>`);
+      continue;
+    }
+    out.push(lines[i]); i++;
+  }
+  return out.join("\n");
+}
+
+/* ===== 圖片牆：把連續「只含圖片」的段落合成 .gallery-block ===== */
+function isImgOnlyP(p){
+  if(!(p && p.nodeType===1 && p.tagName==="P")) return false;
+  const kids=[...p.childNodes]; if(!kids.length) return false;
+  return kids.every(n => (n.nodeType===1 && n.tagName==="IMG") || (n.nodeType===3 && !String(n.nodeValue).trim()));
+}
+function wrapConsecutiveImages(root){
+  const nodes=[...root.childNodes]; let run=[];
+  function flush(){
+    if(!run.length) return;
+    const gallery=document.createElement("div"); gallery.className="gallery-block";
+    const head=document.createElement("div"); head.className="gallery-head"; head.textContent="圖片";
+    const grid=document.createElement("div"); grid.className="gallery-grid";
+    gallery.append(head,grid);
+    run.forEach(p=>{
+      p.querySelectorAll("img").forEach(img=>{
+        const item=document.createElement("div"); item.className="gallery-item";
+        const a=document.createElement("a"); a.className="gallery-link"; a.href=img.getAttribute("src")||"#"; a.target="_blank";
+        const thumb=img.cloneNode(true); thumb.classList.add("thumb"); a.appendChild(thumb);
+        item.appendChild(a);
+        if(img.alt){ const cap=document.createElement("div"); cap.className="caption"; cap.textContent=img.alt; item.appendChild(cap); }
+        grid.appendChild(item);
+      });
+    });
+    root.insertBefore(gallery, run[0]); run.forEach(n=>root.removeChild(n)); run=[];
+  }
+  for(const n of nodes){ if(isImgOnlyP(n)) run.push(n); else flush(); }
+  flush();
+}
+
+/* ===== 在新分頁產出完整 HTML（含 Mermaid） ===== */
+function buildPreviewHTML(md){
+  // 內容 HTML
+  const container=document.createElement("div"); container.className="preview-box";
+  try{ container.innerHTML = renderMarkdown(preprocessCallouts(md)); }catch(e){ container.innerHTML = "<p style='color:#b91c1c'>解析錯誤</p>"; }
+  wrapConsecutiveImages(container);
+  const content = container.outerHTML;
+
+  // 基礎樣式（沿用 md_to_html 的樣式精簡版）
+  const css = `
+:root{ --bg:#f6f7fb; --panel:#fff; --line:#e5e7eb; --text:#111827; --muted:#6b7280; --thumb-w:320px; --thumb-h:200px; }
+body{ font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans TC",sans-serif; margin:0; padding:24px; background:var(--bg); color:var(--text) }
+h1{font-size:1.75rem;margin:.2rem 0 1rem} h2{font-size:1.35rem;margin:1.25rem 0 .75rem} h3{font-size:1.1rem;margin:1rem 0 .5rem}
+p{margin:.5rem 0} a{color:#2563eb;text-decoration:none} a:hover{text-decoration:underline}
+code{background:#f3f4f6;padding:0 .35rem;border-radius:4px} pre{background:#f3f4f6;padding:12px;border:1px solid var(--line);border-radius:8px;overflow:auto}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.95rem} th,td{border:1px solid var(--line);padding:.6rem .75rem;text-align:left} thead th{background:#e0f2fe}
+blockquote{position:relative;margin:1rem 0;padding:12px 16px 12px 18px;border-left:4px solid #d1d5db;background:#f9fafb;border-radius:8px}
+blockquote::before{content:"“";position:absolute;top:-6px;left:8px;font-size:40px;color:rgba(17,24,39,.12)}
+.callout{padding:0;border-left:4px solid #d1d5db;background:#f9fafb;border-radius:8px;margin:1rem 0}
+.callout-head{display:flex;align-items:center;gap:8px;padding:10px 12px;font-weight:700;border-bottom:1px solid #d1d5db}
+.callout-body{padding:12px 14px;background:#fff}
+
+.gallery-block{border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff;margin:1rem 0}
+.gallery-head{font-size:13px;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:6px;margin-bottom:10px}
+.gallery-head::before{content:"🖼️"}
+.gallery-grid{display:grid;grid-template-columns:repeat(3,var(--thumb-w));gap:12px;justify-content:start}
+.gallery-item{width:var(--thumb-w);height:var(--thumb-h);border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}
+.gallery-link{display:block;width:100%;height:100%}
+.gallery-item img.thumb{width:100%;height:100%;object-fit:cover;display:block}
+@media(max-width:767px){ :root{--thumb-w:100%;--thumb-h:220px} .gallery-grid{grid-template-columns:1fr} }
+
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;z-index:2000}
+.lightbox.show{display:flex}
+.lightbox img{max-width:95vw;max-height:90vh;border-radius:8px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.lb-close{position:absolute;top:16px;right:16px;background:rgba(255,255,255,.9);border:0;padding:8px 10px;border-radius:8px;cursor:pointer;font-weight:700}
+`;
+
+  // 整頁
+  return `<!doctype html><html lang="zh-Hant"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>預覽</title>
+<link rel="icon" href="data:,">
+<style>${css}</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"><\/script>
+</head><body>
+${content}
+<div id="lightbox" class="lightbox" aria-hidden="true"><button class="lb-close" onclick="document.getElementById('lightbox').classList.remove('show')">✕</button><img id="lightbox-img" alt=""></div>
+<script>
+// 讓 <pre><code class="language-mermaid"> 變成 <div class="mermaid">
+(function(){
+  function upgrade(el){
+    var list = el.querySelectorAll('pre > code.language-mermaid, pre > code.lang-mermaid, pre > code.mermaid');
+    list.forEach(function(code){
+      var pre = code.parentElement;
+      var div = document.createElement('div');
+      div.className = 'mermaid';
+      div.textContent = code.textContent;
+      pre.replaceWith(div);
+    });
+  }
+  function enableGallery(){
+    document.addEventListener('click', function(e){
+      var a = e.target.closest('.gallery-link');
+      if(!a) return;
+      e.preventDefault();
+      var lb = document.getElementById('lightbox');
+      var img = document.getElementById('lightbox-img');
+      img.src = a.href; img.alt = a.querySelector('img')?.alt || '';
+      lb.classList.add('show'); lb.setAttribute('aria-hidden','false');
+    });
+    document.getElementById('lightbox').addEventListener('click', function(e){
+      if(e.target.id==='lightbox') this.classList.remove('show');
+    });
+    document.addEventListener('keydown', function(e){ if(e.key==='Escape') document.getElementById('lightbox').classList.remove('show'); });
+  }
+  function run(){
+    upgrade(document.body);
+    if (window.mermaid){
+      try{ mermaid.initialize({ startOnLoad:false }); if(typeof mermaid.run==='function') mermaid.run(); else mermaid.init(undefined, document.querySelectorAll('.mermaid')); }catch(e){}
+    }
+    enableGallery();
+  }
+  if (document.readyState==='loading') document.addEventListener('DOMContentLoaded', run); else run();
+})();
+<\/script>
+</body></html>`;
+}
+
+/* ===== 綁定預覽按鈕：開新分頁（Blob URL） ===== */
+document.getElementById('previewBtn').addEventListener('click', function(){
+  const md = document.getElementById('md').value || '';
+  const html = buildPreviewHTML(md);
+  const blob = new Blob([html], {type:'text/html'});
+  const url = URL.createObjectURL(blob);
+  window.open(url, '_blank');           // iPad Safari 需在使用者手勢下呼叫，這裡符合
+  setTimeout(()=>URL.revokeObjectURL(url), 15000);
+});
+</script>
 </body>
 </html>
