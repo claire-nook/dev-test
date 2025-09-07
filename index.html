@@ -1,632 +1,1412 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Markdown 預覽</title>
+        <!-- 嘗試載入 marked；若失敗改用內建 fallback -->
+        <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+        <!-- 嘗試載入 mermaid圖表支援 -->
+        <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+        <!-- 主題色系統一放在這裡 -->
+        <style id="themes-css">
+            /* 原風格：表頭底色 */
+            :root {
+                --bg: #f6f7fb;
+                --panel: #ffffff;
+                --line: #e5e7eb;
+                --text: #111827;
+                --muted: #6b7280;
+                --btn: #111827;
+                --btn-hover: #000000;
+                --link: #2563eb;
+
+                --bq-border: #d1d5db;
+                --bq-bg: #f9fafb;
+                --bq-quote: rgba(17, 24, 39, 0.12);
+                --bq-text-muted: #6b7280;
+
+                --thumb-w: 320px;
+                --thumb-h: 200px;
+
+                --table-head-bg: #f8fafc;
+            }
+            /* 奶茶系 */
+            :root[data-theme="milktea"] {
+                --bg: #fdfaf6; /* 淡奶油米色 */
+                --panel: #ffffff; /* 純白襯托 */
+                --line: #e2c9b7; /* 奶茶邊框色 */
+                --text: #4b3621; /* 深咖啡字色 */
+                --muted: #7a5f4b; /* 次要文字：焦糖色 */
+                --btn: #d7a86e; /* 奶茶拿鐵色按鈕 */
+                --btn-hover: #c08552; /* 焦糖 hover */
+                --bq-border: #e6d0c1; /* 奶油米邊框 */
+                --bq-bg: #f9f3ef; /* 引用背景：淡拿鐵 */
+                --bq-quote: rgba(160, 115, 85, 0.2);
+                --bq-text-muted: #7a5f4b;
+                --link: #a47148; /* 可可連結色 */
+                --table-head-bg: #f3e7df; /* 柔和米灰 */
+            }
+
+            /* 森林系 */
+            :root[data-theme="forest"] {
+                --bg: #ffffff; /* 白底，乾淨 */
+                --panel: #ffffff; /* 面板白 */
+                --line: #cfd8d3; /* 淡灰綠邊線 */
+                --text: #1b2d1b; /* 深墨綠字體，穩重 */
+                --muted: #4a5d4a; /* 次要字色：暗苔綠 */
+
+                --btn: #3b6b3b; /* 主按鈕：森林綠 */
+                --btn-hover: #2f4f2f; /* hover：更暗一階的綠 */
+                --link: #2e6f4f; /* 深藍綠連結 */
+
+                --bq-border: #7a8f7a; /* 引用邊框：灰綠 */
+                --bq-bg: #f4f7f4; /* 引用背景：很淺的灰綠 */
+                --bq-quote: rgba(59, 107, 59, 0.2); /* 引用裝飾 */
+                --bq-text-muted: #4a5d4a;
+
+                --table-head-bg: #e9f0eb; /* 表頭：淡灰綠 */
+            }
+            /* 穩重藍系 */
+            :root[data-theme="navy"] {
+                --bg: #f8fafc; /* 淡霧藍灰背景 */
+                --panel: #ffffff; /* 白色面板 */
+                --line: #cbd5e1; /* 淡灰藍邊線 */
+                --text: #1e293b; /* 深藍灰字體，沉穩 */
+                --muted: #475569; /* 次要字色：石板藍灰 */
+                --btn: #3b82f6; /* 主按鈕：亮藍 */
+                --btn-hover: #1d4ed8; /* hover：深藍 */
+                --bq-border: #93c5fd; /* 引用框邊：淡藍 */
+                --bq-bg: #eff6ff; /* 引用背景：淺藍霧 */
+                --bq-quote: rgba(59, 130, 246, 0.15);
+                --bq-text-muted: #475569;
+                --link: #2563eb; /* 藍色連結 */
+                --table-head-bg: #e0f2fe; /* 表頭：淺湖藍 */
+            }
+            /* 粉紅玻瑰系 */
+            :root[data-theme="rose"] {
+                --bg: #fff7fa; /* 淺粉背景 */
+                --panel: #ffffff;
+                --line: #f7cad0; /* 粉邊框 */
+                --text: #5a2a36; /* 酒紅字體，穩重 */
+                --muted: #915c6c; /* 粉棕次要字色 */
+                --btn: #e66b8c; /* 玫瑰粉按鈕 */
+                --btn-hover: #d13f66; /* 深櫻 hover */
+                --bq-border: #f9b5c3; /* 引用邊框：淺玫瑰 */
+                --bq-bg: #fff0f5; /* 引用背景：蜜桃粉 */
+                --bq-quote: rgba(230, 107, 140, 0.2);
+                --bq-text-muted: #915c6c;
+                --link: #c63c67; /* 玫瑰紅連結 */
+                --table-head-bg: #fbe4eb;
+            }
+
+            /* 粉嫩橘黃系 */
+            :root[data-theme="peach"] {
+                --bg: #fffaf5;
+                --panel: #ffffff;
+                --line: #ffd9b5;
+                --text: #6b3a22;
+                --muted: #8c5a3f;
+                --btn: #ff8b3d;
+                --btn-hover: #f97316;
+                --bq-border: #ffcc99;
+                --bq-bg: #fff1e6;
+                --bq-quote: rgba(247, 127, 0, 0.15);
+                --bq-text-muted: #8c5a3f;
+                --link: #d97706;
+                --table-head-bg: #fff1e6;
+            }
+            /* 青蘋果系 */
+            :root[data-theme="apple"] {
+                --bg: #f8fff5;
+                --panel: #ffffff;
+                --line: #c6f6d5;
+                --text: #1a3c1a;
+                --muted: #4a6f4a;
+                --btn: #34d399;
+                --btn-hover: #059669;
+                --bq-border: #bbf7d0;
+                --bq-bg: #ecfdf5;
+                --bq-quote: rgba(16, 185, 129, 0.15);
+                --bq-text-muted: #2f6d54;
+                --link: #047857;
+                --table-head-bg: #d1fae5;
+            }
+            /* 清新藍綠系 */
+            :root[data-theme="mint"] {
+                --bg: #f0fffd;
+                --panel: #ffffff;
+                --line: #a7f3d0;
+                --text: #0f5132;
+                --muted: #1f6f54;
+                --btn: #10b981;
+                --btn-hover: #059669;
+                --bq-border: #99f6e4;
+                --bq-bg: #ecfeff;
+                --bq-quote: rgba(13, 148, 136, 0.15);
+                --bq-text-muted: #1f6f54;
+                --link: #0ea5e9;
+                --table-head-bg: #ecfeff;
+            }
+            /* 要再加其他主題，就在這裡繼續往下貼 */
+        </style>
+        <!-- 其他的CSS統一放在這裡 -->
+        <style>
+            html,
+            body {
+                height: 100%;
+            }
+            body {
+                margin: 0;
+                font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", "Noto Sans", "Hiragino Sans", "PingFang TC", "Microsoft JhengHei", Arial, Helvetica, sans-serif;
+                color: var(--text);
+                background: var(--bg);
+                display: flex;
+                flex-direction: column;
+            }
+
+            header {
+                position: fixed;
+                inset: 0 0 auto 0;
+                z-index: 1000;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 12px 16px;
+                background: #fff;
+                border-bottom: 1px solid var(--line);
+                gap: 12px;
+            }
+            header .title {
+                font-weight: 700;
+                letter-spacing: 0.5px;
+            }
+            header .actions {
+                display: flex;
+                gap: 8px;
+                align-items: center;
+                flex-wrap: wrap;
+            }
+            .theme-wrap {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                font-size: 14px;
+                color: var(--muted);
+                border: 1px solid var(--line);
+                border-radius: 8px;
+                padding: 6px 10px;
+                background: #fff;
+            }
+            select#themeSelect {
+                border: 0;
+                outline: none;
+                background: transparent;
+                font-size: 14px;
+                color: var(--text);
+                padding: 2px 4px;
+                cursor: pointer;
+            }
+
+            .btn {
+                appearance: none;
+                border: 1px solid var(--line);
+                background: var(--btn);
+                color: #fff;
+                padding: 6px 12px;
+                border-radius: 8px;
+                cursor: pointer;
+                font-size: 14px;
+                line-height: 1;
+                white-space: nowrap;
+            }
+            .btn.secondary {
+                background: #fff;
+                color: var(--text);
+            }
+            .btn:hover {
+                background: var(--btn-hover);
+            }
+            .btn.secondary:hover {
+                background: #f3f4f6;
+            }
+
+            .wrap {
+                flex: 1;
+                padding: 16px;
+                box-sizing: border-box;
+                margin-top: var(--header-h, 60px);
+            }
+            .panel {
+                background: var(--panel);
+                border: 1px solid var(--line);
+                border-radius: 12px;
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+                min-height: 0;
+            }
+            .panel h3 {
+                margin: 0;
+                padding: 12px 14px;
+                border-bottom: 1px solid var(--line);
+                font-size: 14px;
+                color: var(--muted);
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+            .panel .body {
+                padding: 16px;
+                overflow: hidden;
+                min-height: 0;
+                flex: 1;
+                background: #fff;
+            }
+            #preview {
+                max-height: 100%;
+                overflow: auto;
+            }
+
+            textarea {
+                width: 100%;
+                height: 100%;
+                border: 0;
+                outline: none;
+                resize: none;
+                font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+
+            /* 預覽樣式 */
+            .preview-box {
+                max-width: 100%;
+                margin: 0 auto;
+                color: var(--text);
+            }
+            .preview-box h1 {
+                font-size: 1.75rem;
+                margin: 0.2rem 0 1rem;
+            }
+            .preview-box h2 {
+                font-size: 1.35rem;
+                margin: 1.25rem 0 0.75rem;
+            }
+            .preview-box h3 {
+                font-size: 1.1rem;
+                margin: 1rem 0 0.5rem;
+            }
+            .preview-box p {
+                margin: 0.5rem 0;
+            }
+            .preview-box code {
+                background: #f3f4f6;
+                padding: 0 0.35rem;
+                border-radius: 4px;
+                font-size: 0.95em;
+            }
+            .preview-box pre {
+                background: #f3f4f6;
+                padding: 12px;
+                border-radius: 8px;
+                overflow: auto;
+                border: 1px solid var(--line);
+            }
+            .preview-box a {
+                color: var(--link);
+                text-decoration: none;
+            }
+            .preview-box a:hover {
+                text-decoration: underline;
+            }
+
+            /* 表格 */
+            .preview-box table {
+                width: 100%;
+                border-collapse: collapse;
+                margin: 1rem 0;
+                font-size: 0.95rem;
+            }
+            .preview-box th,
+            .preview-box td {
+                border: 1px solid var(--line);
+                padding: 0.6rem 0.75rem;
+                vertical-align: top;
+                text-align: left;
+            }
+            .preview-box thead th {
+                background: var(--table-head-bg);
+                font-weight: 700;
+            }
+
+            /* 引言與 callout */
+            blockquote {
+                position: relative;
+                margin: 1rem 0;
+                padding: 12px 16px 12px 18px;
+                border-left: 4px solid var(--bq-border);
+                background: var(--bq-bg);
+                border-radius: 8px;
+            }
+            blockquote p {
+                margin: 0.5rem 0;
+            }
+            blockquote cite,
+            blockquote .attribution {
+                display: block;
+                margin-top: 0.5em;
+                color: var(--bq-text-muted);
+                font-style: italic;
+                font-size: 0.95em;
+            }
+            blockquote::before {
+                content: "“";
+                position: absolute;
+                top: -6px;
+                left: 8px;
+                font-size: 40px;
+                line-height: 1;
+                color: var(--bq-quote);
+                pointer-events: none;
+            }
+            blockquote blockquote {
+                margin: 0.75rem 0 0.25rem 8px;
+                border-left-color: color-mix(in srgb, var(--bq-border) 60%, white);
+                background: color-mix(in srgb, var(--bq-bg) 70%, white);
+            }
+            blockquote {
+                white-space: pre-wrap; /* 保留換行 + 自動換行 */
+                word-wrap: break-word; /* 長字斷行 */
+                overflow-wrap: break-word; /* 新標準寫法，確保長字斷行 */
+            }
+
+            .callout {
+                padding: 0;
+                border-left: 4px solid var(--bq-border);
+                border-radius: 8px;
+                background: var(--bq-bg);
+                margin: 1rem 0;
+            }
+            .callout > .callout-head {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                padding: 10px 12px;
+                font-weight: 700;
+                border-bottom: 1px solid var(--bq-border);
+            }
+            .callout > .callout-body {
+                padding: 12px 14px;
+            }
+
+            /* 圖片區塊 */
+            .gallery-block {
+                border: 1px solid var(--line);
+                border-radius: 12px;
+                padding: 12px;
+                background: #fff;
+                margin: 1rem 0;
+                box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02);
+            }
+            .gallery-head {
+                font-size: 13px;
+                color: var(--muted);
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                margin-bottom: 10px;
+            }
+            .gallery-head::before {
+                content: "🖼️";
+            }
+            .gallery-grid {
+                display: grid;
+                grid-template-columns: repeat(3, var(--thumb-w)); /* 圖片區塊一行顯示幾張, 若有調整要記得同時改匯出html的css */
+                gap: 12px;
+                justify-content: start;
+            }
+            .gallery-item {
+                width: var(--thumb-w);
+                height: var(--thumb-h);
+                border: 1px solid var(--line);
+                border-radius: 10px;
+                overflow: hidden;
+                background: #fff;
+            }
+            .gallery-link {
+                display: block;
+                width: 100%;
+                height: 100%;
+            }
+            .gallery-item img.thumb {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                display: block;
+            }
+            .gallery-item .caption {
+                padding: 6px 8px;
+                font-size: 12px;
+                color: var(--muted);
+                border-top: 1px solid var(--line);
+                background: #fafafa;
+                display: none;
+            }
+
+            /* Lightbox */
+            .lightbox {
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.8);
+                display: none;
+                align-items: center;
+                justify-content: center;
+                z-index: 2000;
+            }
+            .lightbox.show {
+                display: flex;
+            }
+            .lightbox img {
+                max-width: 95vw;
+                max-height: 90vh;
+                border-radius: 8px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+            }
+            .lightbox .lb-close {
+                position: absolute;
+                top: 16px;
+                right: 16px;
+                background: rgba(255, 255, 255, 0.9);
+                border: 0;
+                padding: 8px 10px;
+                border-radius: 8px;
+                cursor: pointer;
+                font-weight: 700;
+            }
+
+            /* 提示 */
+            .toast {
+                position: fixed;
+                bottom: 16px;
+                right: 16px;
+                background: #111827;
+                color: #fff;
+                padding: 10px 14px;
+                border-radius: 10px;
+                font-size: 13px;
+                opacity: 0;
+                transform: translateY(10px);
+                transition: opacity 0.2s, transform 0.2s;
+                pointer-events: none;
+                z-index: 2100;
+            }
+            .toast.show {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            /* RWD */
+            @media (max-width: 980px) {
+                .wrap {
+                    grid-template-columns: 1fr;
+                }
+            }
+            @media (max-width: 767px) {
+                header {
+                    flex-wrap: wrap;
+                    row-gap: 8px;
+                }
+                header .title {
+                    flex: 1 0 100%;
+                }
+                header .actions {
+                    width: 100%;
+                    overflow-x: auto;
+                    white-space: nowrap;
+                    padding-bottom: 4px;
+                }
+                .wrap {
+                    grid-template-columns: 1fr;
+                }
+                :root {
+                    --thumb-w: 100%;
+                    --thumb-h: 220px;
+                }
+                .gallery-grid {
+                    grid-template-columns: 1fr;
+                }
+                #markdown-input {
+                    min-height: 25vh;
+                }
+            }
+
+            /* 外層用 Grid 控三種寬度 */
+            #workbench {
+                display: grid;
+                grid-template-columns: 1fr 1fr; /* split 預設兩欄 */
+                gap: 0;
+                height: calc(100vh - 120px); /* 自行調整，扣掉你的工具列高度 */
+            }
+
+            /* 三種模式：並排 / 只左 / 只右 */
+            #workbench[data-layout="split"] {
+                grid-template-columns: 1fr 1fr;
+            }
+            #workbench[data-layout="left"] {
+                grid-template-columns: 1fr 0;
+            }
+            #workbench[data-layout="right"] {
+                grid-template-columns: 0 1fr;
+            }
+
+            /* 被收起的那欄完全不可點、也不佔可視 */
+            #workbench[data-layout="left"] #previewPane,
+            #workbench[data-layout="right"] #editorPane {
+                visibility: hidden;
+                pointer-events: none;
+                overflow: hidden;
+            }
+
+            /* 工具列三鍵的選中態，別做 hover，平板不需要 */
+            .view-toggle button[aria-pressed="true"] {
+                font-weight: 700;
+                border: 1px solid var(--line);
+                background: #fff;
+            }
+            .view-toggle button {
+                padding: 6px 10px;
+                border: 1px solid var(--line);
+                background: var(--panel);
+                border-radius: 6px;
+                margin-right: 6px;
+            }
+            #workbench {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 16px; /* ←加這個，左右中間就不會靠到陰陽兩隔 */
+                height: calc(100vh - 120px);
+            }
+            #workbench[data-layout="left"],
+            #workbench[data-layout="right"] {
+                gap: 0;
+            }
+
+            /* === Mobile split 修正：給容器高度 + 明確兩列比例 === */
+            @media (max-width: 768px) {
+                /* 共用：一欄上下堆疊 + 固定可分配的容器高度 */
+                #workbench {
+                    grid-template-columns: 1fr;
+                    gap: 12px;
+                    /* 扣掉表頭與外邊距，讓 fr 有依據可分配 */
+                    height: calc(100vh - var(--header-h, 60px) - 24px);
+                }
+
+                /* 並排：上 40% 編輯，下 60% 預覽（或改成 40vh/1fr 也行） */
+                #workbench[data-layout="split"] {
+                    grid-template-rows: 0.4fr 0.6fr;
+                }
+                /* 讓 grid 列決定高度，不用再鎖 min-height */
+                #workbench[data-layout="split"] #editorPane,
+                #workbench[data-layout="split"] #previewPane {
+                    min-height: 0;
+                    height: auto;
+                }
+
+                /* 只左：滿高；只右：滿高（維持你先前的行為） */
+                #workbench[data-layout="left"] {
+                    grid-template-rows: 1fr 0;
+                }
+                #workbench[data-layout="left"] #editorPane {
+                    min-height: calc(100vh - var(--header-h, 60px) - 24px);
+                }
+                #workbench[data-layout="left"] #previewPane {
+                    display: none;
+                }
+
+                #workbench[data-layout="right"] {
+                    grid-template-rows: 0 1fr;
+                }
+                #workbench[data-layout="right"] #previewPane {
+                    min-height: calc(100vh - var(--header-h, 60px) - 24px);
+                }
+                #workbench[data-layout="right"] #editorPane {
+                    display: none;
+                }
+            }
+
+            /* === Mobile layout: 強制把 split 改成上下 40/60，避免桌面兩欄吃進來 === */
+            @media (max-width: 768px) {
+                /* 共同：一欄，讓列來控高 */
+                #workbench {
+                    grid-template-columns: 1fr;
+                    height: calc(100vh - var(--header-h, 60px) - 24px);
+                    gap: 12px;
+                }
+
+                /* 並排：一定要用相同權重覆蓋 columns，否則會被 #workbench[data-layout="split"] 壓過 */
+                #workbench[data-layout="split"] {
+                    grid-template-columns: 1fr; /* ← 這行是關鍵 */
+                    grid-template-rows: 0.4fr 0.6fr; /* 上 40% 編輯，下 60% 預覽 */
+                }
+                #workbench[data-layout="split"] #editorPane,
+                #workbench[data-layout="split"] #previewPane {
+                    min-height: 0; /* 交給 grid-row 分配高度，不要讓 min-height 搗亂 */
+                    height: auto;
+                }
+
+                /* 只編輯：滿高，預覽不佔版面 */
+                #workbench[data-layout="left"] {
+                    grid-template-columns: 1fr;
+                    grid-template-rows: 1fr 0;
+                }
+                #workbench[data-layout="left"] #previewPane {
+                    display: none;
+                }
+
+                /* 只預覽：滿高，編輯不佔版面 */
+                #workbench[data-layout="right"] {
+                    grid-template-columns: 1fr;
+                    grid-template-rows: 0 1fr;
+                }
+                #workbench[data-layout="right"] #editorPane {
+                    display: none;
+                }
+            }
+
+            /* 共用：未選取 */
+            .mode-btn {
+                background: #f7f9fc;
+                color: #8a5200; /* 你現在那種琥珀字色 */
+                border: 1px solid #d5deff;
+            }
+
+            /* 套組 A：深藍底 + 白字（對比最高） */
+            .mode-btn[aria-pressed="true"].theme-blue {
+                background: #3b5bdb; /* 深藍 */
+                color: #ffffff;
+                border-color: #3b5bdb;
+            }
+
+            /* 套組 B：琥珀淺底 + 深字（暖色系但仍有對比） */
+            .mode-btn[aria-pressed="true"].theme-amber {
+                background: #fff1cc; /* 很淺的琥珀 */
+                color: #7a3e00; /* 比未選取再深一階 */
+                border-color: #e6b980;
+            }
+
+            /* 套組 C：石墨灰底 + 白字（中性） */
+            .mode-btn[aria-pressed="true"].theme-gray {
+                background: #4a4a4a;
+                color: #ffffff;
+                border-color: #4a4a4a;
+            }
+
+            /* 可選：hover 提示，也別讓字色消失 */
+            .mode-btn:hover {
+                filter: brightness(0.97);
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <div class="title">MD 2 Html</div>
+            <div class="actions">
+                <div class="theme-wrap" title="調整渲染後的字體與表格線條色">
+                    <select id="themeSelect" aria-label="選擇外觀主題">
+                        <option value="default">原風格</option>
+                        <option value="milktea">奶茶</option>
+                        <option value="navy">沉穩藍</option>
+                        <option value="forest">森林</option>
+                        <option value="rose">粉紅玫瑰</option>
+                        <option value="peach">橘黃</option>
+                        <option value="mint">藍綠</option>
+                        <option value="apple">青蘋果</option>
+                    </select>
+                </div>
+                <div class="view-toggle" role="group" aria-label="檢視模式">
+                    <button class="mode-btn theme-amber" data-layout="split" aria-pressed="true">並排</button>
+                    <button class="mode-btn theme-amber" data-layout="left" aria-pressed="false">只編輯</button>
+                    <button class="mode-btn theme-amber" data-layout="right" aria-pressed="false">只預覽</button>
+                </div>
+                <button class="btn secondary" onclick="location.href='index.html'">🧭回首頁</button>
+            </div>
+        </header>
+
+        <div class="wrap">
+            <div id="workbench" data-layout="split">
+                <section id="editorPane" class="panel">
+                    <h3>
+                        ✍️ 編輯
+                        <button class="btn secondary" onclick="clearMarkdown()">清空</button>
+                        <button class="btn secondary" onclick="document.getElementById('openMd').click()">開啟MD</button>
+                        <input id="openMd" type="file" accept=".md,.markdown,text/markdown,text/plain" style="display: none;" />
+                        <button class="btn secondary" onclick="copyMarkdown()">複製MD</button>
+                        <button class="btn" id="saveMdBtn">儲存MD</button>
+                    </h3>
+                    <div class="body">
+                        <textarea id="markdown-input">
+# 測試文件-大標題
+## 中標題
+### 小標題
+
+粗體字 **Markdown**
+
+斜體字 *Markdown*
+
+~~刪除線~~
+
+---
+這個是線條
+
+> 這是引言
+ 
+階層用「*或-」都可以
+
+- 階層一
+  - 階層二
+    - 階層三
+
+1. 序號階層1
+2. 序號階層2
+3. 序號階層3
+
+程式碼 `code ~ hello world!`
+
+區塊程式碼 
+```
+code ~ hello world ! 
+test1
+test 2
+```
+
+
+| 項目 | 說明 |
+| ---- | ---- |
+| 航司 | 長榮 |
+| 目的地 | 峇里島 |
+| 住宿 | Hilton, Intercontinental Jimbaran, W, Grand Hyatt |
+           
+
+![圖片1](logo.png)
+![圖片1](logo.png)
+![圖片1](logo.png)
+
+
+                        </textarea>
+                    </div>
+                </section>
+
+                <section id="previewPane" class="panel">
+                    <h3>
+                        🖼️ 預覽
+                        <button class="btn secondary" id="btn-copy" onclick="copyOutputHTML()">複製HTML</button>
+                        <button class="btn" onclick="triggerDownload()">下載HTML</button>
+                    </h3>
+                    <div class="body"><div id="preview" class="preview-box"></div></div>
+                </section>
+            </div>
+        </div>
+        <div id="toast" class="toast"></div>
+
+        <div id="lightbox" class="lightbox" aria-hidden="true">
+            <button class="lb-close" aria-label="Close" onclick="closeLightbox()">✕</button>
+            <img id="lightbox-img" alt="" />
+        </div>
+
+        <script>
+            "use strict";
+
+            // ====== 安全：若 CDN 失敗，用 fallback 解析 Markdown ======
+
+            function escapeHtml(str) {
+                return str.replace(/[&<>"]/g, (s) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[s]));
+            }
+
+            function mdFallback(md) {
+                // 程式碼區塊 ``` ... ```
+                md = md.replace(/```([\s\S]*?)```/g, (_, code) => "<pre><code>" + escapeHtml(code) + "</code></pre>");
+
+                // 標題
+                md = md.replace(/^###\s+(.*)$/gm, "<h3>$1</h3>");
+                md = md.replace(/^##\s+(.*)$/gm, "<h2>$1</h2>");
+                md = md.replace(/^#\s+(.*)$/gm, "<h1>$1</h1>");
+
+                // 圖片與連結
+                md = md.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<p><img alt="$1" src="$2"></p>');
+                md = md.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+
+                // 強調、行內程式
+                md = md.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+                md = md.replace(/\*([^*]+)\*/g, "<em>$1</em>");
+                md = md.replace(/`([^`]+)`/g, "<code>$1</code>");
+
+                // 表格（最陽春版）
+                md = md.replace(/(?:^|\n)(\|.*\|)\n(\|[\-:\s\|]+\|)\n((?:\|.*\|\n?)*)/g, function (_, header, sep, body) {
+                    function rowToCells(r) {
+                        return r
+                            .trim()
+                            .slice(1, -1)
+                            .split("|")
+                            .map((s) => s.trim());
+                    }
+                    const headTds = rowToCells(header)
+                        .map((h) => "<th>" + escapeHtml(h) + "</th>")
+                        .join("");
+                    const bodyHtml = body
+                        .trim()
+                        .split(/\n/)
+                        .filter(Boolean)
+                        .map(
+                            (r) =>
+                                "<tr>" +
+                                rowToCells(r)
+                                    .map((c) => "<td>" + escapeHtml(c) + "</td>")
+                                    .join("") +
+                                "</tr>"
+                        )
+                        .join("");
+                    return "\n<table><thead><tr>" + headTds + "</tr></thead><tbody>" + bodyHtml + "</tbody></table>\n";
+                });
+
+                // 段落
+                md = md.replace(/(^|\n)([^<\n][^\n]*)/g, function (_, br, line) {
+                    if (/^\s*$/.test(line)) return br + line;
+                    if (/^\s*<(h\d|pre|table|blockquote|ul|ol|img)/i.test(line)) return br + line;
+                    return br + "<p>" + line.trim() + "</p>";
+                });
+                return md;
+            }
+
+            function renderMarkdown(md) {
+                if (window.marked && typeof marked.parse === "function") return marked.parse(md);
+                return mdFallback(md);
+            }
+
+            // ====== Header 尺寸變數 ======
+            function setHeaderHeightVar() {
+                const h = document.querySelector("header")?.offsetHeight || 60;
+                document.documentElement.style.setProperty("--header-h", h + "px");
+            }
+            window.addEventListener("load", setHeaderHeightVar);
+            window.addEventListener("resize", setHeaderHeightVar);
+
+            // ====== 主題：初始化與切換 ======
+            const THEME_KEY = "md2html_theme";
+            function applyTheme(theme) {
+                const root = document.documentElement;
+                if (!theme || theme === "default") root.removeAttribute("data-theme");
+                else root.setAttribute("data-theme", theme);
+                const sel = document.getElementById("themeSelect");
+                if (sel && sel.value !== theme) sel.value = theme || "default";
+            }
+            function initTheme() {
+                const saved = localStorage.getItem(THEME_KEY) || "default";
+                applyTheme(saved);
+                const sel = document.getElementById("themeSelect");
+                sel.value = saved;
+                sel.addEventListener("change", () => {
+                    const v = sel.value;
+                    localStorage.setItem(THEME_KEY, v);
+                    applyTheme(v);
+                });
+            }
+
+            // ====== Callout 預處理 ======
+            function preprocessCallouts(md) {
+                const lines = md.split(/\\r?\\n/);
+                const out = [];
+                const defaultTitle = { NOTE: "Note", TIP: "Tip", WARNING: "Warning", INFO: "Info" };
+                let i = 0;
+                while (i < lines.length) {
+                    const m = lines[i].match(/^\\s*>\\s*\\[\\!(NOTE|TIP|WARNING|INFO)\\]\\s*(.*)$/i);
+                    if (m) {
+                        const kind = m[1].toUpperCase();
+                        const titleText = m[2] && m[2].trim() ? m[2].trim() : defaultTitle[kind];
+                        const body = [];
+                        i += 1;
+                        while (i < lines.length) {
+                            const l = lines[i];
+                            if (/^\\s*>/.test(l)) {
+                                body.push(l.replace(/^\\s*>\\s?/, ""));
+                                i += 1;
+                            } else if (/^\\s*$/.test(l)) {
+                                body.push("");
+                                i += 1;
+                            } else {
+                                break;
+                            }
+                        }
+                        const bodyMd = body.join("\\n");
+                        const head = '<div class="callout-head"><strong>' + titleText + "</strong></div>";
+                        const bodyHtml = renderMarkdown(bodyMd);
+                        out.push('<blockquote class="callout">' + head + '<div class="callout-body">' + bodyHtml + "</div></blockquote>");
+                        continue;
+                    }
+                    out.push(lines[i]);
+                    i += 1;
+                }
+                return out.join("\\n");
+            }
+
+            // ====== 連續圖片合併區塊 ======
+            function isImageOnlyParagraph(node) {
+                if (!(node && node.nodeType === 1 && node.tagName === "P")) return false;
+                const kids = Array.from(node.childNodes);
+                if (kids.length === 0) return false;
+                return kids.every((n) => (n.nodeType === 1 && n.tagName === "IMG") || (n.nodeType === 3 && !n.nodeValue.trim()));
+            }
+            function wrapConsecutiveImages(root) {
+                const nodes = Array.from(root.childNodes);
+                let run = [];
+                function flush() {
+                    if (!run.length) return;
+                    const gallery = document.createElement("div");
+                    gallery.className = "gallery-block";
+                    const head = document.createElement("div");
+                    head.className = "gallery-head";
+                    head.textContent = "圖片";
+                    const grid = document.createElement("div");
+                    grid.className = "gallery-grid";
+                    gallery.appendChild(head);
+                    gallery.appendChild(grid);
+                    run.forEach((p) => {
+                        Array.from(p.querySelectorAll("img")).forEach((img) => {
+                            const item = document.createElement("div");
+                            item.className = "gallery-item";
+                            const a = document.createElement("a");
+                            a.className = "gallery-link";
+                            const src = img.getAttribute("src");
+                            a.href = src;
+                            a.target = "_blank";
+                            const thumb = img.cloneNode(true);
+                            thumb.classList.add("thumb");
+                            a.appendChild(thumb);
+                            item.appendChild(a);
+                            if (img.alt) {
+                                const cap = document.createElement("div");
+                                cap.className = "caption";
+                                cap.textContent = img.alt;
+                                item.appendChild(cap);
+                            }
+                            grid.appendChild(item);
+                        });
+                    });
+                    root.insertBefore(gallery, run[0]);
+                    run.forEach((n) => root.removeChild(n));
+                    run = [];
+                }
+                for (const node of nodes) {
+                    if (isImageOnlyParagraph(node)) run.push(node);
+                    else flush();
+                }
+                flush();
+            }
+
+            // ====== 渲染 ======
+            const input = document.getElementById("markdown-input");
+            const preview = document.getElementById("preview");
+            function buildContentHTMLFromMarkdown(md) {
+                const container = document.createElement("div");
+                container.className = "preview-box";
+                try {
+                    container.innerHTML = renderMarkdown(preprocessCallouts(md));
+                } catch (e) {
+                    container.innerHTML = "<p style='color:#b91c1c'>解析錯誤：" + (e.message || e) + "</p><pre>" + escapeHtml(md) + "</pre>";
+                    console.error(e);
+                }
+                wrapConsecutiveImages(container);
+                return container.outerHTML;
+            }
+            function render() {
+                preview.innerHTML = buildContentHTMLFromMarkdown(input.value);
+            }
+
+            // ====== Lightbox ======
+            const lb = document.getElementById("lightbox");
+            const lbImg = document.getElementById("lightbox-img");
+            function openLightbox(src, alt) {
+                lbImg.src = src;
+                lbImg.alt = alt || "";
+                lb.classList.add("show");
+                lb.setAttribute("aria-hidden", "false");
+            }
+            function closeLightbox() {
+                lb.classList.remove("show");
+                lb.setAttribute("aria-hidden", "true");
+                lbImg.src = "";
+            }
+            window.closeLightbox = closeLightbox;
+            document.addEventListener("click", (e) => {
+                const a = e.target.closest(".gallery-link");
+                if (a) {
+                    e.preventDefault();
+                    openLightbox(a.href, a.querySelector("img")?.alt);
+                }
+                if (e.target === lb) closeLightbox();
+            });
+            document.addEventListener("keydown", (e) => {
+                if (e.key === "Escape") closeLightbox();
+            });
+
+            // ====== 匯出：將目前主題變數帶入輸出檔 ======
+            function getOutputHTML() {
+                const content = buildContentHTMLFromMarkdown(document.getElementById("markdown-input").value);
+
+                // 取得目前主題；default 代表不要加 data-theme
+                const themeName = document.documentElement.getAttribute("data-theme") || "default";
+
+                // 1) 先保底：若 THEME_BLOCKS 還沒建好，就直接序列化 #themes-css 的內容
+                const themesStyleEl = document.getElementById("themes-css");
+                const rawThemesText = themesStyleEl ? themesStyleEl.textContent : "";
+
+                // 2) 從快取拿片段
+                const baseRoot = (window.THEME_BLOCKS && window.THEME_BLOCKS.default) || ""; // 基底 :root
+                const themeBlock =
+                    themeName === "default"
+                        ? "" // default 就不加 data-theme 區塊
+                        : (window.THEME_BLOCKS && window.THEME_BLOCKS[themeName]) || "";
+
+                // 3) 若擷取失敗（例如時間點太早），退回整包原始 style 文字，確保不會空白
+                const finalThemeCSS = baseRoot || themeBlock ? baseRoot + "\n" + themeBlock : rawThemesText;
+
+                // 4) 只有在非 default 時才加 data-theme 屬性
+                const htmlAttr = themeName === "default" ? "" : ` data-theme="${themeName}"`;
+
+                // 5) 用變數去吃背景色，不要硬寫白底
+                return `<!DOCTYPE html>
+<html lang="zh-Hant"${htmlAttr}>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Trip to Map Lite</title>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>輸出文件</title>
+<style>
+${finalThemeCSS}
+body{ font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans TC","Noto Sans","Microsoft JhengHei",Arial,Helvetica,sans-serif; padding:2rem; line-height:1.6; color:var(--text); background:#fff; }
+h1,h2,h3{ color:var(--text) }
+a{ color:var(--link); text-decoration:none } a:hover{text-decoration:underline}
+code{ background:#f3f4f6; padding:0 .35rem; border-radius:4px }
+pre{ background:#f3f4f6; padding:12px; border-radius:8px; overflow:auto; border:1px solid var(--line) }
+table{ width:100%; border-collapse:collapse; margin:1rem 0; font-size:.95rem }
+th,td{ border:1px solid var(--line); padding:.6rem .75rem; vertical-align:top; text-align:left }
+thead th{ background:var(--table-head-bg); font-weight:700 }
+blockquote{ position:relative; margin:1rem 0; padding:12px 16px 12px 18px; border-left:4px solid var(--bq-border); background:var(--bq-bg); border-radius:8px }
+blockquote::before{ content:"“"; position:absolute; top:-6px; left:8px; font-size:40px; line-height:1; color:var(--bq-quote); pointer-events:none }
+blockquote { white-space: pre-wrap; word-wrap: break-word; overflow-wrap: break-word; }
 
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="anonymous"/>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js" crossorigin="anonymous"></script>
+.gallery-block{ border:1px solid var(--line); border-radius:12px; padding:12px; background:#fff; margin:1rem 0; box-shadow:0 1px 0 rgba(0,0,0,.02) }
+.gallery-head{ font-size:13px; color:var(--muted); font-weight:600; display:flex; align-items:center; gap:6px; margin-bottom:10px }
+.gallery-head::before{ content:"🖼️" }
+.gallery-grid{ display:grid; grid-template-columns: repeat(3, var(--thumb-w)); gap:12px; justify-content:start }
+.gallery-item{ width:var(--thumb-w); height:var(--thumb-h); border:1px solid var(--line); border-radius:10px; overflow:hidden; background:#fff }
+.gallery-link{ display:block; width:100%; height:100% }
+.gallery-item img.thumb{ width:100%; height:100%; object-fit:cover; display:block }
+@media (max-width:767px){ :root{ --thumb-w:100%; --thumb-h:220px } .gallery-grid{ grid-template-columns:1fr } }
 
-  <style>
-    :root{ --bg:#f6f7fb; --panel:#fff; --line:#e5e7eb; --text:#111827; --primary:#2563eb; --header-h:52px; }
-    html,body{height:100%}
-    body{margin:0;background:var(--bg);color:var(--text);font:16px/1.4 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans TC","PingFang TC","Hiragino Sans","Microsoft JhengHei",Arial,sans-serif}
-    .site-header{position:fixed;top:0;left:0;right:0;background:rgba(255,255,255,.92);backdrop-filter:saturate(150%) blur(6px);border-bottom:1px solid var(--line);z-index:1000}
-    .site-header .wrap{display:flex;align-items:center;gap:12px;padding:max(6px,env(safe-area-inset-top)) 12px 6px}
-    .brand{font-weight:800;letter-spacing:.2px}
-    .brand small{opacity:.6;font-weight:700;margin-left:6px}
-    .grow{flex:1;min-width:0}
-    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:36px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:#fff;cursor:pointer;font-weight:700}
-    .btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
-    .btn-home{display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 12px;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.06);color:rgba(17,24,39,.85);font-weight:600;text-decoration:none;cursor:pointer}
-    .btn-home:hover{background:#f9fafb;border-color:#d1d5db}
-    .btn-home:active{transform:scale(.98);box-shadow:0 2px 10px rgba(0,0,0,.05)}
-    .btn-home:focus{outline:2px solid #3b82f6;outline-offset:2px}
-    .page{padding-top:var(--header-h);height:calc(100dvh - var(--header-h));display:flex;flex-direction:column}
-    .tabs{display:flex;gap:8px;padding:8px 12px 0}
-    .tab{flex:1;display:inline-flex;align-items:center;justify-content:center;height:36px;border-radius:999px;border:1px solid var(--line);background:#fff;color:#374151;cursor:pointer;font-weight:700}
-    .tab.active{background:#111827;color:#fff;border-color:#111827}
-    .content{flex:1;min-height:0;padding:12px;display:flex;flex-direction:column;gap:12px}
-    .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.05);padding:12px}
-    .grid{display:none;gap:12px;flex:1;min-height:0;height:100%}
-    .col{display:flex;flex-direction:column;gap:12px;min-height:0}
-    @media (min-width:900px){
-      .tabs{display:none}
-      .grid{display:grid;grid-template-columns:2fr 3fr;grid-auto-rows:1fr}
-      #stackList, #stackMap{display:none !important}
-      .content{padding:12px}
-    }
-    .add-box{display:flex;flex-direction:column;gap:8px}
-    .row{display:flex;gap:8px}
-    .row .select,.row .text,.row .note{flex:1}
-    select,input[type="text"],textarea{width:100%;border:1px solid var(--line);border-radius:10px;background:#fff;padding:10px 12px;font:inherit}
-    textarea{min-height:40px;max-height:120px;resize:vertical}
-    .list{flex:1;min-height:0;overflow:auto}
-    .item{display:flex;align-items:flex-start;gap:10px;padding:10px;border:1px solid #eef0f3;border-radius:12px;background:#fff}
-    .item + .item{margin-top:8px}
-    .badge{min-width:22px;height:22px;border-radius:999px;background:#111827;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin-top:2px}
-    .meta{flex:1;display:flex;flex-direction:column;gap:4px;min-width:0}
-    .title{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .note{color:#6b7280;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .actions{display:flex;gap:6px}
-    .iconbtn{height:32px;min-width:32px;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:#fff;cursor:pointer}
-    .iconbtn.danger{border-color:#fecaca;background:#fff1f2;color:#b91c1c}
-    .filters{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
-    .chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid var(--line);border-radius:999px;background:#fff;font-size:14px}
-
- 
-.map-wrap {
-  position: relative; /* 讓內部子元素（像 Leaflet 的控制元件）可以用絕對定位 */
-  flex: 1;            /* 在 flex 容器中，佔據剩餘的可用空間 */
-  min-height: 0;      /* 避免 flex 子元素在某些瀏覽器下無法縮小 */
-}   
-/* 地圖容器：桌面版與行動版共用樣式 */
-#map,
-#m_map {
-  height: 55dvh;                 /* 高度 = 螢幕高度的 60%（可調整，例如 55dvh） */
-  border: 1px solid var(--line); /* 外框線條 */
-  border-radius: 12px;           /* 圓角 */
-  overflow: hidden;              /* 超出隱藏，避免 tile 溢出 */
-  box-shadow: inset 0 0 0 1px rgba(0,0,0,.02); /* 內框陰影（微妙的立體感） */
-}
-
-/* 桌面版（寬度 >= 900px）：地圖自動填滿父容器高度 */
-@media (min-width: 900px) {
-  #map {
-    height: 75%; /* 在桌面佈局裡，讓地圖撐滿整個右側欄位 */
-  }
-}
- 
-    .summary{margin-top:8px;border:1px dashed #e5e7eb;border-radius:10px;padding:8px;background:#fff}
-    .summary h3{margin:0 0 6px;font-size:15px}
-    .summary ol{margin:0;padding-left:20px}
-    .summary li{padding:2px 0}
-    .tip{color:#6b7280;font-size:13px}
-    
-  /* 1) 盒模型統一，避免 padding/border 把寬度撐爆 */
-*, *::before, *::after { box-sizing: border-box; }
-
-/* 2) 右側地圖+清單容器不准在 X 軸外溢（避免出現水平捲軸） */
-.map-wrap,
-.summary { 
-  max-width: 100%;
-  overflow-x: hidden;       /* 或用 clip；Safari 也 OK */
-}
-
-/* 3) ordered list 的縮排保守一點，避免邊界計算誤差 */
-.summary ol {
-  padding-left: 16px;       /* 原本 20px → 16px，更保守 */
-  margin-right: 0;          /* 保證不往右撐 */
-}
-
-/* 如果仍偶發看到 1px 的水平捲軸（某些裝置 sub-pixel）：
-   可以保險一點在主要容器層級關掉 X 捲軸 */
-.content { overflow-x: hidden; }  
- 
-/* 拖拉時的半透明影像（Sortable 會套用） */
-.drag-ghost { opacity: .5; }
-
-/* 讓列表正常直向捲動 */
-.list { overscroll-behavior: contain; }
-
-/* 拖曳把手 */
-.grip {
-  width: 18px;
-  align-self: stretch;
-  display: grid; place-items: center;
-  cursor: grab;
-  user-select: none;
-  touch-action: none;       /* 只有把手禁止手勢，避免與捲動打架 */
-  opacity: .6;
-}
-.grip:active { cursor: grabbing; opacity: .9; }
-
-/* Sortable 的視覺狀態 */
-.sort-chosen { opacity: .9; }
-.sort-ghost  { opacity: .5; }
-.sort-drag   { opacity: .8; }
-
-  
-    
-  </style>
+.lightbox{ position:fixed; inset:0; background:rgba(0,0,0,.8); display:none; align-items:center; justify-content:center; z-index:2000 }
+.lightbox.show{ display:flex }
+.lightbox img{ max-width:95vw; max-height:90vh; border-radius:8px; box-shadow:0 10px 30px rgba(0,0,0,.35) }
+.lb-close{ position:absolute; top:16px; right:16px; background:rgba(255,255,255,.9); border:0; padding:8px 10px; border-radius:8px; cursor:pointer; font-weight:700 }
+</style>
 </head>
 <body>
-  <header class="site-header" role="banner">
-    <div class="wrap">
-      <div class="brand">Trip to Map <small>Lite</small></div>
-      <div class="grow"></div>
-      <button class="btn" id="btnPrint"><span>列印</span></button>
-      <a href="/" class="btn-home" id="homeBtn" aria-label="回首頁"><span>🧭</span><span>回首頁</span></a>
-    </div>
-  </header>
-
-  <main class="page">
-    <div class="tabs" role="tablist">
-      <button class="tab active" data-tab="list">清單</button>
-      <button class="tab" data-tab="map">地圖</button>
-    </div>
-
-    <div class="content">
-      <div class="grid">
-        <section class="col">
-          <div class="panel">
-            <div class="add-box">
-              <div class="row">
-                <select class="select" id="type">
-                  <option value="sight">🗺 sight</option>
-                  <option value="food">🍜 food</option>
-                  <option value="cafe">☕️ cafe</option>
-                  <option value="sweet">🍰 sweet</option>
-                  <option value="hotel">🏨 hotel</option>
-                  <option value="transit">🚇 transit</option>
-                  <option value="shop">🛍 shop</option>
-                  <option value="other">⭐️ other</option>
-                </select>
-                 <small class="tip">🚫 非Google Map，僅支援 OSM 與大地標。</small>
-              </div>
-              
-               <div class="row">
-                <input class="text" type="text" id="input" placeholder="名稱或地址…" />
-                  <button class="btn primary" id="btnAdd">加入</button>
-              </div>
-              <!-- 新增：匯出顯示名稱（選填，預設跟上面同步） -->
-              <div class="row">
-                <input class="text" type="text" id="disp" placeholder="匯出顯示名稱（可選，預設用上方）" />
-              </div>
-              <div class="row">
-                <textarea class="note" id="note" placeholder="備註（可選）"></textarea>
-              </div>
-            </div>
-          </div>
-
-          <div class="panel" style="display:flex;flex-direction:column;min-height:0;">
-            <div class="list" id="list"></div>
-            <div class="tip" style="padding:8px 4px;">提示：可拖拉項目排序或用箭頭調整；排序會更新路線。</div>
-          </div>
-        </section>
-
-        <section class="col">
-          <div class="panel" style="display:flex;flex-direction:column;min-height:0;flex:1 1 auto;">
-            <div class="filters" id="filters"></div>
-            <label class="chip"><input type="checkbox" id="routeToggle" checked> 顯示路線</label>
-            <div class="map-wrap" id="mapWrap">
-              <div id="map" aria-label="地圖"></div>
-              <div class="summary" id="summary">
-                <h3>地標清單</h3>
-                <ol id="summaryList"></ol>
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
-
-      <section class="panel" id="stackList">
-        <div class="add-box">
-          <div class="row">
-            <select class="select" id="m_type">
-              <option value="sight">🗺 sight</option>
-              <option value="food">🍜 food</option>
-              <option value="cafe">☕️ cafe</option>
-              <option value="sweet">🍰 sweet</option>
-              <option value="hotel">🏨 hotel</option>
-              <option value="transit">🚇 transit</option>
-              <option value="shop">🛍 shop</option>
-              <option value="other">⭐️ other</option>
-            </select>
-             <small class="tip">🚫 非Google Map，僅支援 OSM 與大地標。</small>
-          </div>
-          
-         <div class="row">
-              <input class="text" type="text" id="m_input" placeholder="名稱或地址…" />
-              <button class="btn primary" id="m_btnAdd">加入</button>
-         </div>
-          <!-- 新增：行動版顯示名稱 -->
-          <div class="row">
-            <input class="text" type="text" id="m_disp" placeholder="匯出顯示名稱（可選，預設用上方）" />
-          </div>
-          <div class="row">
-            <textarea class="note" id="m_note" placeholder="備註（可選）"></textarea>
-          </div>
-        </div>
-        <div class="list" id="m_list" style="margin-top:12px;"></div>
-      </section>
-
-      <section class="panel" id="stackMap" style="display:none;">
-        <div class="filters" id="m_filters"></div>
-        <label class="chip"><input type="checkbox" id="m_routeToggle" checked> 顯示路線</label>
-        <div class="map-wrap">
-          <div id="m_map"></div>
-          <div class="summary" id="m_summary">
-            <h3>地標清單</h3>
-            <ol id="m_summaryList"></ol>
-          </div>
-        </div>
-      </section>
-    </div>
-  </main>
-
+${content}
+<div id="lightbox" class="lightbox" aria-hidden="true"><button class="lb-close" onclick="closeLightbox()">✕</button><img id="lightbox-img" alt=""/></div>
 <script>
 (function(){
-  const $ = (sel, el=document) => el.querySelector(sel);
-  const $$ = (sel, el=document) => [...el.querySelectorAll(sel)];
-  const uid = () => Math.random().toString(36).slice(2,9);
-  const EMOJI = { sight:"🗺", food:"🍜", cafe:"☕️", sweet:"🍰", hotel:"🏨", transit:"🚇", shop:"🛍", other:"⭐️" };
-  const TYPES = Object.keys(EMOJI);
-
-  function setHeaderHeightVar(){
-    const h = $('.site-header').getBoundingClientRect().height;
-    document.documentElement.style.setProperty('--header-h', h + 'px');
-  }
-  window.addEventListener('resize', setHeaderHeightVar);
-  window.visualViewport && window.visualViewport.addEventListener('resize', setHeaderHeightVar);
-  setHeaderHeightVar();
-
-  const STORAGE_KEY = 'trip-lite-v3';
-  const CACHE_KEY = 'geo-cache-v1';
-  let model = { route:true, places:[], filters: new Set(TYPES) };
-  try{
-    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-    if(saved && Array.isArray(saved.places)){
-      model = { ...model, ...saved, filters: new Set(saved.filters || TYPES) };
-    }
-  }catch(e){}
-  function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...model, filters:[...model.filters] })); }
-
-  const cache = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}');
-  function saveCache(){ localStorage.setItem(CACHE_KEY, JSON.stringify(cache)); }
-  let geocodeQueue = Promise.resolve();
-  function geocode(q){
-    if(!q) return Promise.resolve(null);
-    const key = q.trim().toLowerCase();
-    if(cache[key]) return Promise.resolve(cache[key]);
-    geocodeQueue = geocodeQueue.then(() => new Promise((resolve) => {
-      setTimeout(async () => {
-        try{
-          const url = 'https://nominatim.openstreetmap.org/search?format=json&accept-language=zh-TW&q=' + encodeURIComponent(q);
-        const res = await fetch(url, { headers:{'Accept':'application/json'} });
-        const data = await res.json();
-        const item = data && data[0] ? { lat:+data[0].lat, lng:+data[0].lon, display:data[0].display_name } : null;
-        cache[key] = item; saveCache(); resolve(item);
-        }catch(e){ resolve(null); }
-      }, 700);
-    }));
-    return geocodeQueue;
-  }
-
-  // Leaflet map init
-  function createMap(elId){
-    const map = L.map(elId, { zoomControl:true, tap:false });
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      crossOrigin: 'anonymous',
-      attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
-    map.setView([25.033,121.5654], 12);
-    return map;
-  }
-  const mapMain = createMap('map');
-  const mapMobile = createMap('m_map');
-
-  let markersMain=[], lineMain=null, markersM=[], lineM=null;
-  function markerIcon(n){
-    const el = document.createElement('div');
-    el.style.cssText='width:28px;height:28px;border-radius:50%;border:2px solid #111;background:#fff;display:grid;place-items:center;box-shadow:0 2px 6px rgba(0,0,0,.25);font:700 13px/1 system-ui';
-    el.textContent=n; return L.divIcon({html:el,iconSize:[28,28],className:'num-pin'});
-  }
-  function clearMap(isMobile){
-    const mk = isMobile?markersM:markersMain; mk.forEach(m=>m.remove()); mk.length=0;
-    const ln = isMobile?lineM:lineMain; if(ln){ ln.remove(); if(isMobile) lineM=null; else lineMain=null; }
-  }
-  function renderMap(isMobile){
-    const map = isMobile?mapMobile:mapMain;
-    const mkArr = isMobile?markersM:markersMain;
-    clearMap(isMobile);
-    const visible = model.places.filter(p=>model.filters.has(p.type));
-    const latlngs=[];
-    visible.forEach((p,i)=>{
-      if(p.lat && p.lng){
-        const m=L.marker([p.lat,p.lng],{icon:markerIcon(i+1)}).addTo(map);
-        const title=`${EMOJI[p.type]} ${p.name || p.input || '未命名'}`;
-        const note=p.note?`<div style="color:#6b7280;margin-top:4px;">${escapeHtml(p.note)}</div>`:'';
-        m.bindPopup(`<div style="font-weight:700;margin-bottom:4px;">${title}</div>${note}`);
-        mkArr.push(m); latlngs.push([p.lat,p.lng]);
-      }
-    });
-    const routeOn = isMobile ? $('#m_routeToggle').checked : $('#routeToggle').checked;
-    if(routeOn && latlngs.length>=2){
-      const ln=L.polyline(latlngs,{color:'#2563eb',weight:4,opacity:.9}).addTo(map);
-      if(isMobile) lineM=ln; else lineMain=ln;
-    }
-    if(latlngs.length){ try{ map.fitBounds(latlngs,{padding:[40,40]}); }catch(e){} }
-    setTimeout(()=> map.invalidateSize(), 150);
-  }
-
-// 兩點直線距離（公尺，Haversine）
-function haversineMeters(a, b){
-  if(!a || !b || !a.lat || !a.lng || !b.lat || !b.lng) return null;
-  const R = 6371000;
-  const toRad = d => d * Math.PI / 180;
-  const dLat = toRad(b.lat - a.lat);
-  const dLng = toRad(b.lng - a.lng);
-  const lat1 = toRad(a.lat), lat2 = toRad(b.lat);
-  const s = Math.sin(dLat/2)**2 + Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLng/2)**2;
-  return 2 * R * Math.asin(Math.sqrt(s));
-}
-
-// 公里、至少 0.1、1 位小數；回傳例如 "↘︎0.4km"
-function formatKm(meters){
-  if(meters == null) return '';
-  const km = meters / 1000;
-  const shown = Math.max(0.1, Math.round(km * 10) / 10);
-  return '↘︎' + shown.toFixed(1) + 'km';
-}
-
-
-function renderSummary(){
-  const build = el=>{
-    el.innerHTML='';
-
-    // 只取被勾選的項目，且保留順序
-    const visible = model.places.filter(p => model.filters.has(p.type));
-
-    visible.forEach((p, idx) => {
-      const li = document.createElement('li');
-      const name = p.name || p.input || '未命名';
-
-      // 距離：到下一點（最後一個沒有）
-      let distText = '';
-      if(idx < visible.length - 1){
-        const next = visible[idx + 1];
-        const m = haversineMeters(p, next);
-        if(m != null) distText = `（${formatKm(m)}）`; // 全形括號 + 全形箭頭
-      }
-
-      // 備註（如有）
-      const noteText = p.note ? `（${p.note}）` : '';
-
-      // 最終組合：emoji 名稱 + 距離 + 備註
-      li.textContent = `${EMOJI[p.type]} ${name}${distText}${noteText}`;
-      el.appendChild(li);
-    });
-  };
-  build($('#summaryList'));
-  build($('#m_summaryList'));
-}
-
-
-
-  function renderFilters(){
-    function build(container){
-      container.innerHTML='';
-      TYPES.forEach(t=>{
-        const chip=document.createElement('label'); chip.className='chip';
-        const cb=document.createElement('input'); cb.type='checkbox'; cb.checked=model.filters.has(t);
-        const span=document.createElement('span'); span.textContent=`${EMOJI[t]} ${t}`;
-        chip.append(cb,span);
-        cb.addEventListener('change',()=>{
-          if(cb.checked) model.filters.add(t); else model.filters.delete(t);
-          save(); renderMap(container.id.startsWith('m_')); renderSummary();
-        });
-        container.appendChild(chip);
-      });
-    }
-    build($('#filters')); build($('#m_filters'));
-  }
-
-function itemTemplate(p,i){
-  const el = document.createElement('div');
-  el.className = 'item';
-  el.dataset.id = p.id;
-  el.innerHTML = `
-    <div class="grip" aria-label="拖曳調整順序">⋮⋮</div>
-    <div class="badge">${i+1}</div>
-    <div class="meta">
-      <div class="title">${EMOJI[p.type]} ${escapeHtml(p.name||p.input||'未命名')}</div>
-      ${p.note?`<div class="note">${escapeHtml(p.note)}</div>`:''}
-    </div>
-    <div class="actions">
-      <button class="iconbtn" data-act="up" title="上移">↑</button>
-      <button class="iconbtn" data-act="down" title="下移">↓</button>
-      <button class="iconbtn" data-act="loc" title="定位">🎯</button>
-      <button class="iconbtn danger" data-act="del" title="刪除">刪</button>
-    </div>`;
-  return el;
-}
-
-function renderList(){
-  function build(container){
-    // 1) 重新渲染清單
-    container.innerHTML = '';
-    model.places.forEach((p,i)=>container.appendChild(itemTemplate(p,i)));
-
-    // 2) 若已有舊的 Sortable，先砍掉避免多實例衝突
-    if (container._sortable) {
-      try { container._sortable.destroy(); } catch(e){}
-      container._sortable = null;
-    }
-
-    // 3) 啟用 Sortable（只用把手拖、避免影響捲動）
-    container._sortable = new Sortable(container, {
-      handle: '.grip',
-      animation: 150,
-      direction: 'vertical',
-      delay: 160,                 // 觸控長按啟動（避免和捲動打架）
-      delayOnTouchOnly: true,
-      forceFallback: true,        // 行動裝置更穩
-      fallbackOnBody: true,
-      scroll: true,
-      scrollSensitivity: 60,
-      scrollSpeed: 12,
-      touchStartThreshold: 4,     // 手指微移不算拖
-      filter: 'button',
-      preventOnFilter: false,
-      chosenClass: 'sort-chosen',
-      ghostClass: 'sort-ghost',
-      dragClass: 'sort-drag',
-      onEnd: () => {
-        // 4) 依 DOM 順序重排資料
-        const ids = [...container.querySelectorAll('.item')].map(el=>el.dataset.id);
-        model.places.sort((a,b)=> ids.indexOf(a.id) - ids.indexOf(b.id));
-        save();
-
-        // 5) 輕量更新（避免再重建 Sortable）：只更新右側地圖與 summary，和左側編號
-        renderMap(false); renderMap(true); renderSummary();
-        // 更新編號圓點
-        [...container.querySelectorAll('.badge')].forEach((b,i)=> b.textContent = i+1);
-      }
-    });
-
-    // 6) 其餘按鈕、雙擊帶回表單照舊
-    container.onclick = ev => {
-      const btn = ev.target.closest('button'); if(!btn) return;
-      const block = ev.target.closest('.item'); if(!block) return;
-      const id  = block.dataset.id;
-      const idx = model.places.findIndex(p=>p.id===id);
-      const act = btn.dataset.act;
-
-      if(act === 'del'){ if(idx>=0){ model.places.splice(idx,1); save(); renderAll(); } return; }
-      if(act === 'up' && idx>0){ const [x]=model.places.splice(idx,1); model.places.splice(idx-1,0,x); save(); renderAll(); return; }
-      if(act === 'down' && idx<model.places.length-1){ const [x]=model.places.splice(idx,1); model.places.splice(idx+1,0,x); save(); renderAll(); return; }
-      if(act === 'loc'){
-        const p=model.places[idx];
-        if(p && p.lat && p.lng){ (container.id.startsWith('m_')? mapMobile: mapMain).setView([p.lat,p.lng],16,{animate:true}); }
-        else { toast('尚未定位，正在嘗試…'); p && locatePlace(p,true); }
-      }
-    };
-
-    container.ondblclick = ev => {
-      const block = ev.target.closest('.item'); if(!block) return;
-      const id = block.dataset.id;
-      const p  = model.places.find(x=>x.id===id);
-      fillInputs(p, container.id.startsWith('m_'));
-    };
-  }
-
-  build(document.getElementById('list'));
-  build(document.getElementById('m_list'));
-}
-
-
-
-
-
-
-  /* ====== 這裡開始是顯示名稱的加強 ====== */
-  // 讀取目前輸入
-  function currentInputs(isMobile){
-    return {
-      type:  $(isMobile?'#m_type':'#type').value,
-      input: $(isMobile?'#m_input':'#input').value.trim(),
-      disp:  $(isMobile?'#m_disp':'#disp').value.trim(),  // 新增
-      note:  $(isMobile?'#m_note':'#note').value.trim()
-    };
-  }
-  // 清空表單
-  function clearInputs(isMobile){
-    $(isMobile?'#m_input':'#input').value = '';
-    $(isMobile?'#m_disp':'#disp').value   = '';          // 新增
-    $(isMobile?'#m_note':'#note').value   = '';
-    $(isMobile?'#m_input':'#input').focus();
-  }
-  // 將項目帶回表單（雙擊列表）
-  function fillInputs(p,isMobile){
-    $(isMobile?'#m_type':'#type').value   = p.type;
-    $(isMobile?'#m_input':'#input').value = p.input || '';
-    $(isMobile?'#m_disp':'#disp').value   = p.name  || p.input || ''; // 新增
-    $(isMobile?'#m_note':'#note').value   = p.note  || '';
-    $(isMobile?'#m_input':'#input').focus();
-  }
-
-  // 新增項目：顯示名稱用 disp || input
-  function addPlace(isMobile){
-    const {type,input,disp,note}=currentInputs(isMobile);
-    if(!input){ toast('請輸入名稱或地址'); return; }
-    const place={ id:uid(), type, name:(disp || input), input, note, lat:null, lng:null };
-    model.places.push(place); save(); renderAll(); clearInputs(isMobile); locatePlace(place);
-  }
-
-  // 自動同步「顯示名稱」：除非你改過
-  ['','m_'].forEach(prefix=>{
-    const inputEl = document.getElementById(prefix+'input');
-    const dispEl  = document.getElementById(prefix+'disp');
-    if(!inputEl || !dispEl) return;
-    dispEl.addEventListener('input', ()=> dispEl.dataset.dirty = '1'); // 你動過就標記
-    inputEl.addEventListener('input', ()=>{ if(!dispEl.dataset.dirty){ dispEl.value = inputEl.value; } });
+  const lb=document.getElementById('lightbox'); const img=document.getElementById('lightbox-img');
+  function open(src, alt){ img.src=src; img.alt=alt||''; lb.classList.add('show'); lb.setAttribute('aria-hidden','false'); }
+  function close(){ lb.classList.remove('show'); lb.setAttribute('aria-hidden','true'); img.src=''; }
+  window.closeLightbox=close;
+  document.addEventListener('click', function(e){
+    const a=e.target.closest('.gallery-link');
+    if(a){ e.preventDefault(); open(a.href, a.querySelector('img')?.alt); }
+    if(e.target===lb) close();
   });
-  /* ====== 顯示名稱加強到此 ====== */
-
-  async function locatePlace(place, notify=false){
-    const res=await geocode(place.input);
-    if(res){place.lat=res.lat; place.lng=res.lng; save(); renderAll();}
-    else if(notify){toast('定位失敗，換個關鍵字試試');}
-  }
-  $('#btnAdd').addEventListener('click',()=>addPlace(false));
-  $('#m_btnAdd').addEventListener('click',()=>addPlace(true));
-  $('#input').addEventListener('keydown',e=>{if(e.key==='Enter') addPlace(false);});
-  $('#m_input').addEventListener('keydown',e=>{if(e.key==='Enter') addPlace(true);});
-
-  $$('.tab').forEach(tab=>tab.addEventListener('click',()=>{
-    $$('.tab').forEach(t=>t.classList.toggle('active',t===tab));
-    const isMap=tab.dataset.tab==='map';
-    $('#stackList').style.display=isMap?'none':'';
-    $('#stackMap').style.display=isMap?'':'none';
-    setTimeout(()=> mapMobile.invalidateSize(), 200);
-  }));
-
-  $('#routeToggle').addEventListener('change',()=>renderAll());
-  $('#m_routeToggle').addEventListener('change',()=>renderAll());
-
-  $('#homeBtn').addEventListener('click',e=>{
-    if(window.history.length>1){e.preventDefault(); history.back(); setTimeout(()=>{ location.href='/' }, 300);}
-  });
-
-
-
-
-  // 列印修正：把目前 DOM 複製到新視窗並帶 Leaflet CSS
-  document.getElementById('btnPrint').addEventListener('click', ()=>{
-    const isWide = window.matchMedia('(min-width:900px)').matches;
-    const wrap = isWide ? document.getElementById('mapWrap') : document.querySelector('#stackMap .map-wrap');
-    const clone = wrap.cloneNode(true);
-    const wrapRect = wrap.getBoundingClientRect();
-    clone.style.width  = wrapRect.width + 'px'; clone.style.height = 'auto';
-    const srcMapEl = wrap.querySelector(isWide ? '#map' : '#m_map');
-    const dstMapEl = clone.querySelector(isWide ? '#map' : '#m_map');
-    const mapRect  = srcMapEl.getBoundingClientRect();
-    dstMapEl.style.width = mapRect.width + 'px';
-    dstMapEl.style.height= mapRect.height + 'px';
-    dstMapEl.style.borderRadius='0'; dstMapEl.style.boxShadow='none'; dstMapEl.style.border='0';
-    const w = window.open('', '_blank');
-    w.document.write(`<!doctype html><html lang="zh-Hant"><head>
-      <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-      <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="anonymous" />
-      <style>@page{size:A4;margin:10mm} html,body{height:auto} body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC","PingFang TC","Microsoft JhengHei",Arial,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-      .map-wrap{width:${wrapRect.width}px} .summary{margin-top:8px;border:1px dashed #e5e7eb;padding:8px} img{image-rendering:-webkit-optimize-contrast}</style>
-    </head><body></body></html>`);
-    w.document.close(); w.document.body.appendChild(clone);
-    const waitImages = (doc)=>{
-      const imgs = Array.from(doc.images || []); if (!imgs.length) return Promise.resolve();
-      return Promise.allSettled(imgs.map(img => new Promise(res=>{
-        if (img.complete) return res(); img.addEventListener('load', res, {once:true}); img.addEventListener('error', res, {once:true});
-      })));
-    };
-    setTimeout(async ()=>{ try{ await waitImages(w.document); } finally{ w.focus(); w.print(); } }, 150);
-  });
-
-  function toast(msg){
-    let t=$('#toast');
-    if(!t){ t=document.body.appendChild(document.createElement('div')); t.id='toast';
-      Object.assign(t.style,{position:'fixed',left:'50%',bottom:'16px',transform:'translateX(-50%)',background:'#111827',color:'#fff',padding:'8px 12px',borderRadius:'10px',fontWeight:'600',zIndex:2500,transition:'opacity .2s'});
-    }
-    t.textContent=msg; t.style.opacity='1'; setTimeout(()=> t.style.opacity='0', 1800);
-  }
-  function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
-
-  function renderAll(){ renderList(); renderFilters(); renderMap(false); renderMap(true); renderSummary(); }
-  renderAll();
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape') close(); });
 })();
-</script>
+<\/script>
 </body>
+</html>`;
+            }
+
+            // ====== 按鈕動作 ======
+            function triggerDownload() {
+                const html = getOutputHTML();
+                const blob = new Blob([html], { type: "text/html" });
+                const a = document.createElement("a");
+                a.href = URL.createObjectURL(blob);
+                a.download = "output.html";
+                a.click();
+            }
+            async function copyOutputHTML() {
+                const btn = document.getElementById("btn-copy");
+                const html = getOutputHTML();
+                try {
+                    if (navigator.clipboard && window.isSecureContext) {
+                        await navigator.clipboard.writeText(html);
+                    } else {
+                        const ta = document.createElement("textarea");
+                        ta.value = html;
+                        ta.style.position = "fixed";
+                        ta.style.left = "-9999px";
+                        document.body.appendChild(ta);
+                        ta.focus();
+                        ta.select();
+                        document.execCommand("copy");
+                        document.body.removeChild(ta);
+                    }
+                    showToast("HTML 已複製到剪貼簿");
+                    btn.textContent = "已複製";
+                    setTimeout(() => (btn.textContent = "複製 HTML"), 1500);
+                } catch (e) {
+                    showToast("複製失敗");
+                    console.error(e);
+                }
+            }
+            function clearMarkdown() {
+                const input = document.getElementById("markdown-input");
+                input.value = "";
+                render();
+            }
+            function copyMarkdown() {
+                const ta = document.getElementById("markdown-input");
+                try {
+                    if (navigator.clipboard && window.isSecureContext) {
+                        navigator.clipboard.writeText(ta.value);
+                    } else {
+                        const helper = document.createElement("textarea");
+                        helper.value = ta.value;
+                        helper.style.position = "fixed";
+                        helper.style.left = "-9999px";
+                        document.body.appendChild(helper);
+                        helper.focus();
+                        helper.select();
+                        document.execCommand("copy");
+                        document.body.removeChild(helper);
+                    }
+                    showToast("Markdown 已複製到剪貼簿");
+                } catch (e) {
+                    showToast("複製 Markdown 失敗");
+                    console.error(e);
+                }
+            }
+            function showToast(msg) {
+                const t = document.getElementById("toast");
+                t.textContent = msg;
+                t.classList.add("show");
+                setTimeout(() => t.classList.remove("show"), 1600);
+            }
+
+            // 綁定與初始化
+            window.triggerDownload = triggerDownload;
+            window.copyOutputHTML = copyOutputHTML;
+            window.clearMarkdown = clearMarkdown;
+            window.copyMarkdown = copyMarkdown;
+
+            window.addEventListener("DOMContentLoaded", () => {
+                try {
+                    initTheme();
+                    const input = document.getElementById("markdown-input");
+                    if (input) {
+                        input.addEventListener("input", render);
+                        render();
+                    }
+                } catch (e) {
+                    console.error("初始化錯誤", e);
+                }
+            });
+
+            document.getElementById("openMd").addEventListener("change", async (e) => {
+                const f = e.target.files?.[0];
+                if (!f) return;
+                const text = await f.text();
+                const ta = document.getElementById("markdown-input");
+                ta.value = text;
+                render();
+                localStorage.setItem("md2html_current_doc", text);
+                showToast("已載入 " + f.name);
+            });
+
+            // 儲存MD
+            const saveBtn = document.getElementById("saveMdBtn");
+            if (saveBtn && !saveBtn.dataset.bound) {
+                saveBtn.addEventListener("click", () => saveMd());
+                saveBtn.dataset.bound = "1";
+            }
+
+            let saving = false;
+
+            function getMdText() {
+                const ta = document.getElementById("markdown-input");
+                if (!ta) {
+                    throw new Error("找不到 #markdown-input");
+                }
+                return ta.value;
+            }
+
+            function makeFileName(base = "note") {
+                const iso = new Date().toISOString().replace(/[:.]/g, "-");
+                return `${base}-${iso}.md`;
+            }
+
+            function isIOS() {
+                return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+            }
+
+            async function saveMd(filename = makeFileName("note")) {
+                if (saving) return; // 重入鎖
+                saving = true;
+                try {
+                    const mdText = getMdText();
+                    const blob = new Blob([mdText], { type: 'text/markdown;charset=utf-8' });
+                    const file = new File([blob], filename, { type: "text/markdown" });
+
+                    // 桌面 Chromium：真正「存回檔案」
+                    if ("showSaveFilePicker" in window && !isIOS()) {
+                        const handle = await window.showSaveFilePicker({
+                            suggestedName: filename,
+                            types: [{ description: "Markdown", accept: { "text/markdown": [".md"] } }],
+                        });
+                        const writable = await handle.createWritable();
+                        await writable.write(blob);
+                        await writable.close();
+                        return;
+                    }
+
+                    // iOS / Android：用分享面板（含「存入檔案」）
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        try {
+                            await navigator.share({ files: [file], title: filename, text: "Markdown 檔" });
+                            // 重要：在 iOS 上即便 share 成功有時也會 throw
+                            // 我們把它當「已嘗試分享」就結束，不再觸發下載備援，避免雙檔
+                            return;
+                        } catch (err) {
+                            if (isIOS()) {
+                                // iOS：不備援下載，避免雙檔。最多提醒一下使用者。
+                                console.debug("iOS share 被取消或怪錯，略過備援下載以避免重複檔案。", err);
+                                return;
+                            }
+                            // 其他平台才落到下載備援
+                        }
+                    }
+
+                    // 通用備援：下載 .md（PC 就是這條）
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = filename; // 盡量保住 .md
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    URL.revokeObjectURL(url);
+                } catch (e) {
+                    console.error(e);
+                    alert("儲存失敗：" + (e.message || e));
+                } finally {
+                    saving = false;
+                }
+            }
+        </script>
+        <script>
+            // 盡量只掃放主題的那份樣式，避免撈到別的東西
+            function getThemeStyleSheet() {
+                for (const sheet of Array.from(document.styleSheets)) {
+                    try {
+                        // 如果用 <style id="themes-css">，用 ownerNode 快速鎖定
+                        if (sheet.ownerNode && sheet.ownerNode.id === "themes-css") return sheet;
+                        // 或者如果用同源的 themes.css，也可以用 href 判斷
+                        if (sheet.href && sheet.href.endsWith("themes.css")) return sheet;
+                    } catch (e) {
+                        // 非同源會丟 SecurityError，略過
+                    }
+                }
+                return null;
+            }
+
+            function extractThemeBlocksFromSheet(sheet) {
+                const themes = {};
+                if (!sheet) return themes;
+
+                function pushBlock(name, rule, wrapper) {
+                    const cssText = `${wrapper}${rule.selectorText} { ${rule.style.cssText} }${wrapper ? " }" : ""}`;
+                    if (!themes[name]) themes[name] = [];
+                    themes[name].push(cssText);
+                }
+
+                function walk(rules, wrapper = "") {
+                    for (const rule of Array.from(rules || [])) {
+                        if (rule.type === CSSRule.STYLE_RULE && rule.selectorText) {
+                            // 1) 抓裸 :root 當 default
+                            if (rule.selectorText.trim() === ":root") {
+                                pushBlock("default", rule, wrapper);
+                            }
+                            // 2) 抓 :root[data-theme="xxx"]
+                            const m = rule.selectorText.match(/^:root\[data-theme="([^"]+)"\]$/);
+                            if (m) {
+                                pushBlock(m[1], rule, wrapper);
+                            }
+                        }
+                        if (rule.type === CSSRule.MEDIA_RULE) {
+                            walk(rule.cssRules, `@media ${rule.media.mediaText} { `);
+                        }
+                    }
+                }
+
+                try {
+                    walk(sheet.cssRules);
+                } catch (_) {}
+
+                // 合併同名片段
+                const out = {};
+                for (const [k, arr] of Object.entries(themes)) out[k] = arr.join("\n");
+                return out;
+            }
+
+            // 在頁面載入後做一次快取
+            let THEME_BLOCKS = {};
+            document.addEventListener("DOMContentLoaded", () => {
+                const sheet = getThemeStyleSheet();
+                THEME_BLOCKS = extractThemeBlocksFromSheet(sheet);
+            });
+
+            (function () {
+                const root = document.getElementById("workbench");
+                const group = document.querySelector(".view-toggle");
+                const STORAGE_KEY = "mdtool_layout";
+
+                function setLayout(mode) {
+                    if (!root) return;
+                    if (!["split", "left", "right"].includes(mode)) mode = "split";
+                    root.setAttribute("data-layout", mode);
+                    // 更新按鈕 pressed 狀態
+                    group?.querySelectorAll("button[data-layout]").forEach((btn) => {
+                        btn.setAttribute("aria-pressed", btn.getAttribute("data-layout") === mode ? "true" : "false");
+                    });
+                    // 記住使用者選擇
+                    try {
+                        localStorage.setItem(STORAGE_KEY, mode);
+                    } catch (e) {}
+                }
+
+                // 事件綁定：一律點按鈕切模式
+                group?.addEventListener("click", (e) => {
+                    const btn = e.target.closest("button[data-layout]");
+                    if (!btn) return;
+                    setLayout(btn.getAttribute("data-layout"));
+                });
+
+                // 還原上次模式，沒有就用 split
+                const saved = (() => {
+                    try {
+                        return localStorage.getItem(STORAGE_KEY);
+                    } catch (e) {
+                        return null;
+                    }
+                })();
+                setLayout(saved || "split");
+            })();
+        </script>
+    </body>
 </html>
