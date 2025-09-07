@@ -600,7 +600,7 @@ function preprocessCallouts(md){
   const lines=String(md).split(/\r?\n/), out=[]; let i=0;
   const titleMap={NOTE:"Note",TIP:"Tip",WARNING:"Warning",INFO:"Info"};
   while(i<lines.length){
-    // 乾淨可讀的版本：> [!NOTE] 這類
+    // 乾淨可用：支援 > [!NOTE] 這類 Obsidian callout
     const m = lines[i].match(/^\s*>\s*\[!(NOTE|TIP|WARNING|INFO)\]\s*(.*)$/i);
     if(m){
       const kind=m[1].toUpperCase(), title=(m[2]||"").trim()||titleMap[kind];
@@ -705,7 +705,7 @@ blockquote::before{content:"“";position:absolute;top:-6px;left:8px;font-size:4
     const lines=String(md).split(/\\r?\\n/), out=[]; let i=0;
     const titleMap={NOTE:"Note",TIP:"Tip",WARNING:"Warning",INFO:"Info"};
     while(i<lines.length){
-      // 乾淨可讀的版本：> [!NOTE] 這類
+      // 乾淨可用：支援 > [!NOTE] 這類 Obsidian callout
       const m = lines[i].match(/^\s*>\s*\[!(NOTE|TIP|WARNING|INFO)\]\s*(.*)$/i);
       if(m){
         const kind=m[1].toUpperCase(), title=(m[2]||"").trim()||titleMap[kind];
