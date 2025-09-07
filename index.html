@@ -126,6 +126,19 @@
   padding: 8px 0;       /* 確保不擠到邊 */
   border-bottom: 1px solid var(--line); /* 跟縮圖區隔 */
 }
+
+/* 只編輯：顯示編輯卡 + 圖片卡，隱藏預覽卡 */
+body[data-mode="edit"] #previewCard { display:none; }
+body[data-mode="edit"] #imagesCard  { display:block; }
+
+/* 只預覽：整頁只剩預覽卡，吃滿高度 */
+body[data-mode="preview"] .wrap { grid-template-columns:1fr; }
+body[data-mode="preview"] section.card,
+body[data-mode="preview"] aside.card { display:none; }
+body[data-mode="preview"] #previewCard { display:flex; }
+body[data-mode="preview"] #previewCard .body iframe {
+  height: calc(100vh - 64px - 42px); /* 扣掉 header 和卡片標題 */
+}
 </style>
 </head>
 <body>
@@ -139,7 +152,11 @@
     <button class="btn" id="copyMdBtn">複製</button>
     <button class="btn" id="clearMdBtn">清空</button>
     <button class="btn primary" id="insertFromImageBtn" title="請先在右側產生並複製勾選圖片的 MD">插入圖片語法</button>
-    <button class="btn primary" id="previewBtn">預覽</button>
+    
+    <!-- 新：兩顆模式鈕 -->
+    <button class="btn" id="modeEditBtn">只編輯</button>
+    <button class="btn primary" id="modePreviewBtn">只預覽</button>
+    
     <input id="openMdFile" type="file" accept=".md,.markdown,text/markdown,text/plain" hidden />
   </div>
   <a class="btn ghost" href="index.html">🏠 回首頁</a>
@@ -181,6 +198,15 @@
       <div id="grid" class="grid"></div>
     </div>
   </aside>
+  
+  <!-- 新：內嵌預覽卡片 -->
+  <section class="card" id="previewCard" hidden>
+    <h3>預覽</h3>
+    <div class="body" style="padding:0">
+      <iframe id="previewFrame" style="width:100%;height:60vh;border:0"></iframe>
+    </div>
+  </section>
+  
 </main>
 
 <div id="toast" class="toast"></div>
@@ -824,39 +850,73 @@ blockquote::before{content:"“";position:absolute;top:-6px;left:8px;font-size:4
 </body></html>`;
 }
 
-/* ===== 綁定預覽按鈕：先開空白頁，再寫整份 HTML 進去（iPad 安心版） ===== */
-  document.getElementById('previewBtn').addEventListener('click', function () {
-    // 1) 先開 about:blank，確保屬於同一個使用者手勢
-    const win = window.open('about:blank', '_blank');
-    if (!win) { toast('彈出視窗被封鎖，請允許本頁開新視窗'); return; }
 
-    try {
-      // 先給個輕量占位，避免白屏
-      win.document.write('<!doctype html><title>預覽</title><meta name="viewport" content="width=device-width, initial-scale=1"><p style="font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Noto Sans TC,sans-serif;padding:16px">載入中…</p>');
-      win.document.close();
+/* ===========================================================
+   只編輯 / 只預覽：模式切換與預覽渲染
+   依賴你現有的 buildPreviewHTML(md) 產出完整 HTML
+   =========================================================== */
 
-      // 2) 再去組大字串（這步驟可能比較花時間，跟彈窗就分手了）
-      const md = document.getElementById('md').value || '';
-      const html = buildPreviewHTML(md);
+/* 內嵌預覽：把 buildPreviewHTML 產出的整份 HTML，變 Blob URL 塞進 iframe */
+let __prevBlobUrl = null; // 記住上一次的 Blob URL，用來回收避免吃記憶體
 
-      // 3A) 方案 A：覆寫整份文件（多數瀏覽器 OK）
-      try {
-        win.document.open();
-        win.document.write(html);
-        win.document.close();
-      } catch {
-        // 3B) 方案 B：iOS 偶爾對 document.write 臉臭，就改用 Blob URL
-        const blob = new Blob([html], { type: 'text/html' });
-        const url = URL.createObjectURL(blob);
-        win.location.replace(url);
-        // 記得之後在新頁 unload 時自己 revoke（這裡就算了）
-      }
-    } catch (err) {
-      console.error(err);
-      toast('預覽失敗：腳本錯誤');
-    }
-  });
+function renderInlinePreview(){
+  const frame = document.getElementById('previewFrame');
+  if (!frame) {
+    // 沒有預覽 iframe，直接跳過（避免你還沒放 HTML 時報錯）
+    return;
+  }
 
+  const md = (document.getElementById('md')?.value) || '';
+  const html = buildPreviewHTML(md); // ← 直接用你的函式
+
+  // 回收上一次的 Blob URL（iPad 對記憶體特別玻璃心）
+  if (__prevBlobUrl) {
+    URL.revokeObjectURL(__prevBlobUrl);
+    __prevBlobUrl = null;
+  }
+
+  // 產生新預覽並指給 iframe
+  const blob = new Blob([html], { type: 'text/html' });
+  __prevBlobUrl = URL.createObjectURL(blob);
+  frame.src = __prevBlobUrl;
+}
+
+/* 模式切換：在 <body> 上設 data-mode，配合 CSS 顯示/隱藏
+   - mode = 'edit'   ：只編輯（編輯器 + 圖片工具）
+   - mode = 'preview' ：只預覽（顯示預覽卡片，其他藏起來）
+*/
+function setMode(mode){
+  document.body.setAttribute('data-mode', mode);
+  if (mode === 'preview') {
+    // 需要看到預覽時才渲染，減少無謂重排
+    renderInlinePreview();
+  }
+}
+
+/* 綁定兩顆模式按鈕（存在才綁，避免你還沒放按鈕時報錯） */
+const __btnEdit    = document.getElementById('modeEditBtn');
+const __btnPreview = document.getElementById('modePreviewBtn');
+
+if (__btnEdit)    __btnEdit.addEventListener('click',  () => setMode('edit'));
+if (__btnPreview) __btnPreview.addEventListener('click', () => setMode('preview'));
+
+/* 如果你還留著舊的 #previewBtn，那就讓它也切到只預覽 */
+const __oldPreview = document.getElementById('previewBtn');
+if (__oldPreview)  __oldPreview.addEventListener('click', () => setMode('preview'));
+
+/* 快捷鍵：Cmd/Ctrl+Enter 預覽，Esc 回編輯（可刪） */
+document.addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') setMode('preview');
+  if (e.key === 'Escape') setMode('edit');
+});
+
+/* 初始化預設模式：進頁面先處於只編輯 */
+setMode('edit');
+
+/* 安全下莊：離開頁面時回收 Blob URL（可省，但我不想看 iPad 掛） */
+window.addEventListener('beforeunload', () => {
+  if (__prevBlobUrl) URL.revokeObjectURL(__prevBlobUrl);
+});
 
 
 
