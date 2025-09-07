@@ -127,23 +127,10 @@
   border-bottom: 1px solid var(--line); /* 跟縮圖區隔 */
 }
 
-/* 只編輯：顯示編輯卡 + 圖片卡，隱藏預覽卡 */
-body[data-mode="edit"] #previewCard { display:none; }
-body[data-mode="edit"] #imagesCard  { display:block; }
 
-/* 只預覽：整頁只剩預覽卡，吃滿高度 */
-body[data-mode="preview"] .wrap { grid-template-columns:1fr; }
-body[data-mode="preview"] section.card,
-body[data-mode="preview"] aside.card { display:none; }
-body[data-mode="preview"] #previewCard { display:flex; }
-body[data-mode="preview"] #previewCard .body iframe {
-  height: calc(100vh - 64px - 42px); /* 扣掉 header 和卡片標題 */
-}
-
-[hidden] { display: none !important; }
 </style>
 </head>
-<body data-mode="edit">
+<body>
 
 <header>
   <div class="h-left">
@@ -154,10 +141,6 @@ body[data-mode="preview"] #previewCard .body iframe {
     <button class="btn" id="copyMdBtn">複製</button>
     <button class="btn" id="clearMdBtn">清空</button>
     <button class="btn primary" id="insertFromImageBtn" title="請先在右側產生並複製勾選圖片的 MD">插入圖片語法</button>
-    
-    <!-- 新：兩顆模式鈕 -->
-    <button class="btn" id="modeEditBtn">只編輯</button>
-    <button class="btn primary" id="modePreviewBtn">只預覽</button>
     
     <input id="openMdFile" type="file" accept=".md,.markdown,text/markdown,text/plain" hidden />
   </div>
@@ -175,7 +158,7 @@ body[data-mode="preview"] #previewCard .body iframe {
   </section>
 
   <!-- 右：圖片工具 -->
-  <aside class="card" id="imagesCard">
+  <aside class="card">
     <h3>圖片區（壓縮、命名、勾選、ZIP）</h3>
     <div class="body">
       <div class="toolbar sticky">
@@ -201,13 +184,6 @@ body[data-mode="preview"] #previewCard .body iframe {
     </div>
   </aside>
   
-  <!-- 新：內嵌預覽卡片 -->
-  <section class="card" id="previewCard">
-    <h3>預覽</h3>
-    <div class="body" style="padding:0">
-      <iframe id="previewFrame" style="width:100%;height:60vh;border:0"></iframe>
-    </div>
-  </section>
   
 </main>
 
@@ -596,330 +572,6 @@ saveZipBtn.addEventListener('click', async ()=>{
   }
 });
 </script>
-
-
-
-<script>
-/* ===== Markdown 解析：有 CDN 就用 marked，沒載到就用 fallback ===== */
-function escapeHtml(str){return String(str).replace(/[&<>"]/g,s=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[s]));}
-function mdFallback(md){
-  md = md.replace(/```([\s\S]*?)```/g,(_,c)=>"<pre><code>"+escapeHtml(c)+"</code></pre>");
-  md = md.replace(/^###\s+(.*)$/gm,"<h3>$1</h3>").replace(/^##\s+(.*)$/gm,"<h2>$1</h2>").replace(/^#\s+(.*)$/gm,"<h1>$1</h1>");
-  md = md.replace(/!\[([^\]]*)\]\(([^)]+)\)/g,'<p><img alt="$1" src="$2"></p>');
-  md = md.replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>');
-  md = md.replace(/\*\*([^*]+)\*\*/g,"<strong>$1</strong>").replace(/\*([^*]+)\*/g,"<em>$1</em>").replace(/`([^`]+)`/g,"<code>$1</code>");
-  md = md.replace(/(?:^|\n)(\|.*\|)\n(\|[\-:\s\|]+\|)\n((?:\|.*\|\n?)*)/g,function(_,h,sep,body){
-    function row(r){return r.trim().slice(1,-1).split("|").map(s=>s.trim());}
-    const head=row(h).map(x=>"<th>"+escapeHtml(x)+"</th>").join("");
-    const bodyHtml=body.trim().split(/\n/).filter(Boolean).map(r=>"<tr>"+row(r).map(c=>"<td>"+escapeHtml(c)+"</td>").join("")+"</tr>").join("");
-    return "\n<table><thead><tr>"+head+"</tr></thead><tbody>"+bodyHtml+"</tbody></table>\n";
-  });
-  md = md.replace(/(^|\n)([^<\n][^\n]*)/g,(m,br,line)=>{
-    if(/^\s*$/.test(line)) return br+line;
-    if(/^\s*<(h\d|pre|table|blockquote|ul|ol|img)/i.test(line)) return br+line;
-    return br+"<p>"+line.trim()+"</p>";
-  });
-  return md;
-}
-function renderMarkdown(md){ return (window.marked && typeof marked.parse==="function") ? marked.parse(md) : mdFallback(md); }
-
-/* ===== Obsidian callout 轉漂亮盒 ===== */
-function preprocessCallouts(md){
-  const lines=String(md).split(/\r?\n/), out=[]; let i=0;
-  const titleMap={NOTE:"Note",TIP:"Tip",WARNING:"Warning",INFO:"Info"};
-  while(i<lines.length){
-    // 乾淨可用：支援 > [!NOTE] 這類 Obsidian callout
-    const m = lines[i].match(/^\s*>\s*\[!(NOTE|TIP|WARNING|INFO)\]\s*(.*)$/i);
-    if(m){
-      const kind=m[1].toUpperCase(), title=(m[2]||"").trim()||titleMap[kind];
-      const body=[]; i++;
-      while(i<lines.length){
-        const l=lines[i];
-        if(/^\s*>/.test(l)){ body.push(l.replace(/^\s*>\s?/, "")); i++; }
-        else if(/^\s*$/.test(l)){ body.push(""); i++; }
-        else break;
-      }
-      out.push(`<blockquote class="callout"><div class="callout-head"><strong>${title}</strong></div><div class="callout-body">${renderMarkdown(body.join("\n"))}</div></blockquote>`);
-      continue;
-    }
-    out.push(lines[i]); i++;
-  }
-  return out.join("\n");
-}
-
-/* ===== 圖片牆：把連續「只含圖片」的段落合成 .gallery-block ===== */
-function isImgOnlyP(p){
-  if(!(p && p.nodeType===1 && p.tagName==="P")) return false;
-  const kids=[...p.childNodes]; if(!kids.length) return false;
-  return kids.every(n => (n.nodeType===1 && n.tagName==="IMG") || (n.nodeType===3 && !String(n.nodeValue).trim()));
-}
-function wrapConsecutiveImages(root){
-  const nodes=[...root.childNodes]; let run=[];
-  function flush(){
-    if(!run.length) return;
-    const gallery=document.createElement("div"); gallery.className="gallery-block";
-    const head=document.createElement("div"); head.className="gallery-head"; head.textContent="圖片";
-    const grid=document.createElement("div"); grid.className="gallery-grid";
-    gallery.append(head,grid);
-    run.forEach(p=>{
-      p.querySelectorAll("img").forEach(img=>{
-        const item=document.createElement("div"); item.className="gallery-item";
-        const a=document.createElement("a"); a.className="gallery-link"; a.href=img.getAttribute("src")||"#"; a.target="_blank";
-        const thumb=img.cloneNode(true); thumb.classList.add("thumb"); a.appendChild(thumb);
-        item.appendChild(a);
-        if(img.alt){ const cap=document.createElement("div"); cap.className="caption"; cap.textContent=img.alt; item.appendChild(cap); }
-        grid.appendChild(item);
-      });
-    });
-    root.insertBefore(gallery, run[0]); run.forEach(n=>root.removeChild(n)); run=[];
-  }
-  for(const n of nodes){ if(isImgOnlyP(n)) run.push(n); else flush(); }
-  flush();
-}
-
-
-/* ===== 在新分頁產出完整 HTML（含 marked、Mermaid、圖片牆） ===== */
-function buildPreviewHTML(md){
-  // 把原始 MD 變成可安全內嵌的字串
-  const RAW = JSON.stringify(String(md));
-
-  const css = `
-:root{ --bg:#f6f7fb; --panel:#fff; --line:#e5e7eb; --text:#111827; --muted:#6b7280; --thumb-w:320px; --thumb-h:200px; }
-body{ font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans TC",sans-serif; margin:0; padding:24px; background:var(--bg); color:var(--text) }
-h1{font-size:1.75rem;margin:.2rem 0 1rem} h2{font-size:1.35rem;margin:1.25rem 0 .75rem} h3{font-size:1.1rem;margin:1rem 0 .5rem}
-p{margin:.5rem 0} a{color:#2563eb;text-decoration:none} a:hover{text-decoration:underline}
-code{background:#f3f4f6;padding:0 .35rem;border-radius:4px} pre{background:#f3f4f6;padding:12px;border:1px solid var(--line);border-radius:8px;overflow:auto}
-table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.95rem} th,td{border:1px solid var(--line);padding:.6rem .75rem;text-align:left} thead th{background:#e0f2fe}
-blockquote{position:relative;margin:1rem 0;padding:12px 16px 12px 18px;border-left:4px solid #d1d5db;background:#f9fafb;border-radius:8px}
-blockquote::before{content:"“";position:absolute;top:-6px;left:8px;font-size:40px;color:rgba(17,24,39,.12)}
-.callout{padding:0;border-left:4px solid #d1d5db;background:#f9fafb;border-radius:8px;margin:1rem 0}
-.callout-head{display:flex;align-items:center;gap:8px;padding:10px 12px;font-weight:700;border-bottom:1px solid #d1d5db}
-.callout-body{padding:12px 14px;background:#fff}
-.gallery-block{border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff;margin:1rem 0}
-.gallery-head{font-size:13px;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:6px;margin-bottom:10px}
-.gallery-head::before{content:"🖼️"}
-.gallery-grid{display:grid;grid-template-columns:repeat(3,var(--thumb-w));gap:12px;justify-content:start}
-.gallery-item{width:var(--thumb-w);height:var(--thumb-h);border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}
-.gallery-link{display:block;width:100%;height:100%}
-.gallery-item img.thumb{width:100%;height:100%;object-fit:cover;display:block}
-@media(max-width:767px){ :root{--thumb-w:100%;--thumb-h:220px} .gallery-grid{grid-template-columns:1fr} }
-.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;z-index:2000}
-.lightbox.show{display:flex}
-.lightbox img{max-width:95vw;max-height:90vh;border-radius:8px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
-.lb-close{position:absolute;top:16px;right:16px;background:rgba(255,255,255,.9);border:0;padding:8px 10px;border-radius:8px;cursor:pointer;font-weight:700}
-`;
-
-  return `<!doctype html><html lang="zh-Hant"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>預覽</title>
-<link rel="icon" href="data:,">
-<style>${css}</style>
-<!-- 在「預覽分頁」自己載套件 -->
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"><\/script>
-<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"><\/script>
-</head><body>
-<div id="app" class="preview-box"></div>
-<div id="lightbox" class="lightbox" aria-hidden="true">
-  <button class="lb-close" onclick="document.getElementById('lightbox').classList.remove('show')">✕</button>
-  <img id="lightbox-img" alt="">
-</div>
-
-<script>
-(function(){
-  const RAW_MD = ${RAW};
-
-  // Obsidian callout 轉漂亮盒
-  function preprocessCallouts(md){
-    const lines=String(md).split(/\\r?\\n/), out=[]; let i=0;
-    const titleMap={NOTE:"Note",TIP:"Tip",WARNING:"Warning",INFO:"Info"};
-    while(i<lines.length){
-      // 乾淨可用：支援 > [!NOTE] 這類 Obsidian callout
-      const m = lines[i].match(/^\s*>\s*\[!(NOTE|TIP|WARNING|INFO)\]\s*(.*)$/i);
-      if(m){
-        const kind=m[1].toUpperCase(), title=(m[2]||"").trim()||titleMap[kind];
-        const body=[]; i++;
-        while(i<lines.length){
-          const l=lines[i];
-          if(/^\\s*>/.test(l)){ body.push(l.replace(/^\\s*>\\s?/, "")); i++; }
-          else if(/^\\s*$/.test(l)){ body.push(""); i++; }
-          else break;
-        }
-        out.push('> '+title);
-        out.push('>');
-        out.push(body.join('\\n'));
-        continue;
-      }
-      out.push(lines[i]); i++;
-    }
-    return out.join('\\n');
-  }
-
-  // 只含圖片的 <p> 合成圖片牆（>=3 才包）
-  function wrapConsecutiveImages(root){
-    const kids=[...root.childNodes].filter(n=> n.nodeType===1 || (n.nodeType===3 && String(n.nodeValue).trim().length>0));
-    let run=[];
-    function isImgOnlyP(node){
-      if(!(node.nodeType===1 && node.tagName==='P')) return false;
-      const imgs=node.querySelectorAll('img'); if(!imgs.length) return false;
-      const clone=node.cloneNode(true); clone.querySelectorAll('img').forEach(i=>i.remove());
-      return String(clone.textContent||'').trim().length===0;
-    }
-    function flush(){
-      if(run.length<3){ run.length=0; return; }
-      const gallery=document.createElement('div'); gallery.className='gallery-block';
-      const head=document.createElement('div'); head.className='gallery-head'; head.textContent='圖片';
-      const grid=document.createElement('div'); grid.className='gallery-grid';
-      gallery.append(head,grid);
-      run.forEach(p=>{
-        p.querySelectorAll('img').forEach(img=>{
-          const item=document.createElement('div'); item.className='gallery-item';
-          const a=document.createElement('a'); a.className='gallery-link'; a.href=img.getAttribute('src')||'#'; a.target='_blank';
-          const thumb=img.cloneNode(true); thumb.classList.add('thumb'); a.appendChild(thumb);
-          item.appendChild(a);
-          if(img.alt){ const cap=document.createElement('div'); cap.className='caption'; cap.textContent=img.alt; item.appendChild(cap); }
-          grid.appendChild(item);
-        });
-      });
-      root.insertBefore(gallery, run[0]);
-      run.forEach(n=>root.removeChild(n)); run.length=0;
-    }
-    kids.forEach(n=>{ if(isImgOnlyP(n)) run.push(n); else flush(); });
-    flush();
-  }
-
-  // 把 <pre><code> 轉成 .mermaid，支援：
-  // 1) ```mermaid fenced code
-  // 2) ``` + 第一行內容是 "mermaid"
-  function upgradeMermaid(root){
-    root.querySelectorAll('pre > code').forEach(code=>{
-      const lang=(code.className||'').toLowerCase();
-      const txt=code.textContent||'';
-      const hasLang=/(^|\\s)(language\\-|lang\\-)?mermaid(\\s|$)/.test(lang);
-      const firstLine=/^mermaid\\s*\\n/.test(txt);
-      if(!hasLang && !firstLine) return;
-      const graph = hasLang ? txt : txt.replace(/^mermaid\\s*\\n/,'');
-      const pre=code.parentElement;
-      const div=document.createElement('div');
-      div.className='mermaid';
-      div.textContent=graph.trim();
-      pre.replaceWith(div);
-    });
-  }
-
-  function enableLightbox(){
-    document.addEventListener('click', e=>{
-      const a=e.target.closest('.gallery-link'); if(!a) return;
-      e.preventDefault();
-      const lb=document.getElementById('lightbox');
-      const img=document.getElementById('lightbox-img');
-      img.src=a.href; img.alt=a.querySelector('img')?.alt||'';
-      lb.classList.add('show'); lb.setAttribute('aria-hidden','false');
-    });
-    document.getElementById('lightbox').addEventListener('click', e=>{
-      if(e.target.id==='lightbox') e.currentTarget.classList.remove('show');
-    });
-    document.addEventListener('keydown', e=>{
-      if(e.key==='Escape') document.getElementById('lightbox').classList.remove('show');
-    });
-  }
-
-  function run(){
-    const md = preprocessCallouts(RAW_MD);
-    // 用 marked 在預覽頁解析
-    const html = (window.marked && marked.parse) ? marked.parse(md) : md.replace(/[&<>"]/g,s=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[s]));
-    const host = document.getElementById('app');
-    host.innerHTML = html;
-
-    // 升級 mermaid、跑 mermaid
-    upgradeMermaid(host);
-    if(window.mermaid){
-      try{
-        mermaid.initialize({ startOnLoad:false });
-        if(typeof mermaid.run==='function') mermaid.run();
-        else mermaid.init(undefined, host.querySelectorAll('.mermaid'));
-      }catch(e){}
-    }
-
-    // 打包圖片牆
-    wrapConsecutiveImages(host);
-    enableLightbox();
-  }
-
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run);
-  else run();
-})();
-<\/script>
-</body></html>`;
-}
-
-
-/* ===========================================================
-   只編輯 / 只預覽：模式切換與預覽渲染
-   依賴你現有的 buildPreviewHTML(md) 產出完整 HTML
-   =========================================================== */
-
-/* 內嵌預覽：把 buildPreviewHTML 產出的整份 HTML，變 Blob URL 塞進 iframe */
-let __prevBlobUrl = null; // 記住上一次的 Blob URL，用來回收避免吃記憶體
-
-function renderInlinePreview(){
-  const frame = document.getElementById('previewFrame');
-  if (!frame) {
-    // 沒有預覽 iframe，直接跳過（避免你還沒放 HTML 時報錯）
-    return;
-  }
-
-  const md = (document.getElementById('md')?.value) || '';
-  const html = buildPreviewHTML(md); // ← 直接用你的函式
-
-  // 回收上一次的 Blob URL（iPad 對記憶體特別玻璃心）
-  if (__prevBlobUrl) {
-    URL.revokeObjectURL(__prevBlobUrl);
-    __prevBlobUrl = null;
-  }
-
-  // 產生新預覽並指給 iframe
-  const blob = new Blob([html], { type: 'text/html' });
-  __prevBlobUrl = URL.createObjectURL(blob);
-  frame.src = __prevBlobUrl;
-}
-
-/* 模式切換：在 <body> 上設 data-mode，配合 CSS 顯示/隱藏
-   - mode = 'edit'   ：只編輯（編輯器 + 圖片工具）
-   - mode = 'preview' ：只預覽（顯示預覽卡片，其他藏起來）
-*/
-function setMode(mode){
-  document.body.setAttribute('data-mode', mode);
-  if (mode === 'preview') {
-    // 需要看到預覽時才渲染，減少無謂重排
-    renderInlinePreview();
-  }
-}
-
-/* 綁定兩顆模式按鈕（存在才綁，避免你還沒放按鈕時報錯） */
-const __btnEdit    = document.getElementById('modeEditBtn');
-const __btnPreview = document.getElementById('modePreviewBtn');
-
-if (__btnEdit)    __btnEdit.addEventListener('click',  () => setMode('edit'));
-if (__btnPreview) __btnPreview.addEventListener('click', () => setMode('preview'));
-
-/* 如果你還留著舊的 #previewBtn，那就讓它也切到只預覽 */
-const __oldPreview = document.getElementById('previewBtn');
-if (__oldPreview)  __oldPreview.addEventListener('click', () => setMode('preview'));
-
-/* 快捷鍵：Cmd/Ctrl+Enter 預覽，Esc 回編輯（可刪） */
-document.addEventListener('keydown', e => {
-  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') setMode('preview');
-  if (e.key === 'Escape') setMode('edit');
-});
-
-/* 初始化預設模式：進頁面先處於只編輯 */
-setMode('edit');
-
-/* 安全下莊：離開頁面時回收 Blob URL（可省，但我不想看 iPad 掛） */
-window.addEventListener('beforeunload', () => {
-  if (__prevBlobUrl) URL.revokeObjectURL(__prevBlobUrl);
-});
-
 
 
 
