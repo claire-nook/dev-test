@@ -1150,22 +1150,38 @@ blockquote { white-space: pre-wrap; word-wrap: break-word; overflow-wrap: break-
 .lightbox img{ max-width:95vw; max-height:90vh; border-radius:8px; box-shadow:0 10px 30px rgba(0,0,0,.35) }
 .lb-close{ position:absolute; top:16px; right:16px; background:rgba(255,255,255,.9); border:0; padding:8px 10px; border-radius:8px; cursor:pointer; font-weight:700 }
 </style>
+<!-- 匯出檔也要能畫 Mermaid：帶腳本 -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
 </head>
 <body>
 ${content}
 <div id="lightbox" class="lightbox" aria-hidden="true"><button class="lb-close" onclick="closeLightbox()">✕</button><img id="lightbox-img" alt=""/></div>
 <script>
+// 匯出檔內部也做一次「code → .mermaid」並畫圖
 (function(){
-  const lb=document.getElementById('lightbox'); const img=document.getElementById('lightbox-img');
-  function open(src, alt){ img.src=src; img.alt=alt||''; lb.classList.add('show'); lb.setAttribute('aria-hidden','false'); }
-  function close(){ lb.classList.remove('show'); lb.setAttribute('aria-hidden','true'); img.src=''; }
-  window.closeLightbox=close;
-  document.addEventListener('click', function(e){
-    const a=e.target.closest('.gallery-link');
-    if(a){ e.preventDefault(); open(a.href, a.querySelector('img')?.alt); }
-    if(e.target===lb) close();
-  });
-  document.addEventListener('keydown', function(e){ if(e.key==='Escape') close(); });
+  function upgrade(el){
+    if(!el) return;
+    var list = el.querySelectorAll('pre > code.language-mermaid, pre > code.lang-mermaid, pre > code.mermaid');
+    list.forEach(function(code){
+      var pre = code.parentElement;
+      var div = document.createElement('div');
+      div.className = 'mermaid';
+      div.textContent = code.textContent;
+      pre.replaceWith(div);
+    });
+    if(list.length && window.mermaid){
+      try{
+        mermaid.initialize({ startOnLoad:false });
+        if (typeof mermaid.run === 'function') { mermaid.run(); }
+        else { mermaid.init(undefined, document.querySelectorAll('.mermaid')); }
+      }catch(e){}
+    }
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function(){ upgrade(document.body); });
+  } else {
+    upgrade(document.body);
+  }
 })();
 <\/script>
 </body>
