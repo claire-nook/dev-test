@@ -600,7 +600,8 @@ function preprocessCallouts(md){
   const lines=String(md).split(/\r?\n/), out=[]; let i=0;
   const titleMap={NOTE:"Note",TIP:"Tip",WARNING:"Warning",INFO:"Info"};
   while(i<lines.length){
-    const m = lines[i].match(/^\s*>\s*$begin:math:display$!(NOTE|TIP|WARNING|INFO)$end:math:display$\s*(.*)$/i);
+    // 乾淨可讀的版本：> [!NOTE] 這類
+    const m = lines[i].match(/^\s*>\s*\[!(NOTE|TIP|WARNING|INFO)\]\s*(.*)$/i);
     if(m){
       const kind=m[1].toUpperCase(), title=(m[2]||"").trim()||titleMap[kind];
       const body=[]; i++;
@@ -704,7 +705,8 @@ blockquote::before{content:"“";position:absolute;top:-6px;left:8px;font-size:4
     const lines=String(md).split(/\\r?\\n/), out=[]; let i=0;
     const titleMap={NOTE:"Note",TIP:"Tip",WARNING:"Warning",INFO:"Info"};
     while(i<lines.length){
-      const m = lines[i].match(/^\\s*>\\s*\$begin:math:display$!(NOTE|TIP|WARNING|INFO)\\$end:math:display$\\s*(.*)$/i);
+      // 乾淨可讀的版本：> [!NOTE] 這類
+      const m = lines[i].match(/^\s*>\s*\[!(NOTE|TIP|WARNING|INFO)\]\s*(.*)$/i);
       if(m){
         const kind=m[1].toUpperCase(), title=(m[2]||"").trim()||titleMap[kind];
         const body=[]; i++;
@@ -822,15 +824,34 @@ blockquote::before{content:"“";position:absolute;top:-6px;left:8px;font-size:4
 </body></html>`;
 }
 
-/* ===== 綁定預覽按鈕：開新分頁（Blob URL） ===== */
-document.getElementById('previewBtn').addEventListener('click', function(){
+/* ===== 綁定預覽按鈕：開新分頁（先開空白，再寫入） ===== */
+document.getElementById('previewBtn').addEventListener('click', function () {
   const md = document.getElementById('md').value || '';
   const html = buildPreviewHTML(md);
-  const blob = new Blob([html], {type:'text/html'});
-  const url = URL.createObjectURL(blob);
-  window.open(url, '_blank');           // iPad Safari 需在使用者手勢下呼叫，這裡符合
-  setTimeout(()=>URL.revokeObjectURL(url), 15000);
+
+  // 先開一個乾淨分頁，這一步是使用者手勢內，同步執行，不會被擋
+  const win = window.open('', '_blank');
+  if (!win) {
+    toast('彈出視窗被瀏覽器擋住了，請解除封鎖或允許此站開新視窗');
+    return;
+  }
+  // 再把整份 HTML 寫進去
+  win.document.open();
+  win.document.write(html);
+  win.document.close();
 });
+
+
+
+
+
+
+
+
+
+
+
+
 </script>
 </body>
 </html>
