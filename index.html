@@ -65,7 +65,6 @@
       font-size:.98rem;
     }
 
-    /* 上方工具列：日期 + 匯出匯入 */
     .toolbar {
       display:flex;
       flex-wrap:wrap;
@@ -130,7 +129,6 @@
       margin-bottom:18px;
     }
 
-    /* 大日曆卡片 */
     .calendar-shell {
       background:var(--card-bg);
       padding:14px;
@@ -196,7 +194,6 @@
       margin-left:4px;
     }
 
-    /* 區間色條：上方水平線 */
     .day-cell.has-range {
       background:linear-gradient(to bottom, rgba(0,0,0,0.02), rgba(0,0,0,0.015));
     }
@@ -251,7 +248,6 @@
       border:2px solid #ff7043;
     }
 
-    /* 底部左右兩欄：區間 / 單日事件 */
     .bottom-layout {
       display:grid;
       grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -399,7 +395,6 @@
       選一個日期，系統會自動往前補到該週星期一，固定顯示 5 週（35 天）。上方調整視圖與匯出 Markdown／JSON，中間大日曆拿來講行程，下面再細修區間與單日事件。
     </p>
 
-    <!-- 工具列：日期、更新、匯入匯出 -->
     <div class="toolbar">
       <div class="toolbar-group">
         <label for="anchorDate">選擇任一日期：</label>
@@ -414,13 +409,10 @@
       </div>
     </div>
 
-    <!-- 隱藏的 JSON 匯入用檔案 input -->
     <input id="importJsonInput" type="file" accept="application/json" style="display:none" />
 
-    <!-- 總覽資訊 -->
     <div id="summary">尚未建立日曆。請先選一個日期，再按「更新 5 週視圖」。</div>
 
-    <!-- 中間：放大版日曆 -->
     <div class="calendar-shell">
       <div class="calendar-header">
         <h3>5 週日曆視圖</h3>
@@ -440,9 +432,7 @@
       <div id="calendarGrid" class="calendar-grid"></div>
     </div>
 
-    <!-- 底部：左區間、右事件 -->
     <div class="bottom-layout">
-      <!-- 區間 -->
       <div class="panel">
         <h3>① 區間（城市／飯店）</h3>
         <p>設定「住在哪裡」或「待在哪個城市」。每天的地點欄會根據區間自動填入，日曆用頂端色條表示區間。</p>
@@ -471,7 +461,6 @@
         <div id="rangeList" class="list"></div>
       </div>
 
-      <!-- 單日事件 -->
       <div class="panel">
         <h3>② 單日事件（移動／活動／備註）</h3>
         <p>像 ✈️、🚄、🚌、🍣 這種發生在「某一天」的事情。跨日睡機上就自己加兩天，系統只負責乖乖貼上。</p>
@@ -484,14 +473,13 @@
           <label>圖示：</label>
           <select id="eventIcon">
             <option value="✈️">✈️ 飛機</option>
-            <option value="🚄">🚄 新幹線／高鐵</option>
             <option value="🚆">🚆 火車</option>
             <option value="🚌">🚌 巴士</option>
-            <option value="🚗">🚗 自駕</option>
-            <option value="🛏️">🛏️ 換飯店</option>
+            <option value="🚗">🚗 包車</option>
+            <option value="🚢">🚢 郵輪</option>
             <option value="🍣">🍣 吃飯／餐廳</option>
             <option value="🛍">🛍 逛街</option>
-            <option value="📍">📍 其他</option>
+            <option value="📍">📍 景點</option>
           </select>
           <input id="eventNote" type="text" placeholder="例如：AC838、TPE → CTS 夜航" />
           <button id="btnAddEvent" class="btn secondary" type="button">加入事件</button>
@@ -507,8 +495,6 @@
   </div>
 
   <script>
-    // ===== 日期工具函式 =====
-
     function parseDate(value) {
       if (!value) return null;
       return new Date(value + 'T00:00:00');
@@ -529,8 +515,8 @@
     }
 
     function getMondayIndex(date) {
-      const jsDay = date.getDay();  // 0=日
-      return (jsDay + 6) % 7;       // 0=一
+      const jsDay = date.getDay();
+      return (jsDay + 6) % 7;
     }
 
     function isWithin(date, start, end) {
@@ -539,21 +525,14 @@
       return t >= start.getTime() && t <= end.getTime();
     }
 
-    // ===== 全域狀態 =====
-
-    let viewStartDate = null;          // 5 週視圖起始（星期一）
-
-    const ranges = [];                 // 區間：{id, name, color, start, end}
-    const events = [];                 // 事件：{id, date, icon, note}
-
+    let viewStartDate = null;
+    const ranges = [];
+    const events = [];
     let idCounter = 1;
     function nextId() { return idCounter++; }
 
-    // 編輯中 ID（null 表示目前是新增模式）
     let editingRangeId = null;
     let editingEventId = null;
-
-    // ===== DOM 取得 =====
 
     const anchorInput = document.getElementById('anchorDate');
     const btnToday = document.getElementById('btnToday');
@@ -582,8 +561,6 @@
     const btnCancelEventEdit = document.getElementById('btnCancelEventEdit');
     const eventList = document.getElementById('eventList');
 
-    // ===== 初始化：預設抓今天所在週 =====
-
     (function initDefaults() {
       const today = new Date();
       const iso = formatDateISO(today);
@@ -606,8 +583,6 @@
       viewStartDate = addDays(date, -mondayOffset);
     }
 
-    // ===== 視圖控制：今天、更新 =====
-
     btnToday.addEventListener('click', () => {
       const today = new Date();
       anchorInput.value = formatDateISO(today);
@@ -626,8 +601,6 @@
       renderCalendar();
       updateSummary();
     });
-
-    // ===== 區間操作（新增 / 編輯 / 刪除） =====
 
     btnAddRange.addEventListener('click', () => {
       const name = rangeNameInput.value.trim();
@@ -649,7 +622,6 @@
       }
 
       if (editingRangeId != null) {
-        // 編輯模式：更新既有區間
         const target = ranges.find(r => r.id === editingRangeId);
         if (target) {
           target.name = name;
@@ -658,7 +630,6 @@
           target.end = end;
         }
       } else {
-        // 新增模式：加入新區間
         ranges.push({
           id: nextId(),
           name,
@@ -681,7 +652,6 @@
 
     function clearRangeForm() {
       rangeNameInput.value = '';
-      // 不動 color，以方便連續新增相同色段
       editingRangeId = null;
       btnAddRange.textContent = '加入區間';
       btnCancelRangeEdit.style.display = 'none';
@@ -725,9 +695,7 @@
       for (const r of ranges) {
         const chip = document.createElement('div');
         chip.className = 'chip';
-        if (editingRangeId === r.id) {
-          chip.classList.add('editing');
-        }
+        if (editingRangeId === r.id) chip.classList.add('editing');
 
         const main = document.createElement('div');
         main.className = 'chip-main';
@@ -773,8 +741,6 @@
       }
     }
 
-    // ===== 單日事件操作（新增 / 編輯 / 刪除） =====
-
     btnAddEvent.addEventListener('click', () => {
       const date = parseDate(eventDateInput.value);
       const icon = eventIconSelect.value || '📍';
@@ -786,7 +752,6 @@
       }
 
       if (editingEventId != null) {
-        // 編輯模式
         const target = events.find(e => e.id === editingEventId);
         if (target) {
           target.date = date;
@@ -794,7 +759,6 @@
           target.note = note;
         }
       } else {
-        // 新增模式
         events.push({
           id: nextId(),
           date,
@@ -815,7 +779,6 @@
     });
 
     function clearEventForm() {
-      // 日期預設不清，方便連續輸入同一天不同事件
       eventNoteInput.value = '';
       editingEventId = null;
       btnAddEvent.textContent = '加入事件';
@@ -840,9 +803,7 @@
       const idx = events.findIndex(e => e.id === id);
       if (idx >= 0) {
         events.splice(idx, 1);
-        if (editingEventId === id) {
-          clearEventForm();
-        }
+        if (editingEventId === id) clearEventForm();
         renderEventsList();
         renderCalendar();
         updateSummary();
@@ -861,9 +822,7 @@
       for (const e of sorted) {
         const chip = document.createElement('div');
         chip.className = 'chip';
-        if (editingEventId === e.id) {
-          chip.classList.add('editing');
-        }
+        if (editingEventId === e.id) chip.classList.add('editing');
 
         const main = document.createElement('div');
         main.className = 'chip-main';
@@ -904,16 +863,12 @@
       }
     }
 
-    // ===== 日曆渲染 =====
-
     function renderCalendar() {
       calendarGrid.innerHTML = '';
       if (!viewStartDate) return;
 
       const days = [];
-      for (let i = 0; i < 35; i++) {
-        days.push(addDays(viewStartDate, i));
-      }
+      for (let i = 0; i < 35; i++) days.push(addDays(viewStartDate, i));
 
       const first = days[0];
       const last = days[days.length - 1];
@@ -954,7 +909,6 @@
           cell.appendChild(ring);
         }
 
-        // 區間色條與標籤
         const hitRanges = ranges.filter(r => isWithin(day, r.start, r.end));
         if (hitRanges.length) {
           cell.classList.add('has-range');
@@ -967,7 +921,6 @@
           bar.style.background = primary.color;
           cell.appendChild(bar);
 
-          // 若為某區間起始日，顯示名稱
           for (const r of sorted) {
             if (formatDateISO(day) === formatDateISO(r.start)) {
               const labelDiv = document.createElement('div');
@@ -980,7 +933,6 @@
           }
         }
 
-        // 單日事件
         const dayEvents = events.filter(e => formatDateISO(e.date) === dateISO);
         if (dayEvents.length) {
           const eventsBox = document.createElement('div');
@@ -1012,8 +964,6 @@
       }
     }
 
-    // ===== 總覽資訊 =====
-
     function updateSummary() {
       if (!viewStartDate) {
         summaryBox.textContent = '尚未建立日曆。請先選一個日期。';
@@ -1029,8 +979,6 @@
         ✏️ 每天的地點會根據區間自動填入；事件則集中在備註欄，跨日移動就自己加成兩天。
       `;
     }
-
-    // ===== Markdown 表格匯出 =====
 
     function buildMarkdownTable() {
       if (!viewStartDate) return '';
@@ -1095,8 +1043,6 @@
       }
     });
 
-    // ===== JSON 匯出 / 匯入 =====
-
     function buildJsonSnapshot() {
       return {
         version: 1,
@@ -1129,7 +1075,10 @@
     btnExportJson.addEventListener('click', () => {
       const snapshot = buildJsonSnapshot();
       const jsonStr = JSON.stringify(snapshot, null, 2);
-      const blob = new Blob([jsonStr], { type: 'application/json' });
+      // 加 BOM，明確標示 UTF-8
+      const blob = new Blob(['\uFEFF' + jsonStr], {
+        type: 'application/json;charset=utf-8'
+      });
 
       const base = snapshot.viewStart || 'trip';
       const fileName = `trip_${base.replace(/-/g, '')}.json`;
@@ -1150,7 +1099,6 @@
           const text = String(reader.result || '');
           const data = JSON.parse(text);
 
-          // 重置狀態
           ranges.length = 0;
           events.length = 0;
           editingRangeId = null;
@@ -1158,14 +1106,12 @@
           clearRangeForm();
           clearEventForm();
 
-          // 還原 viewStart
           const importedStart = data.viewStart ? parseDate(data.viewStart) : null;
           if (importedStart) {
             viewStartDate = importedStart;
             anchorInput.value = formatDateISO(importedStart);
           }
 
-          // 還原區間
           if (Array.isArray(data.ranges)) {
             for (const r of data.ranges) {
               const start = r.start ? parseDate(r.start) : null;
@@ -1181,7 +1127,6 @@
             }
           }
 
-          // 還原事件
           if (Array.isArray(data.events)) {
             for (const e of data.events) {
               const date = e.date ? parseDate(e.date) : null;
@@ -1204,7 +1149,6 @@
           console.error(err);
           alert('匯入失敗，請確認 JSON 格式是否正確。');
         } finally {
-          // 清掉 value，這樣同一檔案之後還能再次觸發 change
           importJsonInput.value = '';
         }
       };
