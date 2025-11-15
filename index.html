@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>旅遊行事曆</title>
+  <title>旅遊行事曆工具（5 週視圖）</title>
 
   <style>
     :root {
@@ -16,7 +16,7 @@
       --border:#e3e3e6;
     }
 
-    /* 基本排版與底色 */
+    /* 全域排版與底色 */
     body {
       margin:0;
       background:#fafafa;
@@ -24,7 +24,7 @@
       font-family: system-ui, -apple-system, "Segoe UI", Arial, "Noto Sans TC", sans-serif;
     }
 
-    /* 頂部固定列（照你現有工具風格） */
+    /* 頂部固定列：和其他工具同風格 */
     header {
       display:flex;
       justify-content:space-between;
@@ -67,7 +67,7 @@
       font-size:.98rem;
     }
 
-    /* 上方：日期與視圖控制列 */
+    /* 最上方：日期控制＋複製MD 匯出 */
     .toolbar {
       display:flex;
       flex-wrap:wrap;
@@ -79,16 +79,17 @@
       box-shadow:0 2px 10px rgba(0,0,0,.06);
       margin-bottom:14px;
     }
-    .toolbar label {
-      font-size:.95rem;
-      color:var(--muted);
-    }
     .toolbar-group {
       display:flex;
       flex-wrap:wrap;
       gap:8px;
       align-items:center;
     }
+    .toolbar label {
+      font-size:.95rem;
+      color:var(--muted);
+    }
+
     input[type="date"],
     input[type="text"],
     input[type="color"],
@@ -100,6 +101,7 @@
       background:#fff;
     }
     input[type="text"] { min-width:140px; }
+
     .btn {
       border:none;
       border-radius:10px;
@@ -119,7 +121,7 @@
       cursor:not-allowed;
     }
 
-    /* 總覽／說明框 */
+    /* 總覽框：顯示目前 5 週範圍與筆數 */
     #summary {
       background:var(--soft);
       border-left:5px solid var(--accent);
@@ -131,15 +133,139 @@
       margin-bottom:18px;
     }
 
-    /* 下半部：左右兩欄（左：設定，右：日曆） */
-    .layout {
+    /* 中間：大日曆卡片 */
+    .calendar-shell {
+      background:var(--card-bg);
+      padding:14px;
+      border-radius:var(--radius);
+      box-shadow:0 2px 10px rgba(0,0,0,.06);
+      margin-bottom:20px;
+    }
+    .calendar-header {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:8px;
+      gap:8px;
+    }
+    .calendar-header h3 {
+      margin:0;
+      font-size:1.05rem;
+    }
+    .calendar-header span {
+      font-size:.85rem;
+      color:var(--muted);
+    }
+
+    .weekday-row {
       display:grid;
-      grid-template-columns: minmax(0, 1.2fr) minmax(0, 2fr);
+      grid-template-columns: repeat(7, 1fr);
+      gap:4px;
+      margin-bottom:4px;
+      padding:0 2px;
+      font-size:.85rem;
+      color:var(--muted);
+    }
+    .weekday-cell {
+      text-align:center;
+    }
+
+    .calendar-grid {
+      display:grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap:4px;
+    }
+
+    /* 放大版日曆格子 */
+    .day-cell {
+      min-height:110px;             /* 放大高度 */
+      background:#fff;
+      border-radius:8px;
+      border:1px solid var(--border);
+      padding:8px 6px 6px;
+      box-sizing:border-box;
+      display:flex;
+      flex-direction:column;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .day-number {
+      font-size:.95rem;
+      font-weight:600;
+    }
+
+    .day-month-tag {
+      font-size:.8rem;
+      color:var(--muted);
+      margin-left:4px;
+    }
+
+    /* 區間色條：上方一條水平線 + 淡淡背景 */
+    .day-cell.has-range {
+      background:linear-gradient(to bottom, rgba(0,0,0,0.02), rgba(0,0,0,0.015));
+    }
+    .range-top-bar {
+      position:absolute;
+      left:0;
+      right:0;
+      top:0;
+      height:4px;
+      background:var(--accent);
+    }
+    .range-label {
+      margin-top:4px;
+      font-size:.8rem;
+      font-weight:600;
+      white-space:nowrap;
+      text-overflow:ellipsis;
+      overflow:hidden;
+    }
+
+    /* 單日事件區：放在格子底部 */
+    .events {
+      margin-top:auto;
+      font-size:.85rem;
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+    }
+    .event-item {
+      display:flex;
+      align-items:center;
+      gap:4px;
+      padding:1px 3px;
+      border-radius:4px;
+      background:rgba(0,0,0,0.03);
+    }
+    .event-icon {
+      font-size:.95rem;
+    }
+    .event-text {
+      white-space:nowrap;
+      text-overflow:ellipsis;
+      overflow:hidden;
+    }
+
+    /* 今天的小圈圈標記 */
+    .today-ring {
+      position:absolute;
+      top:4px;
+      right:5px;
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      border:2px solid #ff7043;
+    }
+
+    /* 底部：區間與事件設定（左右兩欄） */
+    .bottom-layout {
+      display:grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
       gap:18px;
       align-items:flex-start;
     }
 
-    /* 兩種設定卡片：區間與事件 */
     .panel {
       background:var(--card-bg);
       padding:14px;
@@ -230,131 +356,8 @@
       font-size:.9rem;
     }
 
-    /* 日曆外框 */
-    .calendar-shell {
-      background:var(--card-bg);
-      padding:12px;
-      border-radius:var(--radius);
-      box-shadow:0 2px 10px rgba(0,0,0,.06);
-    }
-    .calendar-header {
-      display:flex;
-      justify-content:space-between;
-      align-items:baseline;
-      margin-bottom:4px;
-    }
-    .calendar-header h3 {
-      margin:0;
-      font-size:1.05rem;
-    }
-    .calendar-header span {
-      font-size:.85rem;
-      color:var(--muted);
-    }
-
-    /* 日曆格線 */
-    .weekday-row {
-      display:grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap:4px;
-      margin-bottom:4px;
-      padding:0 2px;
-      font-size:.8rem;
-      color:var(--muted);
-    }
-    .weekday-cell {
-      text-align:center;
-    }
-
-    .calendar-grid {
-      display:grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap:4px;
-    }
-
-    .day-cell {
-      min-height:80px;
-      background:#fff;
-      border-radius:8px;
-      border:1px solid var(--border);
-      padding:4px 5px 6px;
-      box-sizing:border-box;
-      display:flex;
-      flex-direction:column;
-      position:relative;
-      overflow:hidden;
-    }
-
-    .day-number {
-      font-size:.85rem;
-      font-weight:600;
-    }
-
-    .day-month-tag {
-      font-size:.7rem;
-      color:var(--muted);
-      margin-left:4px;
-    }
-
-    /* 區間顏色帶：整格淡底＋左側實心條 */
-    .day-cell.has-range {
-      background:linear-gradient(to bottom, rgba(0,0,0,0.02), rgba(0,0,0,0.02));
-    }
-    .range-strip {
-      position:absolute;
-      top:0;
-      bottom:0;
-      left:0;
-      width:6px;
-      background:var(--accent);
-    }
-    .range-label {
-      margin-top:2px;
-      font-size:.75rem;
-      font-weight:600;
-      white-space:nowrap;
-      text-overflow:ellipsis;
-      overflow:hidden;
-    }
-
-    /* 單日事件區 */
-    .events {
-      margin-top:auto;
-      font-size:.8rem;
-      display:flex;
-      flex-direction:column;
-      gap:2px;
-    }
-    .event-item {
-      display:flex;
-      align-items:center;
-      gap:4px;
-      padding:1px 3px;
-      border-radius:4px;
-      background:rgba(0,0,0,0.03);
-    }
-    .event-icon {
-      font-size:.9rem;
-    }
-    .event-text {
-      white-space:nowrap;
-      text-overflow:ellipsis;
-      overflow:hidden;
-    }
-
-    /* 今天標記（如果日期正好是今天） */
-    .today-ring {
-      position:absolute;
-      top:3px;
-      right:4px;
-      width:8px;
-      height:8px;
-      border-radius:50%;
-      border:2px solid #ff7043;
-    }
-
     @media (max-width: 900px) {
-      .layout {
+      .bottom-layout {
         grid-template-columns: 1fr;
       }
     }
@@ -367,11 +370,11 @@
         padding:.8rem 1rem;
       }
       input, select, button {
-        font-size:16px !important; /* iOS 不縮太小 */
+        font-size:16px !important; /* iOS 不要太小 */
         height:40px;
       }
       .day-cell {
-        min-height:72px;
+        min-height:95px;
       }
     }
   </style>
@@ -384,29 +387,56 @@
 
   <div class="wrap">
     <h1>5 週旅遊行事曆視圖</h1>
-    <p class="sub">輸入任意日期，系統自動往前補到當週星期一，固定顯示 5 週共 35 天。上半部設城市／飯店區間，下半部日曆自動幫你上色與貼事件圖示。</p>
+    <p class="sub">
+      選一個日期，系統會自動往前補到該週星期一，固定顯示 5 週（35 天）。上方先調整視圖與匯出 Markdown，中間大日曆用來講行程，下面再細修區間與單日事件。
+    </p>
 
-    <!-- 視圖日期控制列 -->
+    <!-- 視圖控制列：日期、更新、今天、複製MD -->
     <div class="toolbar">
       <div class="toolbar-group">
         <label for="anchorDate">選擇任一日期：</label>
         <input id="anchorDate" type="date" />
         <button id="btnToday" class="btn secondary" type="button">跳到今天所在週</button>
-      </div>
-      <div class="toolbar-group">
         <button id="btnGenerate" class="btn" type="button">更新 5 週視圖</button>
-        <span style="font-size:.9rem; color:var(--muted);">會自動把你選的日期對齊成「當週星期一」當第一格。</span>
+      </div>
+      <div class="toolbar-group" style="margin-left:auto;">
+        <button id="btnCopyMd" class="btn secondary" type="button">
+          複製 Markdown 表格
+        </button>
       </div>
     </div>
 
-    <!-- 總覽區 -->
+    <!-- 總覽資訊 -->
     <div id="summary">尚未建立日曆。請先選一個日期，再按「更新 5 週視圖」。</div>
 
-    <div class="layout">
-      <!-- 左側：設定區 -->
+    <!-- 中間：放大版 5 週日曆 -->
+    <div class="calendar-shell">
+      <div class="calendar-header">
+        <h3>5 週日曆視圖</h3>
+        <span id="calendarRangeLabel"></span>
+      </div>
+
+      <div class="weekday-row">
+        <div class="weekday-cell">一</div>
+        <div class="weekday-cell">二</div>
+        <div class="weekday-cell">三</div>
+        <div class="weekday-cell">四</div>
+        <div class="weekday-cell">五</div>
+        <div class="weekday-cell">六</div>
+        <div class="weekday-cell">日</div>
+      </div>
+
+      <div id="calendarGrid" class="calendar-grid">
+        <!-- JS 動態產生日曆格子 -->
+      </div>
+    </div>
+
+    <!-- 底部：左區間、右事件 -->
+    <div class="bottom-layout">
+      <!-- 區間（城市／飯店） -->
       <div class="panel">
         <h3>① 區間（城市／飯店）</h3>
-        <p>這裡用來設定「住在哪裡」或「待在哪個城市」。只會在區間第一天顯示名稱，其他天用顏色延伸。</p>
+        <p>設定「住在哪裡」或「待在哪個城市」。會每天自動填入地點，日曆上用頂端色條顯示區間。</p>
 
         <div class="field-row">
           <input id="rangeName" type="text" placeholder="例如：札幌｜京王飯店" />
@@ -420,20 +450,21 @@
           <button id="btnAddRange" class="btn secondary" type="button">加入區間</button>
         </div>
         <div class="field-row">
-          <small>小提醒：起訖日期會被視為「含當天」。顏色會套用在整段日期上。</small>
+          <small>起訖會被視為「含當天」，顏色會套用整段日期。若某天落在多個區間，表格與日曆都以開始日期較早的那一段為主。</small>
         </div>
 
         <div class="badge">
           <span class="badge-dot"></span>
-          <span>區間只改顏色，不動事件資料。</span>
+          <span>區間只改顏色與地點欄位，不會碰到事件資料。</span>
         </div>
 
         <div id="rangeList" class="list"></div>
+      </div>
 
-        <hr style="margin:14px 0; border:none; border-top:1px dashed #ddd;" />
-
+      <!-- 單日事件 -->
+      <div class="panel">
         <h3>② 單日事件（移動／活動／備註）</h3>
-        <p>像是 ✈️、🚄、🛍、🍣 那種當天會發生一次的事情。跨日睡機上就自己加兩天，很自由。</p>
+        <p>像 ✈️、🚄、🚌、🍣 這種發生在「某一天」的事情。跨日睡機上就自己加兩天，很自由。</p>
 
         <div class="field-row">
           <label>日期：</label>
@@ -443,64 +474,38 @@
           <label>圖示：</label>
           <select id="eventIcon">
             <option value="✈️">✈️ 飛機</option>
-            <option value="🚄">🚄 新幹線／高鐵</option>
-            <option value="🚆">🚆 火車</option>
+            <option value="🚆">🚆 火車地鐵</option>
             <option value="🚌">🚌 巴士</option>
-            <option value="🚗">🚗 自駕</option>
-            <option value="🛏️">🛏️ 換飯店</option>
-            <option value="🍣">🍣 吃飯／餐廳</option>
+            <option value="🚗">🚗 包車</option>
+            <option value="🚢">🚢 郵輪</option>
+            <option value="🍣">🍣 餐廳</option>
             <option value="🛍">🛍 逛街</option>
-            <option value="📍">📍 其他</option>
+            <option value="📍">📍 景點</option>
           </select>
-          <input id="eventNote" type="text" placeholder="例如：TPE → CTS 夜航" />
+          <input id="eventNote" type="text" placeholder="例如：AC838、TPE → CTS 夜航" />
           <button id="btnAddEvent" class="btn secondary" type="button">加入事件</button>
         </div>
         <div class="field-row">
-          <small>你要跨日睡飛機，就自己加兩筆：13 ✈️、14 ✈️。系統只負責乖乖貼上圖示。</small>
+          <small>同一天可以有多個事件，日曆會全部顯示；匯出 Markdown 時會放進備註欄，用「；」分隔。</small>
         </div>
 
         <div id="eventList" class="list"></div>
-      </div>
-
-      <!-- 右側：日曆視圖 -->
-      <div class="calendar-shell">
-        <div class="calendar-header">
-          <h3>5 週日曆視圖</h3>
-          <span id="calendarRangeLabel"></span>
-        </div>
-
-        <div class="weekday-row">
-          <div class="weekday-cell">一</div>
-          <div class="weekday-cell">二</div>
-          <div class="weekday-cell">三</div>
-          <div class="weekday-cell">四</div>
-          <div class="weekday-cell">五</div>
-          <div class="weekday-cell">六</div>
-          <div class="weekday-cell">日</div>
-        </div>
-
-        <div id="calendarGrid" class="calendar-grid">
-          <!-- JS 動態產生日曆格子 -->
-        </div>
       </div>
     </div>
   </div>
 
   <script>
-    // ===== 工具層：日期處理 =====
+    // =========================
+    // 日期工具函式
+    // =========================
 
-    /**
-     * 將 "YYYY-MM-DD" 字串轉成 Date（鎖在當地 00:00，避免時區亂飄）
-     */
+    /** 將 "YYYY-MM-DD" 轉成 Date（鎖在當地 00:00） */
     function parseDate(value) {
       if (!value) return null;
-      // 加上 T00:00:00，避免被當成 UTC
       return new Date(value + 'T00:00:00');
     }
 
-    /**
-     * 將 Date 轉成 "YYYY-MM-DD"
-     */
+    /** 將 Date 轉成 "YYYY-MM-DD" */
     function formatDateISO(date) {
       if (!date) return '';
       const y = date.getFullYear();
@@ -509,9 +514,7 @@
       return `${y}-${m}-${d}`;
     }
 
-    /**
-     * 把 Date 複製一份，並加上指定天數
-     */
+    /** 回傳新的 Date，為原日期加上指定天數 */
     function addDays(date, days) {
       const d = new Date(date);
       d.setDate(d.getDate() + days);
@@ -519,32 +522,33 @@
     }
 
     /**
-     * 取得 JS getDay() 轉成以「週一為 0」的索引
-     * JS: 0=週日,1=週一,... → 轉成 0=週一,...,6=週日
+     * 取得以「週一為 0」的索引
+     * JS: getDay() → 0=日,1=一,…6=六
+     * 我們要 0=一,…,6=日
      */
     function getMondayIndex(date) {
-      const jsDay = date.getDay(); // 0~6
+      const jsDay = date.getDay();
       return (jsDay + 6) % 7;
     }
 
-    /**
-     * 判斷 date 是否介於 [start, end] 之間（含邊界）
-     */
+    /** 判斷 date 是否在 [start, end] 範圍內（含邊界） */
     function isWithin(date, start, end) {
       if (!start || !end) return false;
       const t = date.getTime();
       return t >= start.getTime() && t <= end.getTime();
     }
 
-    // ===== 狀態儲存 =====
+    // =========================
+    // 全域狀態：視圖、區間、事件
+    // =========================
 
     /** 視圖起始日期（一定是星期一） */
     let viewStartDate = null;
 
-    /** 區間資料：{id, name, color, start, end} */
+    /** 區間列表：{id, name, color, start, end} */
     const ranges = [];
 
-    /** 單日事件資料：{id, date, icon, note} */
+    /** 單日事件列表：{id, date, icon, note} */
     const events = [];
 
     let idCounter = 1;
@@ -552,11 +556,14 @@
       return idCounter++;
     }
 
-    // ===== DOM 取得 =====
+    // =========================
+    // DOM 元素
+    // =========================
 
     const anchorInput = document.getElementById('anchorDate');
     const btnToday = document.getElementById('btnToday');
     const btnGenerate = document.getElementById('btnGenerate');
+    const btnCopyMd = document.getElementById('btnCopyMd');
 
     const summaryBox = document.getElementById('summary');
     const calendarGrid = document.getElementById('calendarGrid');
@@ -575,31 +582,36 @@
     const btnAddEvent = document.getElementById('btnAddEvent');
     const eventList = document.getElementById('eventList');
 
-    // ===== 視圖初始化：預設抓今天所在週 =====
+    // =========================
+    // 初始化：預設抓今天所在週
+    // =========================
 
     (function initDefaults() {
       const today = new Date();
       const iso = formatDateISO(today);
+
       anchorInput.value = iso;
       eventDateInput.value = iso;
       rangeStartInput.value = iso;
       rangeEndInput.value = iso;
 
       setViewStartFromAnchor(today);
+      renderRangesList();
+      renderEventsList();
       renderCalendar();
       updateSummary();
     })();
 
-    /**
-     * 根據「任意日期」計算本週星期一，更新 viewStartDate
-     */
+    /** 根據 anchor 日期計算當週星期一當作視圖起始日 */
     function setViewStartFromAnchor(date) {
       if (!date) return;
       const mondayOffset = getMondayIndex(date); // 0~6
       viewStartDate = addDays(date, -mondayOffset);
     }
 
-    // ===== 事件監聽：視圖控制 =====
+    // =========================
+    // 視圖控制：今天、更新
+    // =========================
 
     btnToday.addEventListener('click', () => {
       const today = new Date();
@@ -620,7 +632,9 @@
       updateSummary();
     });
 
-    // ===== 區間操作 =====
+    // =========================
+    // 區間操作：新增 / 刪除 / 清單
+    // =========================
 
     btnAddRange.addEventListener('click', () => {
       const name = rangeNameInput.value.trim();
@@ -665,6 +679,7 @@
       }
     }
 
+    /** 將區間列表畫在左下卡片 */
     function renderRangesList() {
       rangeList.innerHTML = '';
       if (!ranges.length) {
@@ -707,7 +722,9 @@
       }
     }
 
-    // ===== 單日事件操作 =====
+    // =========================
+    // 單日事件操作：新增 / 刪除 / 清單
+    // =========================
 
     btnAddEvent.addEventListener('click', () => {
       const date = parseDate(eventDateInput.value);
@@ -742,6 +759,7 @@
       }
     }
 
+    /** 將事件列表畫在右下卡片 */
     function renderEventsList() {
       eventList.innerHTML = '';
       if (!events.length) {
@@ -749,7 +767,6 @@
         return;
       }
 
-      // 依日期排序，方便你自己看
       const sorted = [...events].sort((a, b) => a.date - b.date);
 
       for (const e of sorted) {
@@ -782,11 +799,12 @@
       }
     }
 
-    // ===== 日曆渲染 =====
+    // =========================
+    // 日曆渲染：5 週 x 7 天
+    // =========================
 
     function renderCalendar() {
       calendarGrid.innerHTML = '';
-
       if (!viewStartDate) return;
 
       const days = [];
@@ -794,11 +812,9 @@
         days.push(addDays(viewStartDate, i));
       }
 
-      // 日曆範圍文字（左上小字）
       const first = days[0];
       const last = days[days.length - 1];
-      const label = `${formatDateISO(first)} ～ ${formatDateISO(last)}`;
-      calendarRangeLabel.textContent = label;
+      calendarRangeLabel.textContent = `${formatDateISO(first)} ～ ${formatDateISO(last)}`;
 
       const todayISO = formatDateISO(new Date());
 
@@ -810,10 +826,11 @@
         const dayNum = day.getDate();
         const month = day.getMonth() + 1;
 
-        // 日期＋月標籤（每月 1 號顯示）
+        // 上方：日期＋每月 1 號小月標籤
         const topRow = document.createElement('div');
         topRow.style.display = 'flex';
         topRow.style.alignItems = 'baseline';
+
         const numSpan = document.createElement('span');
         numSpan.className = 'day-number';
         numSpan.textContent = dayNum;
@@ -829,47 +846,48 @@
 
         cell.appendChild(topRow);
 
-        // 今天的小圈圈
+        // 今天標記
         if (dateISO === todayISO) {
           const ring = document.createElement('div');
           ring.className = 'today-ring';
           cell.appendChild(ring);
         }
 
-        // 找出這天有哪些區間命中
+        // 找出涵蓋這天的所有區間，若有多個，以開始日期最早的一段為主
         const hitRanges = ranges.filter(r => isWithin(day, r.start, r.end));
-
         if (hitRanges.length) {
           cell.classList.add('has-range');
 
-          // 目前只取第一個區間的顏色做底色與側邊條（一般情況也只會有一個）
-          const primary = hitRanges[0];
+          const sorted = hitRanges.sort((a, b) => a.start - b.start);
+          const primary = sorted[0];
 
-          const strip = document.createElement('div');
-          strip.className = 'range-strip';
-          strip.style.background = primary.color;
-          cell.appendChild(strip);
+          // 頂部色帶
+          const bar = document.createElement('div');
+          bar.className = 'range-top-bar';
+          bar.style.background = primary.color;
+          cell.appendChild(bar);
 
-          // 如果是這個區間的第一天，就顯示名稱
-          for (const r of hitRanges) {
+          // 若當天剛好是某個區間的起始日，顯示名稱標籤
+          for (const r of sorted) {
             if (formatDateISO(day) === formatDateISO(r.start)) {
               const labelDiv = document.createElement('div');
               labelDiv.className = 'range-label';
               labelDiv.textContent = r.name;
               labelDiv.style.color = r.color;
               cell.appendChild(labelDiv);
+              break; // 一天顯示一個名稱就好
             }
           }
         }
 
-        // 單日事件
+        // 單日事件：底部顯示所有事件
         const dayEvents = events.filter(e => formatDateISO(e.date) === dateISO);
         if (dayEvents.length) {
           const eventsBox = document.createElement('div');
           eventsBox.className = 'events';
 
-          const sorted = dayEvents.sort((a, b) => a.id - b.id);
-          for (const e of sorted) {
+          const sortedEvents = dayEvents.sort((a, b) => a.id - b.id);
+          for (const e of sortedEvents) {
             const item = document.createElement('div');
             item.className = 'event-item';
 
@@ -894,7 +912,9 @@
       }
     }
 
-    // ===== 總覽資訊 =====
+    // =========================
+    // 總覽訊息
+    // =========================
 
     function updateSummary() {
       if (!viewStartDate) {
@@ -911,9 +931,86 @@
         📅 目前視圖範圍：<strong>${formatDateISO(first)}</strong> ～ <strong>${formatDateISO(last)}</strong><br/>
         🏨 區間（城市／飯店）共：<strong>${rangeCount}</strong> 筆<br/>
         📌 單日事件共：<strong>${eventCount}</strong> 筆<br/>
-        ✏️ 區間只會在起始日顯示名稱，其餘靠顏色辨識。事件採「單日一筆」邏輯，跨日移動就自己加兩筆。
+        ✏️ 每天的地點會根據區間自動填入；事件則集中在備註欄，跨日移動就自己加成兩天。
       `;
     }
+
+    // =========================
+    // 匯出：複製 Markdown 表格
+    // =========================
+
+    /**
+     * 產生「日期 / 地點 / 備註」三欄的 Markdown 表格字串
+     * - 日期：2026/05/13（三）
+     * - 地點：當天落在哪一個區間（若有多段重疊，取開始日最早的那一段）
+     * - 備註：當天所有事件，格式「圖示＋備註」，以「；」分隔
+     */
+    function buildMarkdownTable() {
+      if (!viewStartDate) return '';
+
+      const lines = [];
+      lines.push('| 日期 | 地點 | 備註 |');
+      lines.push('| ---- | ---- | ---- |');
+
+      const weekdayChars = ['日', '一', '二', '三', '四', '五', '六'];
+
+      for (let i = 0; i < 35; i++) {
+        const day = addDays(viewStartDate, i);
+        const iso = formatDateISO(day);
+
+        // 日期：YYYY/MM/DD（X）
+        const y = day.getFullYear();
+        const m = String(day.getMonth() + 1).padStart(2, '0');
+        const d = String(day.getDate()).padStart(2, '0');
+        const weekday = weekdayChars[day.getDay()];
+        const dateStr = `${y}/${m}/${d}（${weekday}）`;
+
+        // 地點：找出涵蓋這天的所有區間，取開始日期最早的一段
+        const coveringRanges = ranges
+          .filter(r => isWithin(day, r.start, r.end))
+          .sort((a, b) => a.start - b.start);
+        const location = coveringRanges.length ? coveringRanges[0].name : '';
+
+        // 備註：當天所有事件
+        const dayEvents = events
+          .filter(e => formatDateISO(e.date) === iso)
+          .sort((a, b) => a.id - b.id);
+
+        const remark = dayEvents
+          .map(e => {
+            const base = e.icon || '';
+            const note = (e.note || '').trim();
+            return note ? `${base} ${note}` : base;
+          })
+          .join('；');
+
+        lines.push(`| ${dateStr} | ${location} | ${remark} |`);
+      }
+
+      return lines.join('\n');
+    }
+
+    // 複製 Markdown 按鈕綁定
+    btnCopyMd.addEventListener('click', async () => {
+      if (!viewStartDate) {
+        alert('請先建立 5 週日曆視圖（選日期並按「更新」）。');
+        return;
+      }
+
+      const md = buildMarkdownTable();
+      if (!md) {
+        alert('目前沒有可匯出的內容。');
+        return;
+      }
+
+      try {
+        await navigator.clipboard.writeText(md);
+        alert('已複製 Markdown 表格，可以貼到 Day One / Notion / Obsidian。');
+      } catch (err) {
+        console.error(err);
+        alert('複製失敗，可能是瀏覽器權限問題。以下是表格內容，請手動複製：\n\n' + md);
+      }
+    });
   </script>
 </body>
 </html>
