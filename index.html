@@ -964,21 +964,58 @@
       }
     }
 
-    function updateSummary() {
-      if (!viewStartDate) {
-        summaryBox.textContent = '尚未建立日曆。請先選一個日期。';
-        return;
-      }
-      const first = viewStartDate;
-      const last = addDays(viewStartDate, 34);
+// 計算整趟旅程的起訖與天數（含頭尾兩天）
+function getTripSpan() {
+  const dates = [];
 
-      summaryBox.innerHTML = `
-        📅 目前視圖範圍：<strong>${formatDateISO(first)}</strong> ～ <strong>${formatDateISO(last)}</strong><br/>
-        🏨 區間（城市／飯店）共：<strong>${ranges.length}</strong> 筆<br/>
-        📌 單日事件共：<strong>${events.length}</strong> 筆<br/>
-        ✏️ 每天的地點會根據區間自動填入；事件則集中在備註欄，跨日移動就自己加成兩天。
-      `;
-    }
+  // 把所有區間的起訖日期丟進來
+  for (const r of ranges) {
+    if (r.start) dates.push(r.start);
+    if (r.end) dates.push(r.end);
+  }
+
+  // 把所有事件日期也丟進來
+  for (const e of events) {
+    if (e.date) dates.push(e.date);
+  }
+
+  if (!dates.length) return null;
+
+  // 排序後取最早與最晚
+  dates.sort((a, b) => a - b);
+  const first = dates[0];
+  const last = dates[dates.length - 1];
+
+  // 天數要「含頭尾」，所以 +1
+  const MS_PER_DAY = 24 * 60 * 60 * 1000;
+  const days = Math.round((last - first) / MS_PER_DAY) + 1;
+
+  return { first, last, days };
+}
+
+
+function updateSummary() {
+  if (!viewStartDate) {
+    summaryBox.textContent = '尚未建立日曆。請先選一個日期。';
+    return;
+  }
+  const first = viewStartDate;
+  const last = addDays(viewStartDate, 34);
+
+  const span = getTripSpan(); // 這裡拿整趟旅程資訊
+  let tripLine = '🧭 旅程天數：目前尚未設定任何區間或事件。';
+
+  if (span) {
+    tripLine = `🧭 旅程天數：<strong>${span.days}</strong> 天（${formatDateISO(span.first)} ～ ${formatDateISO(span.last)}）`;
+  }
+
+  summaryBox.innerHTML = `
+    📅 目前視圖範圍：<strong>${formatDateISO(first)}</strong> ～ <strong>${formatDateISO(last)}</strong><br/>
+    🏨 區間（城市／飯店）共：<strong>${ranges.length}</strong> 筆<br/>
+    📌 單日事件共：<strong>${events.length}</strong> 筆<br/>
+    ${tripLine}<br/>
+  `;
+}
 
     function buildMarkdownTable() {
       if (!viewStartDate) return '';
