@@ -143,9 +143,10 @@
       margin-bottom:16px;
     }
 
+    /* 這個現在不包任何東西，但保留不影響 */
     .main-layout {
       display:grid;
-      grid-template-columns:minmax(0, 3fr) minmax(0, 2fr);
+      grid-template-columns:minmax(0, 1fr);
       gap:18px;
       align-items:flex-start;
     }
@@ -155,6 +156,7 @@
       border-radius:var(--radius);
       padding:12px 12px 16px;
       box-shadow:0 2px 10px rgba(0,0,0,.06);
+      margin-bottom:18px;
     }
 
     .calendar-header {
@@ -397,12 +399,6 @@
       background:#f0f4ff;
     }
 
-    @media (max-width: 900px) {
-      .main-layout {
-        grid-template-columns: minmax(0, 1fr);
-      }
-    }
-
     @media (max-width: 767px) {
       .wrap { padding:16px 10px 28px; }
       header { padding:0.75rem 1rem; }
@@ -444,137 +440,138 @@
 
     <div id="summary">尚未建立日曆。請先選一個日期，並按「更新 5 週視圖」。</div>
 
-    <div class="main-layout">
-      <div class="calendar-card">
-        <div class="calendar-header">
-          <h3>🗓 5 週行事曆</h3>
-          <div id="calendarRangeLabel" class="calendar-range-label"></div>
-        </div>
-        <div class="calendar-weekdays">
-          <div class="weekday-cell">一</div>
-          <div class="weekday-cell">二</div>
-          <div class="weekday-cell">三</div>
-          <div class="weekday-cell">四</div>
-          <div class="weekday-cell">五</div>
-          <div class="weekday-cell">六</div>
-          <div class="weekday-cell">日</div>
-        </div>
-
-        <div id="calendarGrid" class="calendar-grid"></div>
+    <!-- 日曆獨立一張大卡 -->
+    <div class="calendar-card">
+      <div class="calendar-header">
+        <h3>🗓 5 週行事曆</h3>
+        <div id="calendarRangeLabel" class="calendar-range-label"></div>
+      </div>
+      <div class="calendar-weekdays">
+        <div class="weekday-cell">一</div>
+        <div class="weekday-cell">二</div>
+        <div class="weekday-cell">三</div>
+        <div class="weekday-cell">四</div>
+        <div class="weekday-cell">五</div>
+        <div class="weekday-cell">六</div>
+        <div class="weekday-cell">日</div>
       </div>
 
-      <div class="bottom-layout">
-        <div class="panel">
-          <h3>① 區間（城市／飯店）</h3>
-          <p>設定「住在哪裡」或「待在哪個城市」。</p>
+      <div id="calendarGrid" class="calendar-grid"></div>
+    </div>
 
-          <div class="field-row">
-            <input id="rangeName" type="text" placeholder="例如：札幌｜京王飯店" />
-            <input id="rangeColor" type="color" value="#4f8cff" />
-          </div>
-          <div class="field-row">
-            <label>起：</label>
-            <input id="rangeStart" type="date" />
-            <label>迄：</label>
-            <input id="rangeEnd" type="date" />
-            <button id="btnAddRange" class="btn secondary" type="button">加入區間</button>
-            <button id="btnCancelRangeEdit" class="btn secondary" type="button" style="display:none;">取消編輯</button>
-          </div>
-          <div class="field-row">
-            <span class="badge">
-              <span class="badge-dot"></span>
-              <span>區間只改顏色與地點欄位，不會碰到事件資料。</span>
-            </span>
-          </div>
+    <!-- 輸入區塊整排在下面 -->
+    <div class="bottom-layout">
+      <div class="panel">
+        <h3>① 區間（城市／飯店）</h3>
+        <p>設定「住在哪裡」或「待在哪個城市」。</p>
 
-          <div id="rangeList" class="list"></div>
+        <div class="field-row">
+          <input id="rangeName" type="text" placeholder="例如：札幌｜京王飯店" />
+          <input id="rangeColor" type="color" value="#4f8cff" />
+        </div>
+        <div class="field-row">
+          <label>起：</label>
+          <input id="rangeStart" type="date" />
+          <label>迄：</label>
+          <input id="rangeEnd" type="date" />
+          <button id="btnAddRange" class="btn secondary" type="button">加入區間</button>
+          <button id="btnCancelRangeEdit" class="btn secondary" type="button" style="display:none;">取消編輯</button>
+        </div>
+        <div class="field-row">
+          <span class="badge">
+            <span class="badge-dot"></span>
+            <span>區間只改顏色與地點欄位，不會碰到事件資料。</span>
+          </span>
         </div>
 
-        <div class="panel">
-          <h3>② 飯店住宿（含匯率）</h3>
-          <p>設定每一段住宿的飯店名稱、金額與概算匯率，會顯示在日曆格子裡。</p>
+        <div id="rangeList" class="list"></div>
+      </div>
 
-          <div class="field-row">
-            <input id="hotelName" type="text" placeholder="例如：溫哥華萬豪" />
-          </div>
-          <div class="field-row">
-            <label>起：</label>
-            <input id="hotelStart" type="date" />
-            <label>迄：</label>
-            <input id="hotelEnd" type="date" />
-          </div>
-          <div class="field-row">
-            <label>幣別：</label>
-            <select id="hotelCurrency">
-              <option value="TWD">TWD</option>
-              <option value="JPY">JPY</option>
-              <option value="USD">USD</option>
-              <option value="EUR">EUR</option>
-              <option value="AUD">AUD</option>
-              <option value="CAD">CAD</option>
-              <option value="IDR">IDR</option>
-              <option value="VND">VND</option>
-              <option value="KRW">KRW</option>
-            </select>
-          </div>
-          <div class="field-row">
-            <label>金額：</label>
-            <input id="hotelAmount" type="number" step="0.01" min="0" placeholder="例如：1.8" />
-            <select id="hotelUnit">
-              <option value="元">元</option>
-              <option value="K">K（千）</option>
-              <option value="M">M（百萬）</option>
-            </select>
-          </div>
-          <div class="field-row">
-            <label>匯率：</label>
-            <input id="hotelFxRate" type="number" step="0.0001" min="0" placeholder="1 原幣 ≈ 幾台幣" />
-          </div>
-          <div class="field-row">
-            <small>例如：AUD 1 ≈ 20 TWD、JPY 100 ≈ 20 TWD（則填 0.2）、IDR 1,000 ≈ 2 TWD（則填 0.002）。</small>
-          </div>
-          <div class="field-row">
-            <button id="btnAddHotel" class="btn secondary" type="button">加入住宿</button>
-            <button id="btnCancelHotelEdit" class="btn secondary" type="button" style="display:none;">取消編輯</button>
-          </div>
+      <div class="panel">
+        <h3>② 飯店住宿（含匯率）</h3>
+        <p>設定每一段住宿的飯店名稱、金額與概算匯率，會顯示在日曆格子裡。</p>
 
-          <div id="hotelList" class="list"></div>
+        <div class="field-row">
+          <input id="hotelName" type="text" placeholder="例如：溫哥華萬豪" />
+        </div>
+        <div class="field-row">
+          <label>起：</label>
+          <input id="hotelStart" type="date" />
+          <label>迄：</label>
+          <input id="hotelEnd" type="date" />
+        </div>
+        <div class="field-row">
+          <label>幣別：</label>
+          <select id="hotelCurrency">
+            <option value="TWD">TWD</option>
+            <option value="JPY">JPY</option>
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+            <option value="AUD">AUD</option>
+            <option value="CAD">CAD</option>
+            <option value="IDR">IDR</option>
+            <option value="VND">VND</option>
+            <option value="KRW">KRW</option>
+          </select>
+        </div>
+        <div class="field-row">
+          <label>金額：</label>
+          <input id="hotelAmount" type="number" step="0.01" min="0" placeholder="例如：1.8" />
+          <select id="hotelUnit">
+            <option value="元">元</option>
+            <option value="K">K（千）</option>
+            <option value="M">M（百萬）</option>
+          </select>
+        </div>
+        <div class="field-row">
+          <label>匯率：</label>
+          <input id="hotelFxRate" type="number" step="0.0001" min="0" placeholder="1 原幣 ≈ 幾台幣" />
+        </div>
+        <div class="field-row">
+          <small>例如：AUD 1 ≈ 20 TWD、JPY 100 ≈ 20 TWD（則填 0.2）、IDR 1,000 ≈ 2 TWD（則填 0.002）。</small>
+        </div>
+        <div class="field-row">
+          <button id="btnAddHotel" class="btn secondary" type="button">加入住宿</button>
+          <button id="btnCancelHotelEdit" class="btn secondary" type="button" style="display:none;">取消編輯</button>
         </div>
 
-        <div class="panel">
-          <h3>③ 單日事件（移動／活動／備註）</h3>
-          <p>像 ✈️、🚄、🚌、🍣 這種發生在「某一天」的事情。</p>
+        <div id="hotelList" class="list"></div>
+      </div>
 
-          <div class="field-row">
-            <label>日期：</label>
-            <input id="eventDate" type="date" />
-          </div>
-          <div class="field-row">
-            <label>圖示：</label>
-            <select id="eventIcon">
-              <option value="✈️">✈️ 飛機</option>
-              <option value="🚆">🚆 火車</option>
-              <option value="🚌">🚌 巴士</option>
-              <option value="🚗">🚗 包車</option>
-              <option value="🚢">🚢 郵輪</option>
-              <option value="🍣">🍣 餐廳</option>
-              <option value="🛍">🛍 逛街</option>
-              <option value="📍">📍 景點</option>
-            </select>
-            <input id="eventNote" type="text" placeholder="例如：AC838、TPE → CTS 夜航" />
-            <button id="btnAddEvent" class="btn secondary" type="button">加入事件</button>
-            <button id="btnCancelEventEdit" class="btn secondary" type="button" style="display:none;">取消編輯</button>
-          </div>
-          <div class="field-row">
-            <small>同一天可以有多個事件，日曆會全部顯示；匯出 Markdown 時會放進備註欄，用「；」分隔。</small>
-          </div>
+      <div class="panel">
+        <h3>③ 單日事件（移動／活動／備註）</h3>
+        <p>像 ✈️、🚄、🚌、🍣 這種發生在「某一天」的事情。</p>
 
-          <div id="eventList" class="list"></div>
+        <div class="field-row">
+          <label>日期：</label>
+          <input id="eventDate" type="date" />
         </div>
+        <div class="field-row">
+          <label>圖示：</label>
+          <select id="eventIcon">
+            <option value="✈️">✈️ 飛機</option>
+            <option value="🚆">🚆 火車</option>
+            <option value="🚌">🚌 巴士</option>
+            <option value="🚗">🚗 包車</option>
+            <option value="🚢">🚢 郵輪</option>
+            <option value="🍣">🍣 餐廳</option>
+            <option value="🛍">🛍 逛街</option>
+            <option value="📍">📍 景點</option>
+          </select>
+          <input id="eventNote" type="text" placeholder="例如：AC838、TPE → CTS 夜航" />
+          <button id="btnAddEvent" class="btn secondary" type="button">加入事件</button>
+          <button id="btnCancelEventEdit" class="btn secondary" type="button" style="display:none;">取消編輯</button>
+        </div>
+        <div class="field-row">
+          <small>同一天可以有多個事件，日曆會全部顯示；匯出 Markdown 時會放進備註欄，用「；」分隔。</small>
+        </div>
+
+        <div id="eventList" class="list"></div>
       </div>
     </div>
   </div>
 
+  <!-- 下面整段 JS 跟上一版一樣：資料結構＋匯率計算＋JSON＋Markdown -->
   <script>
     /* 日期工具：解析、格式化、加天數、判斷是否在區間內 */
     function parseDate(value) {
@@ -610,7 +607,7 @@
       return t >= start.getTime() && t <= end.getTime();
     }
 
-    /* 金額計算：把輸入值＋單位換成原幣總額，再算 TWD K */
+    /* 金額計算 */
     function computeAmountBase(amountInput, unitType) {
       const n = Number(amountInput) || 0;
       if (unitType === 'K') return n * 1000;
@@ -628,7 +625,7 @@
       return s + 'K';
     }
 
-    /* 全域資料：view 起點＋三種實體（ranges、events、stays） */
+    /* 全域資料 */
     let viewStartDate = null;
     const ranges = [];
     const events = [];
@@ -636,12 +633,10 @@
     let idCounter = 1;
     function nextId() { return idCounter++; }
 
-    /* 編輯中的 id */
     let editingRangeId = null;
     let editingEventId = null;
     let editingHotelId = null;
 
-    /* DOM 取得 */
     const anchorInput       = document.getElementById('anchorDate');
     const btnToday          = document.getElementById('btnToday');
     const btnGenerate       = document.getElementById('btnGenerate');
@@ -680,7 +675,6 @@
     const btnCancelEventEdit= document.getElementById('btnCancelEventEdit');
     const eventList         = document.getElementById('eventList');
 
-    /* 初始化預設值 */
     (function initDefaults() {
       const today = new Date();
       const iso = formatDateISO(today);
@@ -705,7 +699,6 @@
       viewStartDate = monday;
     }
 
-    /* 錨點相關按鈕 */
     btnToday.addEventListener('click', () => {
       const today = new Date();
       const iso = formatDateISO(today);
@@ -726,7 +719,6 @@
       updateSummary();
     });
 
-    /* 區間表單：清空、渲染、CRUD */
     function clearRangeForm() {
       editingRangeId = null;
       rangeNameInput.value = '';
@@ -868,7 +860,6 @@
       renderRangesList();
     });
 
-    /* 事件表單：清空、渲染、CRUD */
     function clearEventForm() {
       editingEventId = null;
       eventDateInput.value = anchorInput.value || '';
@@ -991,7 +982,6 @@
       renderEventsList();
     });
 
-    /* 住宿表單：清空、渲染、CRUD */
     function clearHotelForm() {
       editingHotelId = null;
       hotelNameInput.value  = '';
@@ -1161,7 +1151,6 @@
       renderHotelList();
     });
 
-    /* 日曆渲染：區間色條＋飯店＋事件 */
     function renderCalendar() {
       calendarGrid.innerHTML = '';
       if (!viewStartDate) return;
@@ -1183,7 +1172,6 @@
         const dayNum  = day.getDate();
         const month   = day.getMonth() + 1;
 
-        /* 日期列 */
         const topRow = document.createElement('div');
         topRow.style.display = 'flex';
         topRow.style.alignItems = 'baseline';
@@ -1209,7 +1197,6 @@
           cell.appendChild(ring);
         }
 
-        /* 區間色條／標籤 */
         const hitRanges = ranges.filter(r => isWithin(day, r.start, r.end));
         if (hitRanges.length) {
           cell.classList.add('has-range');
@@ -1234,7 +1221,6 @@
           }
         }
 
-        /* 住宿顯示：每天顯示飯店名，入住第一天加金額 */
         const hitStays = stays
           .filter(s => isWithin(day, s.start, s.end))
           .sort((a, b) => a.start - b.start);
@@ -1256,7 +1242,6 @@
           }
         }
 
-        /* 單日事件 */
         const dayEvents = events.filter(e => formatDateISO(e.date) === dateISO);
         if (dayEvents.length) {
           const eventsBox = document.createElement('div');
@@ -1287,10 +1272,8 @@
       }
     }
 
-    /* 整趟旅程天數：抓所有區間＋住宿＋事件的最早＆最晚 */
     function getTripSpan() {
       const dates = [];
-
       for (const r of ranges) {
         if (r.start) dates.push(r.start);
         if (r.end)   dates.push(r.end);
@@ -1302,20 +1285,15 @@
       for (const e of events) {
         if (e.date) dates.push(e.date);
       }
-
       if (!dates.length) return null;
-
       dates.sort((a, b) => a - b);
       const first = dates[0];
       const last  = dates[dates.length - 1];
-
       const MS = 24 * 60 * 60 * 1000;
       const days = Math.round((last - first) / MS) + 1;
-
       return { first, last, days };
     }
 
-    /* Summary 區塊渲染 */
     function updateSummary() {
       if (!viewStartDate) {
         summaryBox.textContent = '尚未建立日曆。請先選一個日期。';
@@ -1327,8 +1305,7 @@
       const span = getTripSpan();
       let tripLine = '🧭 旅程天數：目前尚未設定任何區間或事件。';
       if (span) {
-        tripLine =
-          `🧭 旅程天數：<strong>${span.days}</strong> 天（${formatDateISO(span.first)} ～ ${formatDateISO(span.last)}）`;
+        tripLine = `🧭 旅程天數：<strong>${span.days}</strong> 天（${formatDateISO(span.first)} ～ ${formatDateISO(span.last)}）`;
       }
 
       summaryBox.innerHTML = `
@@ -1340,7 +1317,6 @@
       `;
     }
 
-    /* Markdown 匯出：日期｜地點｜飯店｜金額摘要｜備註 */
     function buildMarkdownTable() {
       if (!viewStartDate) return '';
 
@@ -1418,7 +1394,6 @@
       }
     });
 
-    /* JSON 匯出／匯入：含 version=2 與 stays，相容舊版 */
     function buildJsonSnapshot() {
       return {
         version: 2,
