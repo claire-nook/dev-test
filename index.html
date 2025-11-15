@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>旅遊行事曆工具（5 週視圖）</title>
+  <title>旅遊行事曆工具（5週視圖）</title>
 
   <style>
     :root {
@@ -390,9 +390,9 @@
   </header>
 
   <div class="wrap">
-    <h1>5 週旅遊行事曆視圖</h1>
+    <h1>5週旅遊行事曆視圖</h1>
     <p class="sub">
-      選一個日期，系統會自動往前補到該週星期一，固定顯示 5 週（35 天）。上方調整視圖與匯出 Markdown／JSON，中間大日曆拿來講行程，下面再細修區間與單日事件。
+      選一個日期，系統會自動往前補到該週星期一，固定顯示5週（35 天）。
     </p>
 
     <div class="toolbar">
@@ -400,12 +400,12 @@
         <label for="anchorDate">選擇任一日期：</label>
         <input id="anchorDate" type="date" />
         <button id="btnToday" class="btn secondary" type="button">跳到今天所在週</button>
-        <button id="btnGenerate" class="btn" type="button">更新 5 週視圖</button>
+        <button id="btnGenerate" class="btn" type="button">產生5週視圖</button>
       </div>
       <div class="toolbar-group" style="margin-left:auto;">
         <button id="btnImportJson" class="btn secondary" type="button">匯入 JSON</button>
         <button id="btnExportJson" class="btn secondary" type="button">匯出 JSON</button>
-        <button id="btnCopyMd" class="btn secondary" type="button">複製 Markdown 表格</button>
+        <button id="btnCopyMd" class="btn secondary" type="button">產生MD表格</button>
       </div>
     </div>
 
@@ -415,7 +415,7 @@
 
     <div class="calendar-shell">
       <div class="calendar-header">
-        <h3>5 週日曆視圖</h3>
+        <h3>5週日曆視圖</h3>
         <span id="calendarRangeLabel"></span>
       </div>
 
@@ -435,7 +435,7 @@
     <div class="bottom-layout">
       <div class="panel">
         <h3>① 區間（城市／飯店）</h3>
-        <p>設定「住在哪裡」或「待在哪個城市」。每天的地點欄會根據區間自動填入，日曆用頂端色條表示區間。</p>
+        <p>設定「住在哪裡」或「待在哪個城市」。</p>
 
         <div class="field-row">
           <input id="rangeName" type="text" placeholder="例如：札幌｜京王飯店" />
@@ -463,7 +463,7 @@
 
       <div class="panel">
         <h3>② 單日事件（移動／活動／備註）</h3>
-        <p>像 ✈️、🚄、🚌、🍣 這種發生在「某一天」的事情。跨日睡機上就自己加兩天，系統只負責乖乖貼上。</p>
+        <p>像 ✈️、🚄、🚌、🍣 這種發生在「某一天」的事情。</p>
 
         <div class="field-row">
           <label>日期：</label>
@@ -477,7 +477,7 @@
             <option value="🚌">🚌 巴士</option>
             <option value="🚗">🚗 包車</option>
             <option value="🚢">🚢 郵輪</option>
-            <option value="🍣">🍣 吃飯／餐廳</option>
+            <option value="🍣">🍣 餐廳</option>
             <option value="🛍">🛍 逛街</option>
             <option value="📍">📍 景點</option>
           </select>
