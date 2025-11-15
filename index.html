@@ -192,7 +192,7 @@
       background:#fff;
       border-radius:10px;
       border:1px solid #eee;
-      min-height:80px;
+      min-height:120px;
       padding:4px 6px 6px;
       position:relative;
       display:flex;
@@ -282,12 +282,13 @@
       overflow:hidden;
     }
 
-    .bottom-layout {
-      display:grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap:18px;
-      align-items:flex-start;
-    }
+/* 下方輸入區塊：全部直向一列一欄 */
+.bottom-layout {
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+  align-items:stretch;
+}
 
     .panel {
       background:var(--card-bg);
