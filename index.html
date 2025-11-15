@@ -16,11 +16,13 @@
       --border:#e3e3e6;
     }
 
+    * { box-sizing:border-box; }
+
     body {
       margin:0;
+      font-family: system-ui, -apple-system, "Segoe UI", Arial, "Noto Sans TC", sans-serif;
       background:#fafafa;
       color:var(--ink);
-      font-family: system-ui, -apple-system, "Segoe UI", Arial, "Noto Sans TC", sans-serif;
     }
 
     header {
@@ -34,15 +36,16 @@
       top:0;
       z-index:10;
     }
+
     header h2 {
       margin:0;
-      font-size:1.4rem;
-      letter-spacing:.5px;
+      font-size:1.3rem;
     }
+
     header a {
       text-decoration:none;
-      font-size:1rem;
-      padding:.5rem 1rem;
+      font-size:0.95rem;
+      padding:0.45rem 0.85rem;
       border-radius:6px;
       background:#eee;
       color:#333;
@@ -52,17 +55,18 @@
     .wrap {
       max-width:1080px;
       margin:0 auto;
-      padding:24px 24px 40px;
+      padding:20px 16px 40px;
     }
 
-    h1 {
-      margin:0 0 10px;
-      font-size: clamp(1.4rem, 1.2rem + 1vw, 1.8rem);
+    h3 {
+      margin:0 0 8px;
+      font-size:1.05rem;
     }
-    .sub {
-      margin:0 0 16px;
+
+    p {
+      margin:0 0 10px;
+      font-size:0.95rem;
       color:var(--muted);
-      font-size:.98rem;
     }
 
     .toolbar {
@@ -74,113 +78,123 @@
       padding:14px;
       border-radius:var(--radius);
       box-shadow:0 2px 10px rgba(0,0,0,.06);
-      margin-bottom:14px;
+      margin-bottom:16px;
     }
+
     .toolbar-group {
       display:flex;
       flex-wrap:wrap;
       gap:8px;
       align-items:center;
     }
-    .toolbar label {
-      font-size:.95rem;
+
+    label {
+      font-size:0.9rem;
       color:var(--muted);
     }
 
     input[type="date"],
     input[type="text"],
-    input[type="color"],
-    select {
+    input[type="number"],
+    select,
+    textarea {
+      font-size:0.95rem;
+      padding:6px 8px;
       border:1px solid var(--border);
       border-radius:8px;
-      padding:6px 10px;
-      font-size:.95rem;
       background:#fff;
     }
-    input[type="text"] { min-width:140px; }
+
+    input[type="color"] {
+      padding:0;
+      width:40px;
+      height:32px;
+      border-radius:6px;
+      border:1px solid var(--border);
+      background:#fff;
+    }
 
     .btn {
       border:none;
-      border-radius:10px;
-      padding:8px 14px;
-      font-size:.95rem;
-      cursor:pointer;
       background:#2f855a;
       color:#fff;
+      padding:8px 12px;
+      border-radius:10px;
+      cursor:pointer;
+      font-size:0.95rem;
+      display:inline-flex;
+      align-items:center;
+      gap:4px;
       white-space:nowrap;
     }
-    .btn.secondary {
-      background:#e0e0e0;
-      color:#333;
-    }
-    .btn[disabled] {
-      background:#bdbdbd;
-      cursor:not-allowed;
-    }
+
+    .btn.secondary { background:#4f8cff; }
+    .btn.ghost { background:#e0e7ff; color:#333; }
+    .btn[disabled] { background:#bdbdbd; cursor:not-allowed; }
 
     #summary {
       background:var(--soft);
       border-left:5px solid var(--accent);
-      padding:10px 14px;
+      padding:12px 14px;
       border-radius:10px;
-      font-size:.95rem;
+      font-size:0.95rem;
       line-height:1.6;
-      box-shadow: inset 0 0 0 1px #eee;
-      margin-bottom:18px;
+      box-shadow:inset 0 0 0 1px #eee;
+      margin-bottom:16px;
     }
 
-    .calendar-shell {
-      background:var(--card-bg);
-      padding:14px;
-      border-radius:var(--radius);
-      box-shadow:0 2px 10px rgba(0,0,0,.06);
-      margin-bottom:20px;
+    .main-layout {
+      display:grid;
+      grid-template-columns:minmax(0, 3fr) minmax(0, 2fr);
+      gap:18px;
+      align-items:flex-start;
     }
+
+    .calendar-card {
+      background:var(--card-bg);
+      border-radius:var(--radius);
+      padding:12px 12px 16px;
+      box-shadow:0 2px 10px rgba(0,0,0,.06);
+    }
+
     .calendar-header {
       display:flex;
       justify-content:space-between;
       align-items:center;
       margin-bottom:8px;
-      gap:8px;
     }
-    .calendar-header h3 {
-      margin:0;
-      font-size:1.05rem;
-    }
-    .calendar-header span {
-      font-size:.85rem;
+
+    .calendar-range-label {
+      font-size:0.9rem;
       color:var(--muted);
     }
 
-    .weekday-row {
+    .calendar-weekdays {
       display:grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap:4px;
+      grid-template-columns:repeat(7, 1fr);
+      font-size:0.9rem;
+      color:var(--muted);
       margin-bottom:4px;
       padding:0 2px;
-      font-size:.85rem;
-      color:var(--muted);
     }
-    .weekday-cell {
-      text-align:center;
-    }
+
+    .weekday-cell { text-align:center; }
 
     .calendar-grid {
       display:grid;
-      grid-template-columns: repeat(7, 1fr);
+      grid-template-columns:repeat(7, 1fr);
       gap:4px;
     }
 
     .day-cell {
-      min-height:110px;
       background:#fff;
-      border-radius:8px;
-      border:1px solid var(--border);
-      padding:8px 6px 6px;
-      box-sizing:border-box;
+      border-radius:10px;
+      border:1px solid #eee;
+      min-height:80px;
+      padding:4px 6px 6px;
+      position:relative;
       display:flex;
       flex-direction:column;
-      position:relative;
       overflow:hidden;
     }
 
@@ -188,54 +202,11 @@
       font-size:.95rem;
       font-weight:600;
     }
+
     .day-month-tag {
       font-size:.8rem;
       color:var(--muted);
       margin-left:4px;
-    }
-
-    .day-cell.has-range {
-      background:linear-gradient(to bottom, rgba(0,0,0,0.02), rgba(0,0,0,0.015));
-    }
-    .range-top-bar {
-      position:absolute;
-      left:0;
-      right:0;
-      top:0;
-      height:4px;
-      background:var(--accent);
-    }
-    .range-label {
-      margin-top:4px;
-      font-size:.8rem;
-      font-weight:600;
-      white-space:nowrap;
-      text-overflow:ellipsis;
-      overflow:hidden;
-    }
-
-    .events {
-      margin-top:auto;
-      font-size:.85rem;
-      display:flex;
-      flex-direction:column;
-      gap:2px;
-    }
-    .event-item {
-      display:flex;
-      align-items:center;
-      gap:4px;
-      padding:1px 3px;
-      border-radius:4px;
-      background:rgba(0,0,0,0.03);
-    }
-    .event-icon {
-      font-size:.95rem;
-    }
-    .event-text {
-      white-space:nowrap;
-      text-overflow:ellipsis;
-      overflow:hidden;
     }
 
     .today-ring {
@@ -248,253 +219,364 @@
       border:2px solid #ff7043;
     }
 
+    .has-range {
+      background:linear-gradient(to bottom, rgba(79,140,255,0.08), #fff);
+      border-color:#d0dcff;
+    }
+
+    .range-bar {
+      position:absolute;
+      left:0;
+      right:0;
+      top:0;
+      height:4px;
+    }
+
+    .range-label {
+      margin-top:2px;
+      font-size:.78rem;
+      font-weight:600;
+      white-space:nowrap;
+      text-overflow:ellipsis;
+      overflow:hidden;
+    }
+
+    .hotel-line {
+      margin-top:2px;
+      font-size:.8rem;
+      color:#444;
+      white-space:nowrap;
+      text-overflow:ellipsis;
+      overflow:hidden;
+    }
+
+    .hotel-amount {
+      margin-top:2px;
+      font-size:.78rem;
+      color:var(--muted);
+      white-space:nowrap;
+      text-overflow:ellipsis;
+      overflow:hidden;
+    }
+
+    .events {
+      margin-top:4px;
+      padding-top:2px;
+      border-top:1px dashed #e0e0e0;
+    }
+
+    .event-item {
+      display:flex;
+      gap:4px;
+      align-items:flex-start;
+      font-size:.8rem;
+      margin-bottom:1px;
+    }
+
+    .event-icon { font-size:.95rem; }
+    .event-text {
+      white-space:nowrap;
+      text-overflow:ellipsis;
+      overflow:hidden;
+    }
+
     .bottom-layout {
       display:grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
       gap:18px;
       align-items:flex-start;
     }
 
     .panel {
       background:var(--card-bg);
-      padding:14px;
       border-radius:var(--radius);
+      padding:12px 12px 16px;
       box-shadow:0 2px 10px rgba(0,0,0,.06);
-    }
-    .panel h3 {
-      margin:0 0 8px;
-      font-size:1.05rem;
-    }
-    .panel p {
-      margin:0 0 10px;
-      font-size:.9rem;
-      color:var(--muted);
     }
 
     .field-row {
       display:flex;
       flex-wrap:wrap;
       gap:8px;
-      margin-bottom:8px;
       align-items:center;
+      margin-bottom:8px;
     }
+
     .field-row small {
-      font-size:.8rem;
+      font-size:0.8rem;
       color:var(--muted);
     }
 
     .badge {
       display:inline-flex;
       align-items:center;
-      gap:6px;
-      padding:3px 8px;
+      gap:4px;
+      padding:2px 6px;
       border-radius:999px;
-      background:var(--soft);
-      font-size:.8rem;
-      color:var(--muted);
+      background:#f4f4ff;
+      font-size:0.8rem;
+      color:#555;
     }
+
     .badge-dot {
-      width:10px;
-      height:10px;
+      width:8px;
+      height:8px;
       border-radius:50%;
-      background:var(--accent);
+      border:2px solid #4f8cff;
     }
 
     .list {
-      margin-top:8px;
+      border-top:1px dashed #e0e0e0;
+      padding-top:8px;
+      margin-top:6px;
       max-height:260px;
       overflow:auto;
-      border-top:1px solid #eee;
-      padding-top:6px;
     }
+
     .chip {
+      border-radius:999px;
+      border:1px solid #e0e0e0;
+      padding:6px 10px;
+      margin-bottom:6px;
       display:flex;
-      justify-content:space-between;
       align-items:center;
+      justify-content:space-between;
       gap:8px;
-      padding:6px 8px;
-      border-radius:8px;
       background:#fafafa;
-      border:1px solid #eee;
-      font-size:.86rem;
-      margin-bottom:4px;
+      font-size:.85rem;
     }
+
     .chip-main {
       display:flex;
       flex-direction:column;
-      gap:2px;
+      min-width:0;
     }
+
     .chip-title {
       font-weight:600;
+      white-space:nowrap;
+      text-overflow:ellipsis;
+      overflow:hidden;
     }
+
     .chip-meta {
+      font-size:.78rem;
       color:var(--muted);
-      font-size:.8rem;
+      white-space:nowrap;
+      text-overflow:ellipsis;
+      overflow:hidden;
     }
-    .chip-color {
-      width:14px;
-      height:14px;
-      border-radius:4px;
-      border:1px solid rgba(0,0,0,.08);
-    }
-    .chip .chip-actions {
+
+    .chip-actions {
       display:flex;
       gap:4px;
+      flex-shrink:0;
     }
+
     .chip button {
       border:none;
-      background:transparent;
+      border-radius:999px;
+      padding:3px 7px;
+      font-size:.75rem;
       cursor:pointer;
-      font-size:.85rem;
-      padding:2px 4px;
-      border-radius:4px;
     }
+
     .chip button.edit {
+      background:#e3f2fd;
       color:#1565c0;
     }
+
     .chip button.delete {
+      background:#ffebee;
       color:#c62828;
     }
+
     .chip.editing {
-      border-color:#1565c0;
-      background:#e8f1ff;
+      border-color:#4f8cff;
+      box-shadow:0 0 0 1px rgba(79,140,255,0.45);
+      background:#f0f4ff;
     }
 
     @media (max-width: 900px) {
-      .bottom-layout {
-        grid-template-columns: 1fr;
+      .main-layout {
+        grid-template-columns: minmax(0, 1fr);
       }
     }
 
     @media (max-width: 767px) {
-      .wrap {
-        padding:18px 14px 28px;
-      }
-      header {
-        padding:.8rem 1rem;
-      }
-      input, select, button {
+      .wrap { padding:16px 10px 28px; }
+      header { padding:0.75rem 1rem; }
+      .toolbar { padding:12px; }
+      input, select, textarea, button {
         font-size:16px !important;
-        height:40px;
+        height:44px;
       }
-      .day-cell {
-        min-height:95px;
-      }
+      .calendar-card { padding:10px; }
+      .panel { padding:10px; }
     }
   </style>
 </head>
 <body>
   <header>
-    <h2>🧳 旅遊行事曆工具</h2>
+    <h2>🗺️ 旅遊行事曆（5 週規劃視圖）</h2>
     <a href="index.html">🧭 回首頁</a>
   </header>
 
   <div class="wrap">
-    <h1>5週旅遊行事曆視圖</h1>
-    <p class="sub">
-      選一個日期，系統會自動往前補到該週星期一，固定顯示5週（35 天）。
-    </p>
-
     <div class="toolbar">
       <div class="toolbar-group">
-        <label for="anchorDate">選擇任一日期：</label>
+        <label>錨點日期：</label>
         <input id="anchorDate" type="date" />
-        <button id="btnToday" class="btn secondary" type="button">跳到今天所在週</button>
-        <button id="btnGenerate" class="btn" type="button">產生5週視圖</button>
+        <button id="btnToday" class="btn ghost" type="button">回到今天</button>
+        <button id="btnGenerate" class="btn" type="button">更新 5 週視圖</button>
       </div>
-      <div class="toolbar-group" style="margin-left:auto;">
-        <button id="btnImportJson" class="btn secondary" type="button">匯入 JSON</button>
-        <button id="btnExportJson" class="btn secondary" type="button">匯出 JSON</button>
-        <button id="btnCopyMd" class="btn secondary" type="button">產生MD表格</button>
+
+      <div class="toolbar-group">
+        <button id="btnCopyMd" class="btn secondary" type="button">複製 Markdown 表格</button>
+      </div>
+
+      <div class="toolbar-group">
+        <button id="btnImportJson" class="btn ghost" type="button">匯入 JSON</button>
+        <button id="btnExportJson" class="btn ghost" type="button">匯出 JSON</button>
+        <input id="importJsonInput" type="file" accept="application/json" style="display:none;" />
       </div>
     </div>
 
-    <input id="importJsonInput" type="file" accept="application/json" style="display:none" />
+    <div id="summary">尚未建立日曆。請先選一個日期，並按「更新 5 週視圖」。</div>
 
-    <div id="summary">尚未建立日曆。請先選一個日期，再按「更新 5 週視圖」。</div>
+    <div class="main-layout">
+      <div class="calendar-card">
+        <div class="calendar-header">
+          <h3>🗓 5 週行事曆</h3>
+          <div id="calendarRangeLabel" class="calendar-range-label"></div>
+        </div>
+        <div class="calendar-weekdays">
+          <div class="weekday-cell">一</div>
+          <div class="weekday-cell">二</div>
+          <div class="weekday-cell">三</div>
+          <div class="weekday-cell">四</div>
+          <div class="weekday-cell">五</div>
+          <div class="weekday-cell">六</div>
+          <div class="weekday-cell">日</div>
+        </div>
 
-    <div class="calendar-shell">
-      <div class="calendar-header">
-        <h3>5週日曆視圖</h3>
-        <span id="calendarRangeLabel"></span>
+        <div id="calendarGrid" class="calendar-grid"></div>
       </div>
 
-      <div class="weekday-row">
-        <div class="weekday-cell">一</div>
-        <div class="weekday-cell">二</div>
-        <div class="weekday-cell">三</div>
-        <div class="weekday-cell">四</div>
-        <div class="weekday-cell">五</div>
-        <div class="weekday-cell">六</div>
-        <div class="weekday-cell">日</div>
-      </div>
+      <div class="bottom-layout">
+        <div class="panel">
+          <h3>① 區間（城市／飯店）</h3>
+          <p>設定「住在哪裡」或「待在哪個城市」。</p>
 
-      <div id="calendarGrid" class="calendar-grid"></div>
-    </div>
+          <div class="field-row">
+            <input id="rangeName" type="text" placeholder="例如：札幌｜京王飯店" />
+            <input id="rangeColor" type="color" value="#4f8cff" />
+          </div>
+          <div class="field-row">
+            <label>起：</label>
+            <input id="rangeStart" type="date" />
+            <label>迄：</label>
+            <input id="rangeEnd" type="date" />
+            <button id="btnAddRange" class="btn secondary" type="button">加入區間</button>
+            <button id="btnCancelRangeEdit" class="btn secondary" type="button" style="display:none;">取消編輯</button>
+          </div>
+          <div class="field-row">
+            <span class="badge">
+              <span class="badge-dot"></span>
+              <span>區間只改顏色與地點欄位，不會碰到事件資料。</span>
+            </span>
+          </div>
 
-    <div class="bottom-layout">
-      <div class="panel">
-        <h3>① 區間（城市／飯店）</h3>
-        <p>設定「住在哪裡」或「待在哪個城市」。</p>
-
-        <div class="field-row">
-          <input id="rangeName" type="text" placeholder="例如：札幌｜京王飯店" />
-          <input id="rangeColor" type="color" value="#4f8cff" />
-        </div>
-        <div class="field-row">
-          <label>起：</label>
-          <input id="rangeStart" type="date" />
-          <label>迄：</label>
-          <input id="rangeEnd" type="date" />
-          <button id="btnAddRange" class="btn secondary" type="button">加入區間</button>
-          <button id="btnCancelRangeEdit" class="btn secondary" type="button" style="display:none;">取消編輯</button>
-        </div>
-        <div class="field-row">
-          <small>起訖會被視為「含當天」，顏色會套用整段日期。若某天落在多個區間，日曆與表格都以開始日期較早的那一段為主。</small>
+          <div id="rangeList" class="list"></div>
         </div>
 
-        <div class="badge">
-          <span class="badge-dot"></span>
-          <span>區間只改顏色與地點欄位，不會碰到事件資料。</span>
+        <div class="panel">
+          <h3>② 飯店住宿（含匯率）</h3>
+          <p>設定每一段住宿的飯店名稱、金額與概算匯率，會顯示在日曆格子裡。</p>
+
+          <div class="field-row">
+            <input id="hotelName" type="text" placeholder="例如：溫哥華萬豪" />
+          </div>
+          <div class="field-row">
+            <label>起：</label>
+            <input id="hotelStart" type="date" />
+            <label>迄：</label>
+            <input id="hotelEnd" type="date" />
+          </div>
+          <div class="field-row">
+            <label>幣別：</label>
+            <select id="hotelCurrency">
+              <option value="TWD">TWD</option>
+              <option value="JPY">JPY</option>
+              <option value="USD">USD</option>
+              <option value="EUR">EUR</option>
+              <option value="AUD">AUD</option>
+              <option value="CAD">CAD</option>
+              <option value="IDR">IDR</option>
+              <option value="VND">VND</option>
+              <option value="KRW">KRW</option>
+            </select>
+          </div>
+          <div class="field-row">
+            <label>金額：</label>
+            <input id="hotelAmount" type="number" step="0.01" min="0" placeholder="例如：1.8" />
+            <select id="hotelUnit">
+              <option value="元">元</option>
+              <option value="K">K（千）</option>
+              <option value="M">M（百萬）</option>
+            </select>
+          </div>
+          <div class="field-row">
+            <label>匯率：</label>
+            <input id="hotelFxRate" type="number" step="0.0001" min="0" placeholder="1 原幣 ≈ 幾台幣" />
+          </div>
+          <div class="field-row">
+            <small>例如：AUD 1 ≈ 20 TWD、JPY 100 ≈ 20 TWD（則填 0.2）、IDR 1,000 ≈ 2 TWD（則填 0.002）。</small>
+          </div>
+          <div class="field-row">
+            <button id="btnAddHotel" class="btn secondary" type="button">加入住宿</button>
+            <button id="btnCancelHotelEdit" class="btn secondary" type="button" style="display:none;">取消編輯</button>
+          </div>
+
+          <div id="hotelList" class="list"></div>
         </div>
 
-        <div id="rangeList" class="list"></div>
-      </div>
+        <div class="panel">
+          <h3>③ 單日事件（移動／活動／備註）</h3>
+          <p>像 ✈️、🚄、🚌、🍣 這種發生在「某一天」的事情。</p>
 
-      <div class="panel">
-        <h3>② 單日事件（移動／活動／備註）</h3>
-        <p>像 ✈️、🚄、🚌、🍣 這種發生在「某一天」的事情。</p>
+          <div class="field-row">
+            <label>日期：</label>
+            <input id="eventDate" type="date" />
+          </div>
+          <div class="field-row">
+            <label>圖示：</label>
+            <select id="eventIcon">
+              <option value="✈️">✈️ 飛機</option>
+              <option value="🚆">🚆 火車</option>
+              <option value="🚌">🚌 巴士</option>
+              <option value="🚗">🚗 包車</option>
+              <option value="🚢">🚢 郵輪</option>
+              <option value="🍣">🍣 餐廳</option>
+              <option value="🛍">🛍 逛街</option>
+              <option value="📍">📍 景點</option>
+            </select>
+            <input id="eventNote" type="text" placeholder="例如：AC838、TPE → CTS 夜航" />
+            <button id="btnAddEvent" class="btn secondary" type="button">加入事件</button>
+            <button id="btnCancelEventEdit" class="btn secondary" type="button" style="display:none;">取消編輯</button>
+          </div>
+          <div class="field-row">
+            <small>同一天可以有多個事件，日曆會全部顯示；匯出 Markdown 時會放進備註欄，用「；」分隔。</small>
+          </div>
 
-        <div class="field-row">
-          <label>日期：</label>
-          <input id="eventDate" type="date" />
+          <div id="eventList" class="list"></div>
         </div>
-        <div class="field-row">
-          <label>圖示：</label>
-          <select id="eventIcon">
-            <option value="✈️">✈️ 飛機</option>
-            <option value="🚆">🚆 火車</option>
-            <option value="🚌">🚌 巴士</option>
-            <option value="🚗">🚗 包車</option>
-            <option value="🚢">🚢 郵輪</option>
-            <option value="🍣">🍣 餐廳</option>
-            <option value="🛍">🛍 逛街</option>
-            <option value="📍">📍 景點</option>
-          </select>
-          <input id="eventNote" type="text" placeholder="例如：AC838、TPE → CTS 夜航" />
-          <button id="btnAddEvent" class="btn secondary" type="button">加入事件</button>
-          <button id="btnCancelEventEdit" class="btn secondary" type="button" style="display:none;">取消編輯</button>
-        </div>
-        <div class="field-row">
-          <small>同一天可以有多個事件，日曆會全部顯示；匯出 Markdown 時會放進備註欄，用「；」分隔。</small>
-        </div>
-
-        <div id="eventList" class="list"></div>
       </div>
     </div>
   </div>
 
   <script>
+    /* 日期工具：解析、格式化、加天數、判斷是否在區間內 */
     function parseDate(value) {
       if (!value) return null;
       return new Date(value + 'T00:00:00');
@@ -514,9 +596,12 @@
       return d;
     }
 
-    function getMondayIndex(date) {
-      const jsDay = date.getDay();
-      return (jsDay + 6) % 7;
+    function getMondayOfWeek(date) {
+      const d = new Date(date);
+      const day = d.getDay();
+      const diff = (day === 0 ? -6 : 1) - day;
+      d.setDate(d.getDate() + diff);
+      return d;
     }
 
     function isWithin(date, start, end) {
@@ -525,42 +610,77 @@
       return t >= start.getTime() && t <= end.getTime();
     }
 
+    /* 金額計算：把輸入值＋單位換成原幣總額，再算 TWD K */
+    function computeAmountBase(amountInput, unitType) {
+      const n = Number(amountInput) || 0;
+      if (unitType === 'K') return n * 1000;
+      if (unitType === 'M') return n * 1000000;
+      return n;
+    }
+
+    function formatTwdK(twdAmount) {
+      const k = twdAmount / 1000;
+      if (!isFinite(k) || k === 0) return '0K';
+      const absK = Math.abs(k);
+      const decimals = absK >= 10 ? 0 : 1;
+      let s = k.toFixed(decimals);
+      if (s.indexOf('.') !== -1) s = s.replace(/\.0$/, '');
+      return s + 'K';
+    }
+
+    /* 全域資料：view 起點＋三種實體（ranges、events、stays） */
     let viewStartDate = null;
     const ranges = [];
     const events = [];
+    const stays  = [];
     let idCounter = 1;
     function nextId() { return idCounter++; }
 
+    /* 編輯中的 id */
     let editingRangeId = null;
     let editingEventId = null;
+    let editingHotelId = null;
 
-    const anchorInput = document.getElementById('anchorDate');
-    const btnToday = document.getElementById('btnToday');
-    const btnGenerate = document.getElementById('btnGenerate');
-    const btnCopyMd = document.getElementById('btnCopyMd');
-    const btnImportJson = document.getElementById('btnImportJson');
-    const btnExportJson = document.getElementById('btnExportJson');
-    const importJsonInput = document.getElementById('importJsonInput');
+    /* DOM 取得 */
+    const anchorInput       = document.getElementById('anchorDate');
+    const btnToday          = document.getElementById('btnToday');
+    const btnGenerate       = document.getElementById('btnGenerate');
+    const btnCopyMd         = document.getElementById('btnCopyMd');
+    const btnImportJson     = document.getElementById('btnImportJson');
+    const btnExportJson     = document.getElementById('btnExportJson');
+    const importJsonInput   = document.getElementById('importJsonInput');
 
-    const summaryBox = document.getElementById('summary');
-    const calendarGrid = document.getElementById('calendarGrid');
-    const calendarRangeLabel = document.getElementById('calendarRangeLabel');
+    const summaryBox        = document.getElementById('summary');
+    const calendarGrid      = document.getElementById('calendarGrid');
+    const calendarRangeLabel= document.getElementById('calendarRangeLabel');
 
-    const rangeNameInput = document.getElementById('rangeName');
-    const rangeColorInput = document.getElementById('rangeColor');
-    const rangeStartInput = document.getElementById('rangeStart');
-    const rangeEndInput = document.getElementById('rangeEnd');
-    const btnAddRange = document.getElementById('btnAddRange');
-    const btnCancelRangeEdit = document.getElementById('btnCancelRangeEdit');
-    const rangeList = document.getElementById('rangeList');
+    const rangeNameInput    = document.getElementById('rangeName');
+    const rangeColorInput   = document.getElementById('rangeColor');
+    const rangeStartInput   = document.getElementById('rangeStart');
+    const rangeEndInput     = document.getElementById('rangeEnd');
+    const btnAddRange       = document.getElementById('btnAddRange');
+    const btnCancelRangeEdit= document.getElementById('btnCancelRangeEdit');
+    const rangeList         = document.getElementById('rangeList');
 
-    const eventDateInput = document.getElementById('eventDate');
-    const eventIconSelect = document.getElementById('eventIcon');
-    const eventNoteInput = document.getElementById('eventNote');
-    const btnAddEvent = document.getElementById('btnAddEvent');
-    const btnCancelEventEdit = document.getElementById('btnCancelEventEdit');
-    const eventList = document.getElementById('eventList');
+    const hotelNameInput    = document.getElementById('hotelName');
+    const hotelStartInput   = document.getElementById('hotelStart');
+    const hotelEndInput     = document.getElementById('hotelEnd');
+    const hotelCurrencySelect = document.getElementById('hotelCurrency');
+    const hotelAmountInput  = document.getElementById('hotelAmount');
+    const hotelUnitSelect   = document.getElementById('hotelUnit');
+    const hotelFxRateInput  = document.getElementById('hotelFxRate');
+    const btnAddHotel       = document.getElementById('btnAddHotel');
+    const btnCancelHotelEdit= document.getElementById('btnCancelHotelEdit');
+    const hotelList         = document.getElementById('hotelList');
 
+    const eventDateInput    = document.getElementById('eventDate');
+    const eventIconSelect   = document.getElementById('eventIcon');
+    const eventNoteInput    = document.getElementById('eventNote');
+    const btnAddEvent       = document.getElementById('btnAddEvent');
+    const btnCancelEventEdit= document.getElementById('btnCancelEventEdit');
+    const eventList         = document.getElementById('eventList');
+
+    /* 初始化預設值 */
     (function initDefaults() {
       const today = new Date();
       const iso = formatDateISO(today);
@@ -573,19 +693,23 @@
       setViewStartFromAnchor(today);
       renderRangesList();
       renderEventsList();
+      clearHotelForm();
+      renderHotelList();
       renderCalendar();
       updateSummary();
     })();
 
     function setViewStartFromAnchor(date) {
       if (!date) return;
-      const mondayOffset = getMondayIndex(date);
-      viewStartDate = addDays(date, -mondayOffset);
+      const monday = getMondayOfWeek(date);
+      viewStartDate = monday;
     }
 
+    /* 錨點相關按鈕 */
     btnToday.addEventListener('click', () => {
       const today = new Date();
-      anchorInput.value = formatDateISO(today);
+      const iso = formatDateISO(today);
+      anchorInput.value = iso;
       setViewStartFromAnchor(today);
       renderCalendar();
       updateSummary();
@@ -602,87 +726,15 @@
       updateSummary();
     });
 
-    btnAddRange.addEventListener('click', () => {
-      const name = rangeNameInput.value.trim();
-      const color = rangeColorInput.value || '#4f8cff';
-      const start = parseDate(rangeStartInput.value);
-      const end = parseDate(rangeEndInput.value);
-
-      if (!name) {
-        alert('請輸入區間名稱（城市或飯店）。');
-        return;
-      }
-      if (!start || !end) {
-        alert('請設定起訖日期。');
-        return;
-      }
-      if (end < start) {
-        alert('結束日期不能早於開始日期。');
-        return;
-      }
-
-      if (editingRangeId != null) {
-        const target = ranges.find(r => r.id === editingRangeId);
-        if (target) {
-          target.name = name;
-          target.color = color;
-          target.start = start;
-          target.end = end;
-        }
-      } else {
-        ranges.push({
-          id: nextId(),
-          name,
-          color,
-          start,
-          end
-        });
-      }
-
-      clearRangeForm();
-      renderRangesList();
-      renderCalendar();
-      updateSummary();
-    });
-
-    btnCancelRangeEdit.addEventListener('click', () => {
-      clearRangeForm();
-      renderRangesList();
-    });
-
+    /* 區間表單：清空、渲染、CRUD */
     function clearRangeForm() {
-      rangeNameInput.value = '';
       editingRangeId = null;
+      rangeNameInput.value = '';
+      rangeColorInput.value = '#4f8cff';
+      rangeStartInput.value = anchorInput.value || '';
+      rangeEndInput.value = anchorInput.value || '';
       btnAddRange.textContent = '加入區間';
       btnCancelRangeEdit.style.display = 'none';
-    }
-
-    function startEditRange(id) {
-      const r = ranges.find(x => x.id === id);
-      if (!r) return;
-
-      editingRangeId = id;
-      rangeNameInput.value = r.name;
-      rangeColorInput.value = r.color || '#4f8cff';
-      rangeStartInput.value = formatDateISO(r.start);
-      rangeEndInput.value = formatDateISO(r.end);
-
-      btnAddRange.textContent = '儲存區間';
-      btnCancelRangeEdit.style.display = 'inline-block';
-      renderRangesList();
-    }
-
-    function removeRange(id) {
-      const idx = ranges.findIndex(r => r.id === id);
-      if (idx >= 0) {
-        ranges.splice(idx, 1);
-        if (editingRangeId === id) {
-          clearRangeForm();
-        }
-        renderRangesList();
-        renderCalendar();
-        updateSummary();
-      }
     }
 
     function renderRangesList() {
@@ -712,8 +764,11 @@
         main.appendChild(meta);
 
         const colorBox = document.createElement('div');
-        colorBox.className = 'chip-color';
-        colorBox.style.background = r.color;
+        colorBox.style.width = '10px';
+        colorBox.style.height = '10px';
+        colorBox.style.borderRadius = '999px';
+        colorBox.style.background = r.color || '#4f8cff';
+        colorBox.style.flexShrink = '0';
 
         const actions = document.createElement('div');
         actions.className = 'chip-actions';
@@ -741,73 +796,86 @@
       }
     }
 
-    btnAddEvent.addEventListener('click', () => {
-      const date = parseDate(eventDateInput.value);
-      const icon = eventIconSelect.value || '📍';
-      const note = eventNoteInput.value.trim();
+    function startEditRange(id) {
+      const r = ranges.find(x => x.id === id);
+      if (!r) return;
 
-      if (!date) {
-        alert('請先選擇事件日期。');
+      editingRangeId = id;
+      rangeNameInput.value = r.name;
+      rangeColorInput.value = r.color || '#4f8cff';
+      rangeStartInput.value = formatDateISO(r.start);
+      rangeEndInput.value = formatDateISO(r.end);
+
+      btnAddRange.textContent = '儲存區間';
+      btnCancelRangeEdit.style.display = 'inline-block';
+    }
+
+    function removeRange(id) {
+      const idx = ranges.findIndex(x => x.id === id);
+      if (idx === -1) return;
+      ranges.splice(idx, 1);
+      if (editingRangeId === id) clearRangeForm();
+      renderRangesList();
+      renderCalendar();
+      updateSummary();
+    }
+
+    btnAddRange.addEventListener('click', () => {
+      const name  = rangeNameInput.value.trim();
+      const color = rangeColorInput.value || '#4f8cff';
+      const start = parseDate(rangeStartInput.value);
+      const end   = parseDate(rangeEndInput.value);
+
+      if (!name) {
+        alert('請輸入區間名稱（城市或飯店）。');
+        return;
+      }
+      if (!start || !end) {
+        alert('請設定起訖日期。');
+        return;
+      }
+      if (end < start) {
+        alert('結束日期不能早於開始日期。');
         return;
       }
 
-      if (editingEventId != null) {
-        const target = events.find(e => e.id === editingEventId);
+      if (editingRangeId != null) {
+        const target = ranges.find(r => r.id === editingRangeId);
         if (target) {
-          target.date = date;
-          target.icon = icon;
-          target.note = note;
+          target.name  = name;
+          target.color = color;
+          target.start = start;
+          target.end   = end;
         }
       } else {
-        events.push({
+        ranges.push({
           id: nextId(),
-          date,
-          icon,
-          note
+          name,
+          color,
+          start,
+          end
         });
       }
 
-      clearEventForm();
-      renderEventsList();
+      clearRangeForm();
+      renderRangesList();
       renderCalendar();
       updateSummary();
     });
 
-    btnCancelEventEdit.addEventListener('click', () => {
-      clearEventForm();
-      renderEventsList();
+    btnCancelRangeEdit.addEventListener('click', () => {
+      clearRangeForm();
+      renderRangesList();
     });
 
+    /* 事件表單：清空、渲染、CRUD */
     function clearEventForm() {
-      eventNoteInput.value = '';
       editingEventId = null;
+      eventDateInput.value = anchorInput.value || '';
+      eventIconSelect.value = '📍';
+      eventNoteInput.value = '';
       btnAddEvent.textContent = '加入事件';
       btnCancelEventEdit.style.display = 'none';
-    }
-
-    function startEditEvent(id) {
-      const e = events.find(x => x.id === id);
-      if (!e) return;
-
-      editingEventId = id;
-      eventDateInput.value = formatDateISO(e.date);
-      eventIconSelect.value = e.icon || '📍';
-      eventNoteInput.value = e.note || '';
-
-      btnAddEvent.textContent = '儲存事件';
-      btnCancelEventEdit.style.display = 'inline-block';
-      renderEventsList();
-    }
-
-    function removeEvent(id) {
-      const idx = events.findIndex(e => e.id === id);
-      if (idx >= 0) {
-        events.splice(idx, 1);
-        if (editingEventId === id) clearEventForm();
-        renderEventsList();
-        renderCalendar();
-        updateSummary();
-      }
     }
 
     function renderEventsList() {
@@ -863,6 +931,237 @@
       }
     }
 
+    function startEditEvent(id) {
+      const e = events.find(x => x.id === id);
+      if (!e) return;
+
+      editingEventId = id;
+      eventDateInput.value  = formatDateISO(e.date);
+      eventIconSelect.value = e.icon || '📍';
+      eventNoteInput.value  = e.note || '';
+
+      btnAddEvent.textContent = '儲存事件';
+      btnCancelEventEdit.style.display = 'inline-block';
+    }
+
+    function removeEvent(id) {
+      const idx = events.findIndex(x => x.id === id);
+      if (idx === -1) return;
+      events.splice(idx, 1);
+      if (editingEventId === id) clearEventForm();
+      renderEventsList();
+      renderCalendar();
+      updateSummary();
+    }
+
+    btnAddEvent.addEventListener('click', () => {
+      const date = parseDate(eventDateInput.value);
+      const icon = eventIconSelect.value || '📍';
+      const note = eventNoteInput.value.trim();
+
+      if (!date) {
+        alert('請先選擇事件日期。');
+        return;
+      }
+
+      if (editingEventId != null) {
+        const target = events.find(e => e.id === editingEventId);
+        if (target) {
+          target.date = date;
+          target.icon = icon;
+          target.note = note;
+        }
+      } else {
+        events.push({
+          id: nextId(),
+          date,
+          icon,
+          note
+        });
+      }
+
+      clearEventForm();
+      renderEventsList();
+      renderCalendar();
+      updateSummary();
+    });
+
+    btnCancelEventEdit.addEventListener('click', () => {
+      clearEventForm();
+      renderEventsList();
+    });
+
+    /* 住宿表單：清空、渲染、CRUD */
+    function clearHotelForm() {
+      editingHotelId = null;
+      hotelNameInput.value  = '';
+      hotelStartInput.value = anchorInput.value || '';
+      hotelEndInput.value   = anchorInput.value || '';
+      hotelCurrencySelect.value = 'TWD';
+      hotelAmountInput.value = '';
+      hotelUnitSelect.value  = '元';
+      hotelFxRateInput.value = '';
+      btnAddHotel.textContent = '加入住宿';
+      btnCancelHotelEdit.style.display = 'none';
+    }
+
+    function renderHotelList() {
+      hotelList.innerHTML = '';
+      if (!stays.length) {
+        hotelList.innerHTML = '<div style="font-size:.85rem; color:var(--muted);">尚未加入任何住宿。</div>';
+        return;
+      }
+
+      const sorted = [...stays].sort((a, b) => a.start - b.start);
+
+      for (const s of sorted) {
+        const chip = document.createElement('div');
+        chip.className = 'chip';
+        if (editingHotelId === s.id) chip.classList.add('editing');
+
+        const main = document.createElement('div');
+        main.className = 'chip-main';
+
+        const title = document.createElement('div');
+        title.className = 'chip-title';
+        title.textContent = s.name || '(未命名住宿)';
+
+        const meta = document.createElement('div');
+        meta.className = 'chip-meta';
+        const datePart   = `${formatDateISO(s.start)} ～ ${formatDateISO(s.end)}`;
+        const amountPart = `${s.currency}${s.amountInput}${s.unitType}｜NTD ${formatTwdK(s.twdAmount)}`;
+        meta.textContent = `${datePart}｜${amountPart}`;
+
+        main.appendChild(title);
+        main.appendChild(meta);
+
+        const actions = document.createElement('div');
+        actions.className = 'chip-actions';
+
+        const btnEdit = document.createElement('button');
+        btnEdit.type = 'button';
+        btnEdit.className = 'edit';
+        btnEdit.textContent = '編輯';
+        btnEdit.addEventListener('click', () => startEditHotel(s.id));
+
+        const btnDel = document.createElement('button');
+        btnDel.type = 'button';
+        btnDel.className = 'delete';
+        btnDel.textContent = '刪除';
+        btnDel.addEventListener('click', () => removeHotel(s.id));
+
+        actions.appendChild(btnEdit);
+        actions.appendChild(btnDel);
+
+        chip.appendChild(main);
+        chip.appendChild(actions);
+
+        hotelList.appendChild(chip);
+      }
+    }
+
+    function startEditHotel(id) {
+      const s = stays.find(x => x.id === id);
+      if (!s) return;
+      editingHotelId = id;
+      hotelNameInput.value  = s.name || '';
+      hotelStartInput.value = formatDateISO(s.start);
+      hotelEndInput.value   = formatDateISO(s.end);
+      hotelCurrencySelect.value = s.currency || 'TWD';
+      hotelAmountInput.value = s.amountInput;
+      hotelUnitSelect.value  = s.unitType || '元';
+      hotelFxRateInput.value = s.fxRate;
+
+      btnAddHotel.textContent = '儲存住宿';
+      btnCancelHotelEdit.style.display = 'inline-block';
+    }
+
+    function removeHotel(id) {
+      const idx = stays.findIndex(x => x.id === id);
+      if (idx === -1) return;
+      stays.splice(idx, 1);
+      if (editingHotelId === id) clearHotelForm();
+      renderHotelList();
+      renderCalendar();
+      updateSummary();
+    }
+
+    btnAddHotel.addEventListener('click', () => {
+      const name     = (hotelNameInput.value || '').trim();
+      const start    = parseDate(hotelStartInput.value);
+      const end      = parseDate(hotelEndInput.value);
+      const currency = hotelCurrencySelect.value || 'TWD';
+      const unitType = hotelUnitSelect.value || '元';
+      const amountInputVal = hotelAmountInput.value;
+      const fxRateVal      = hotelFxRateInput.value;
+
+      if (!name) {
+        alert('請輸入飯店名稱。');
+        return;
+      }
+      if (!start || !end) {
+        alert('請設定住宿起訖日期。');
+        return;
+      }
+      if (end < start) {
+        alert('住宿結束日期不能早於開始日期。');
+        return;
+      }
+
+      const amountInputNum = Number(amountInputVal);
+      if (!isFinite(amountInputNum) || amountInputNum <= 0) {
+        alert('請輸入正確的金額數字（可以用小數）。');
+        return;
+      }
+      const fxRateNum = Number(fxRateVal);
+      if (!isFinite(fxRateNum) || fxRateNum <= 0) {
+        alert('請輸入正確的概算匯率（1 原幣 ≈ 幾台幣）。');
+        return;
+      }
+
+      const amountBase = computeAmountBase(amountInputNum, unitType);
+      const twdAmount  = amountBase * fxRateNum;
+
+      if (editingHotelId != null) {
+        const target = stays.find(s => s.id === editingHotelId);
+        if (target) {
+          target.name        = name;
+          target.start       = start;
+          target.end         = end;
+          target.currency    = currency;
+          target.unitType    = unitType;
+          target.amountInput = amountInputNum;
+          target.amountBase  = amountBase;
+          target.fxRate      = fxRateNum;
+          target.twdAmount   = twdAmount;
+        }
+      } else {
+        stays.push({
+          id: nextId(),
+          name,
+          start,
+          end,
+          currency,
+          unitType,
+          amountInput: amountInputNum,
+          amountBase,
+          fxRate: fxRateNum,
+          twdAmount
+        });
+      }
+
+      clearHotelForm();
+      renderHotelList();
+      renderCalendar();
+      updateSummary();
+    });
+
+    btnCancelHotelEdit.addEventListener('click', () => {
+      clearHotelForm();
+      renderHotelList();
+    });
+
+    /* 日曆渲染：區間色條＋飯店＋事件 */
     function renderCalendar() {
       calendarGrid.innerHTML = '';
       if (!viewStartDate) return;
@@ -871,7 +1170,7 @@
       for (let i = 0; i < 35; i++) days.push(addDays(viewStartDate, i));
 
       const first = days[0];
-      const last = days[days.length - 1];
+      const last  = days[days.length - 1];
       calendarRangeLabel.textContent = `${formatDateISO(first)} ～ ${formatDateISO(last)}`;
 
       const todayISO = formatDateISO(new Date());
@@ -881,9 +1180,10 @@
         cell.className = 'day-cell';
 
         const dateISO = formatDateISO(day);
-        const dayNum = day.getDate();
-        const month = day.getMonth() + 1;
+        const dayNum  = day.getDate();
+        const month   = day.getMonth() + 1;
 
+        /* 日期列 */
         const topRow = document.createElement('div');
         topRow.style.display = 'flex';
         topRow.style.alignItems = 'baseline';
@@ -909,6 +1209,7 @@
           cell.appendChild(ring);
         }
 
+        /* 區間色條／標籤 */
         const hitRanges = ranges.filter(r => isWithin(day, r.start, r.end));
         if (hitRanges.length) {
           cell.classList.add('has-range');
@@ -917,8 +1218,8 @@
           const primary = sorted[0];
 
           const bar = document.createElement('div');
-          bar.className = 'range-top-bar';
-          bar.style.background = primary.color;
+          bar.className = 'range-bar';
+          bar.style.background = primary.color || '#4f8cff';
           cell.appendChild(bar);
 
           for (const r of sorted) {
@@ -933,6 +1234,29 @@
           }
         }
 
+        /* 住宿顯示：每天顯示飯店名，入住第一天加金額 */
+        const hitStays = stays
+          .filter(s => isWithin(day, s.start, s.end))
+          .sort((a, b) => a.start - b.start);
+
+        if (hitStays.length) {
+          const primaryStay = hitStays[0];
+
+          const hotelLine = document.createElement('div');
+          hotelLine.className = 'hotel-line';
+          hotelLine.textContent = '🏨 ' + (primaryStay.name || '');
+          cell.appendChild(hotelLine);
+
+          if (formatDateISO(day) === formatDateISO(primaryStay.start)) {
+            const hotelAmount = document.createElement('div');
+            hotelAmount.className = 'hotel-amount';
+            hotelAmount.textContent =
+              `${primaryStay.currency} ${primaryStay.amountInput}${primaryStay.unitType} / NTD ${formatTwdK(primaryStay.twdAmount)}`;
+            cell.appendChild(hotelAmount);
+          }
+        }
+
+        /* 單日事件 */
         const dayEvents = events.filter(e => formatDateISO(e.date) === dateISO);
         if (dayEvents.length) {
           const eventsBox = document.createElement('div');
@@ -952,8 +1276,7 @@
             textSpan.textContent = e.note || '';
 
             item.appendChild(iconSpan);
-            if (e.note) item.appendChild(textSpan);
-
+            item.appendChild(textSpan);
             eventsBox.appendChild(item);
           }
 
@@ -964,65 +1287,66 @@
       }
     }
 
-// 計算整趟旅程的起訖與天數（含頭尾兩天）
-function getTripSpan() {
-  const dates = [];
+    /* 整趟旅程天數：抓所有區間＋住宿＋事件的最早＆最晚 */
+    function getTripSpan() {
+      const dates = [];
 
-  // 把所有區間的起訖日期丟進來
-  for (const r of ranges) {
-    if (r.start) dates.push(r.start);
-    if (r.end) dates.push(r.end);
-  }
+      for (const r of ranges) {
+        if (r.start) dates.push(r.start);
+        if (r.end)   dates.push(r.end);
+      }
+      for (const s of stays) {
+        if (s.start) dates.push(s.start);
+        if (s.end)   dates.push(s.end);
+      }
+      for (const e of events) {
+        if (e.date) dates.push(e.date);
+      }
 
-  // 把所有事件日期也丟進來
-  for (const e of events) {
-    if (e.date) dates.push(e.date);
-  }
+      if (!dates.length) return null;
 
-  if (!dates.length) return null;
+      dates.sort((a, b) => a - b);
+      const first = dates[0];
+      const last  = dates[dates.length - 1];
 
-  // 排序後取最早與最晚
-  dates.sort((a, b) => a - b);
-  const first = dates[0];
-  const last = dates[dates.length - 1];
+      const MS = 24 * 60 * 60 * 1000;
+      const days = Math.round((last - first) / MS) + 1;
 
-  // 天數要「含頭尾」，所以 +1
-  const MS_PER_DAY = 24 * 60 * 60 * 1000;
-  const days = Math.round((last - first) / MS_PER_DAY) + 1;
+      return { first, last, days };
+    }
 
-  return { first, last, days };
-}
+    /* Summary 區塊渲染 */
+    function updateSummary() {
+      if (!viewStartDate) {
+        summaryBox.textContent = '尚未建立日曆。請先選一個日期。';
+        return;
+      }
+      const first = viewStartDate;
+      const last  = addDays(viewStartDate, 34);
 
+      const span = getTripSpan();
+      let tripLine = '🧭 旅程天數：目前尚未設定任何區間或事件。';
+      if (span) {
+        tripLine =
+          `🧭 旅程天數：<strong>${span.days}</strong> 天（${formatDateISO(span.first)} ～ ${formatDateISO(span.last)}）`;
+      }
 
-function updateSummary() {
-  if (!viewStartDate) {
-    summaryBox.textContent = '尚未建立日曆。請先選一個日期。';
-    return;
-  }
-  const first = viewStartDate;
-  const last = addDays(viewStartDate, 34);
+      summaryBox.innerHTML = `
+        📅 目前視圖範圍：<strong>${formatDateISO(first)}</strong> ～ <strong>${formatDateISO(last)}</strong><br/>
+        🏨 區間（城市／飯店）共：<strong>${ranges.length}</strong> 筆<br/>
+        🛏️ 住宿紀錄共：<strong>${stays.length}</strong> 筆<br/>
+        📌 單日事件共：<strong>${events.length}</strong> 筆<br/>
+        ${tripLine}<br/>
+      `;
+    }
 
-  const span = getTripSpan(); // 這裡拿整趟旅程資訊
-  let tripLine = '🧭 旅程天數：目前尚未設定任何區間或事件。';
-
-  if (span) {
-    tripLine = `🧭 旅程天數：<strong>${span.days}</strong> 天（${formatDateISO(span.first)} ～ ${formatDateISO(span.last)}）`;
-  }
-
-  summaryBox.innerHTML = `
-    📅 目前視圖範圍：<strong>${formatDateISO(first)}</strong> ～ <strong>${formatDateISO(last)}</strong><br/>
-    🏨 區間（城市／飯店）共：<strong>${ranges.length}</strong> 筆<br/>
-    📌 單日事件共：<strong>${events.length}</strong> 筆<br/>
-    ${tripLine}<br/>
-  `;
-}
-
+    /* Markdown 匯出：日期｜地點｜飯店｜金額摘要｜備註 */
     function buildMarkdownTable() {
       if (!viewStartDate) return '';
 
       const lines = [];
-      lines.push('| 日期 | 地點 | 備註 |');
-      lines.push('| ---- | ---- | ---- |');
+      lines.push('| 日期 | 地點 | 飯店 | 金額摘要 | 備註 |');
+      lines.push('| ---- | ---- | ---- | ---- | ---- |');
 
       const weekdayChars = ['日', '一', '二', '三', '四', '五', '六'];
 
@@ -1041,6 +1365,20 @@ function updateSummary() {
           .sort((a, b) => a.start - b.start);
         const location = coveringRanges.length ? coveringRanges[0].name : '';
 
+        const coveringStays = stays
+          .filter(s => isWithin(day, s.start, s.end))
+          .sort((a, b) => a.start - b.start);
+        const hotelName = coveringStays.length ? (coveringStays[0].name || '') : '';
+
+        let amountSummary = '';
+        if (coveringStays.length) {
+          const s = coveringStays[0];
+          if (iso === formatDateISO(s.start)) {
+            amountSummary =
+              `${s.currency} ${s.amountInput}${s.unitType} / NTD ${formatTwdK(s.twdAmount)}`;
+          }
+        }
+
         const dayEvents = events
           .filter(e => formatDateISO(e.date) === iso)
           .sort((a, b) => a.id - b.id);
@@ -1053,7 +1391,7 @@ function updateSummary() {
           })
           .join('；');
 
-        lines.push(`| ${dateStr} | ${location} | ${remark} |`);
+        lines.push(`| ${dateStr} | ${location} | ${hotelName} | ${amountSummary} | ${remark} |`);
       }
 
       return lines.join('\n');
@@ -1073,27 +1411,39 @@ function updateSummary() {
 
       try {
         await navigator.clipboard.writeText(md);
-        alert('已複製 Markdown 表格，可以貼到 Day One / Notion / Obsidian。');
+        alert('Markdown 表格已複製到剪貼簿。');
       } catch (err) {
         console.error(err);
-        alert('複製失敗，可能是瀏覽器權限問題。以下是表格內容，請手動複製：\n\n' + md);
+        alert('複製失敗，可能是瀏覽器權限問題。請手動選取複製。');
       }
     });
 
+    /* JSON 匯出／匯入：含 version=2 與 stays，相容舊版 */
     function buildJsonSnapshot() {
       return {
-        version: 1,
+        version: 2,
         viewStart: viewStartDate ? formatDateISO(viewStartDate) : null,
         ranges: ranges.map(r => ({
           name: r.name,
           color: r.color,
           start: formatDateISO(r.start),
-          end: formatDateISO(r.end)
+          end:   formatDateISO(r.end)
         })),
         events: events.map(e => ({
           date: formatDateISO(e.date),
           icon: e.icon,
           note: e.note
+        })),
+        stays: stays.map(s => ({
+          name: s.name,
+          start: formatDateISO(s.start),
+          end:   formatDateISO(s.end),
+          currency: s.currency,
+          unitType: s.unitType,
+          amountInput: s.amountInput,
+          amountBase:  s.amountBase,
+          fxRate:      s.fxRate,
+          twdAmount:   s.twdAmount
         }))
       };
     }
@@ -1112,7 +1462,6 @@ function updateSummary() {
     btnExportJson.addEventListener('click', () => {
       const snapshot = buildJsonSnapshot();
       const jsonStr = JSON.stringify(snapshot, null, 2);
-      // 加 BOM，明確標示 UTF-8
       const blob = new Blob(['\uFEFF' + jsonStr], {
         type: 'application/json;charset=utf-8'
       });
@@ -1138,10 +1487,13 @@ function updateSummary() {
 
           ranges.length = 0;
           events.length = 0;
+          stays.length  = 0;
           editingRangeId = null;
           editingEventId = null;
+          editingHotelId = null;
           clearRangeForm();
           clearEventForm();
+          clearHotelForm();
 
           const importedStart = data.viewStart ? parseDate(data.viewStart) : null;
           if (importedStart) {
@@ -1152,11 +1504,11 @@ function updateSummary() {
           if (Array.isArray(data.ranges)) {
             for (const r of data.ranges) {
               const start = r.start ? parseDate(r.start) : null;
-              const end = r.end ? parseDate(r.end) : null;
+              const end   = r.end   ? parseDate(r.end)   : null;
               if (!start || !end) continue;
               ranges.push({
                 id: nextId(),
-                name: r.name || '',
+                name:  r.name  || '',
                 color: r.color || '#4f8cff',
                 start,
                 end
@@ -1177,8 +1529,41 @@ function updateSummary() {
             }
           }
 
+          if (Array.isArray(data.stays)) {
+            for (const s of data.stays) {
+              const start = s.start ? parseDate(s.start) : null;
+              const end   = s.end   ? parseDate(s.end)   : null;
+              if (!start || !end) continue;
+
+              const currency   = s.currency || 'TWD';
+              const unitType   = s.unitType || '元';
+              const amountInput= Number(s.amountInput) || 0;
+              const fxRate     = Number(s.fxRate) || 0;
+              const amountBase = s.amountBase != null
+                                   ? Number(s.amountBase)
+                                   : computeAmountBase(amountInput, unitType);
+              const twdAmount  = s.twdAmount != null
+                                   ? Number(s.twdAmount)
+                                   : amountBase * fxRate;
+
+              stays.push({
+                id: nextId(),
+                name: s.name || '',
+                start,
+                end,
+                currency,
+                unitType,
+                amountInput,
+                amountBase,
+                fxRate,
+                twdAmount
+              });
+            }
+          }
+
           renderRangesList();
           renderEventsList();
+          renderHotelList();
           renderCalendar();
           updateSummary();
           alert('JSON 匯入完成。');
