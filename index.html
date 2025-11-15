@@ -1,589 +1,919 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Writer + Images (合併版)</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>旅遊行事曆（5 週視圖）</title>
 
-<!-- ===== 外觀：簡潔到不會礙事 ===== -->
-<style>
-  :root{
-    --bg:#f6f7fb; --card:#fff; --text:#111827; --muted:#6b7280; --line:#e5e7eb; --brand:#4f46e5;
-    --radius:12px; --shadow:0 6px 18px rgba(17,24,39,.06);
-  }
-  *{ box-sizing:border-box }
-  html,body{ height:100% }
-  body{ margin:0; background:var(--bg); color:var(--text); font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans TC",sans-serif; }
+  <style>
+    :root {
+      --card-bg:#fff;
+      --soft:#f5f5f7;
+      --ink:#222;
+      --muted:#666;
+      --accent:#888;
+      --radius:12px;
+      --border:#e3e3e6;
+    }
 
-  header{
-    position:sticky; top:0; z-index:10;
-    display:flex; align-items:center; gap:8px; justify-content:space-between;
-    padding:10px 12px; background:#fff; border-bottom:1px solid var(--line);
-  }
-  .h-left{ display:flex; align-items:center; gap:8px }
-  .title{ font-weight:800; letter-spacing:.2px }
-  .btn{
-    appearance:none; border:1px solid var(--line); background:#fff; color:#111; padding:.5rem .8rem;
-    border-radius:10px; cursor:pointer; font-weight:600; box-shadow:0 1px 4px rgba(0,0,0,.05);
-  }
-  .btn.primary{ background:var(--brand); color:#fff; border-color:transparent }
-  .btn.ghost{ background:#fff }
-  .btn:disabled{ opacity:.5; cursor:not-allowed }
-  .btn:hover{ transform:translateY(-1px); box-shadow:0 3px 10px rgba(0,0,0,.08) }
-.btn.ghost {
-  background:#fff;
-  text-decoration: none; /* ← 這行拿掉底線 */
-}
-.btn.ghost,
-.btn.ghost:hover {
-  text-decoration: none;
-}
-  .wrap{ display:grid; grid-template-columns: 1.2fr .8fr; gap:12px; padding:12px; height:calc(100vh - 64px); }
-  @media (max-width: 980px){ .wrap{ grid-template-columns:1fr; height:auto; } }
+    /* 基本排版與底色 */
+    body {
+      margin:0;
+      background:#fafafa;
+      color:var(--ink);
+      font-family: system-ui, -apple-system, "Segoe UI", Arial, "Noto Sans TC", sans-serif;
+    }
 
-  .card{
-    background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
-    box-shadow:var(--shadow); display:flex; flex-direction:column; min-height:0;
-  }
-  .card h3{
-    margin:0; padding:10px 12px; border-bottom:1px solid var(--line);
-    font-size:14px; color:var(--muted); display:flex; align-items:center; gap:8px; flex-wrap:wrap;
-  }
-  .card .body{ padding:12px; min-height:0; overflow:auto; }
+    /* 頂部固定列（照你現有工具風格） */
+    header {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:1rem 1.5rem;
+      background:#fff;
+      box-shadow:0 2px 5px rgba(0,0,0,0.05);
+      position:sticky;
+      top:0;
+      z-index:10;
+    }
+    header h2 {
+      margin:0;
+      font-size:1.4rem;
+      letter-spacing:.5px;
+    }
+    header a {
+      text-decoration:none;
+      font-size:1rem;
+      padding:.5rem 1rem;
+      border-radius:6px;
+      background:#eee;
+      color:#333;
+      box-shadow:0 1px 4px rgba(0,0,0,0.1);
+    }
 
-  /* 編輯器 */
-  textarea#md{
-    width:100%; height:60vh; border:1px solid var(--line); border-radius:10px; padding:12px;
-    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:14px; resize:vertical;
-  }
-  @media (max-width:980px){ textarea#md{ height:40vh } }
+    .wrap {
+      max-width:1080px;
+      margin:0 auto;
+      padding:24px 24px 40px;
+    }
 
-  /* 圖片區 */
-  .toolbar{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px }
-  .grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap:10px }
-  @media (max-width:600px){ .grid{ grid-template-columns: repeat(2, 1fr) } }
-  .thumb{
-    position:relative; border:1px solid var(--line); border-radius:10px; overflow:hidden; background:#fff;
-  }
-  .thumb img{ width:100%; height:140px; object-fit:cover; display:block }
-  .thumb .meta{
-    display:flex; align-items:center; justify-content:space-between; gap:8px;
-    padding:6px; background:#fafafa; border-top:1px solid var(--line); font-size:12px;
-  }
-  .thumb .name{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#374151 }
-  .thumb .chk{ display:inline-flex; align-items:center; gap:6px }
-  .thumb .x{
-    position:absolute; top:6px; right:6px; width:28px; height:28px; display:grid; place-items:center;
-    background:rgba(255,255,255,.85); border:1px solid #fecaca; color:#b91c1c; border-radius:8px; cursor:pointer;
-  }
+    h1 {
+      margin:0 0 10px;
+      font-size: clamp(1.4rem, 1.2rem + 1vw, 1.8rem);
+    }
+    .sub {
+      margin:0 0 16px;
+      color:var(--muted);
+      font-size:.98rem;
+    }
 
-  /* 小提示 */
-  .tip{ font-size:13px; color:var(--muted) }
+    /* 上方：日期與視圖控制列 */
+    .toolbar {
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+      background:var(--card-bg);
+      padding:14px;
+      border-radius:var(--radius);
+      box-shadow:0 2px 10px rgba(0,0,0,.06);
+      margin-bottom:14px;
+    }
+    .toolbar label {
+      font-size:.95rem;
+      color:var(--muted);
+    }
+    .toolbar-group {
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      align-items:center;
+    }
+    input[type="date"],
+    input[type="text"],
+    input[type="color"],
+    select {
+      border:1px solid var(--border);
+      border-radius:8px;
+      padding:6px 10px;
+      font-size:.95rem;
+      background:#fff;
+    }
+    input[type="text"] { min-width:140px; }
+    .btn {
+      border:none;
+      border-radius:10px;
+      padding:8px 14px;
+      font-size:.95rem;
+      cursor:pointer;
+      background:#2f855a;
+      color:#fff;
+      white-space:nowrap;
+    }
+    .btn.secondary {
+      background:#e0e0e0;
+      color:#333;
+    }
+    .btn[disabled] {
+      background:#bdbdbd;
+      cursor:not-allowed;
+    }
 
-  /* Toast */
-  .toast{
-    position:fixed; bottom:16px; right:16px; background:#111827; color:#fff;
-    padding:10px 14px; border-radius:10px; font-size:13px; opacity:0; transform:translateY(10px);
-    transition:opacity .2s, transform .2s; pointer-events:none; z-index:99;
-  }
-  .toast.show{ opacity:1; transform:translateY(0) }
+    /* 總覽／說明框 */
+    #summary {
+      background:var(--soft);
+      border-left:5px solid var(--accent);
+      padding:10px 14px;
+      border-radius:10px;
+      font-size:.95rem;
+      line-height:1.6;
+      box-shadow: inset 0 0 0 1px #eee;
+      margin-bottom:18px;
+    }
 
-/* 左上角大顆勾選框（更好戳） */
-.thumb .chk {
-  position: absolute;
-  left: 8px; top: 8px;
-  z-index: 2;
-  background: rgba(255,255,255,.95);
-  border: 1px solid #d1d5db;
-  border-radius: 10px;
-  padding: 4px;
-}
-.thumb .chk input[type="checkbox"]{
-  width: 22px; height: 22px;
-  accent-color: #2563eb;
-}
+    /* 下半部：左右兩欄（左：設定，右：日曆） */
+    .layout {
+      display:grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 2fr);
+      gap:18px;
+      align-items:flex-start;
+    }
 
-/* 被選中時，整張卡片有高對比外框與淡藍遮罩 */
-.thumb.selected { box-shadow: 0 0 0 3px #2563eb inset; }
-.thumb.selected::after{
-  content:"";
-  position:absolute; inset:0;
-  background: rgba(37,99,235,.08);
-  pointer-events:none;
-}
+    /* 兩種設定卡片：區間與事件 */
+    .panel {
+      background:var(--card-bg);
+      padding:14px;
+      border-radius:var(--radius);
+      box-shadow:0 2px 10px rgba(0,0,0,.06);
+    }
+    .panel h3 {
+      margin:0 0 8px;
+      font-size:1.05rem;
+    }
+    .panel p {
+      margin:0 0 10px;
+      font-size:.9rem;
+      color:var(--muted);
+    }
 
-/* 固定圖片工具列在圖片區塊上方 */
-.card .body {
-  display: flex;
-  flex-direction: column;
-}
+    .field-row {
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-bottom:8px;
+      align-items:center;
+    }
+    .field-row small {
+      font-size:.8rem;
+      color:var(--muted);
+    }
 
-.toolbar.sticky {
-  position: sticky;
-  top: 0;               /* 貼齊卡片內的最上方 */
-  z-index: 5;           /* 蓋在縮圖之上 */
-  background: #fff;     /* 背景要白，不然會跟下方縮圖疊色 */
-  padding: 8px 0;       /* 確保不擠到邊 */
-  border-bottom: 1px solid var(--line); /* 跟縮圖區隔 */
-}
+    .badge {
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:3px 8px;
+      border-radius:999px;
+      background:var(--soft);
+      font-size:.8rem;
+      color:var(--muted);
+    }
+    .badge-dot {
+      width:10px;
+      height:10px;
+      border-radius:50%;
+      background:var(--accent);
+    }
 
+    .list {
+      margin-top:8px;
+      max-height:260px;
+      overflow:auto;
+      border-top:1px solid #eee;
+      padding-top:6px;
+    }
+    .chip {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:8px;
+      padding:6px 8px;
+      border-radius:8px;
+      background:#fafafa;
+      border:1px solid #eee;
+      font-size:.86rem;
+      margin-bottom:4px;
+    }
+    .chip-main {
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+    }
+    .chip-title {
+      font-weight:600;
+    }
+    .chip-meta {
+      color:var(--muted);
+      font-size:.8rem;
+    }
+    .chip-color {
+      width:14px;
+      height:14px;
+      border-radius:4px;
+      border:1px solid rgba(0,0,0,.08);
+    }
+    .chip button {
+      border:none;
+      background:transparent;
+      color:#c62828;
+      cursor:pointer;
+      font-size:.9rem;
+    }
 
-</style>
+    /* 日曆外框 */
+    .calendar-shell {
+      background:var(--card-bg);
+      padding:12px;
+      border-radius:var(--radius);
+      box-shadow:0 2px 10px rgba(0,0,0,.06);
+    }
+    .calendar-header {
+      display:flex;
+      justify-content:space-between;
+      align-items:baseline;
+      margin-bottom:4px;
+    }
+    .calendar-header h3 {
+      margin:0;
+      font-size:1.05rem;
+    }
+    .calendar-header span {
+      font-size:.85rem;
+      color:var(--muted);
+    }
+
+    /* 日曆格線 */
+    .weekday-row {
+      display:grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap:4px;
+      margin-bottom:4px;
+      padding:0 2px;
+      font-size:.8rem;
+      color:var(--muted);
+    }
+    .weekday-cell {
+      text-align:center;
+    }
+
+    .calendar-grid {
+      display:grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap:4px;
+    }
+
+    .day-cell {
+      min-height:80px;
+      background:#fff;
+      border-radius:8px;
+      border:1px solid var(--border);
+      padding:4px 5px 6px;
+      box-sizing:border-box;
+      display:flex;
+      flex-direction:column;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .day-number {
+      font-size:.85rem;
+      font-weight:600;
+    }
+
+    .day-month-tag {
+      font-size:.7rem;
+      color:var(--muted);
+      margin-left:4px;
+    }
+
+    /* 區間顏色帶：整格淡底＋左側實心條 */
+    .day-cell.has-range {
+      background:linear-gradient(to bottom, rgba(0,0,0,0.02), rgba(0,0,0,0.02));
+    }
+    .range-strip {
+      position:absolute;
+      top:0;
+      bottom:0;
+      left:0;
+      width:6px;
+      background:var(--accent);
+    }
+    .range-label {
+      margin-top:2px;
+      font-size:.75rem;
+      font-weight:600;
+      white-space:nowrap;
+      text-overflow:ellipsis;
+      overflow:hidden;
+    }
+
+    /* 單日事件區 */
+    .events {
+      margin-top:auto;
+      font-size:.8rem;
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+    }
+    .event-item {
+      display:flex;
+      align-items:center;
+      gap:4px;
+      padding:1px 3px;
+      border-radius:4px;
+      background:rgba(0,0,0,0.03);
+    }
+    .event-icon {
+      font-size:.9rem;
+    }
+    .event-text {
+      white-space:nowrap;
+      text-overflow:ellipsis;
+      overflow:hidden;
+    }
+
+    /* 今天標記（如果日期正好是今天） */
+    .today-ring {
+      position:absolute;
+      top:3px;
+      right:4px;
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      border:2px solid #ff7043;
+    }
+
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 767px) {
+      .wrap {
+        padding:18px 14px 28px;
+      }
+      header {
+        padding:.8rem 1rem;
+      }
+      input, select, button {
+        font-size:16px !important; /* iOS 不縮太小 */
+        height:40px;
+      }
+      .day-cell {
+        min-height:72px;
+      }
+    }
+  </style>
 </head>
 <body>
+  <header>
+    <h2>🧳 旅遊行事曆工具</h2>
+    <a href="index.html">🧭 回首頁</a>
+  </header>
 
-<header>
-  <div class="h-left">
-    <div class="title">✍️ Writer + 🖼 Images</div>
-    <!-- 編輯器功能列：開啟 / 儲存 / 複製 / 清空 / 插入圖片語法 -->
-    <button class="btn" id="openMdBtn">開啟</button>
-    <button class="btn" id="saveMdBtn">儲存</button>
-    <button class="btn" id="copyMdBtn">複製</button>
-    <button class="btn" id="clearMdBtn">清空</button>
-    <button class="btn primary" id="insertFromImageBtn" title="請先在右側產生並複製勾選圖片的 MD">插入圖片語法</button>
-    
-    <input id="openMdFile" type="file" accept=".md,.markdown,text/markdown,text/plain" hidden />
+  <div class="wrap">
+    <h1>5 週旅遊行事曆視圖</h1>
+    <p class="sub">輸入任意日期，系統自動往前補到當週星期一，固定顯示 5 週共 35 天。上半部設城市／飯店區間，下半部日曆自動幫你上色與貼事件圖示。</p>
+
+    <!-- 視圖日期控制列 -->
+    <div class="toolbar">
+      <div class="toolbar-group">
+        <label for="anchorDate">選擇任一日期：</label>
+        <input id="anchorDate" type="date" />
+        <button id="btnToday" class="btn secondary" type="button">跳到今天所在週</button>
+      </div>
+      <div class="toolbar-group">
+        <button id="btnGenerate" class="btn" type="button">更新 5 週視圖</button>
+        <span style="font-size:.9rem; color:var(--muted);">會自動把你選的日期對齊成「當週星期一」當第一格。</span>
+      </div>
+    </div>
+
+    <!-- 總覽區 -->
+    <div id="summary">尚未建立日曆。請先選一個日期，再按「更新 5 週視圖」。</div>
+
+    <div class="layout">
+      <!-- 左側：設定區 -->
+      <div class="panel">
+        <h3>① 區間（城市／飯店）</h3>
+        <p>這裡用來設定「住在哪裡」或「待在哪個城市」。只會在區間第一天顯示名稱，其他天用顏色延伸。</p>
+
+        <div class="field-row">
+          <input id="rangeName" type="text" placeholder="例如：札幌｜京王飯店" />
+          <input id="rangeColor" type="color" value="#4f8cff" />
+        </div>
+        <div class="field-row">
+          <label>起：</label>
+          <input id="rangeStart" type="date" />
+          <label>迄：</label>
+          <input id="rangeEnd" type="date" />
+          <button id="btnAddRange" class="btn secondary" type="button">加入區間</button>
+        </div>
+        <div class="field-row">
+          <small>小提醒：起訖日期會被視為「含當天」。顏色會套用在整段日期上。</small>
+        </div>
+
+        <div class="badge">
+          <span class="badge-dot"></span>
+          <span>區間只改顏色，不動事件資料。</span>
+        </div>
+
+        <div id="rangeList" class="list"></div>
+
+        <hr style="margin:14px 0; border:none; border-top:1px dashed #ddd;" />
+
+        <h3>② 單日事件（移動／活動／備註）</h3>
+        <p>像是 ✈️、🚄、🛍、🍣 那種當天會發生一次的事情。跨日睡機上就自己加兩天，很自由。</p>
+
+        <div class="field-row">
+          <label>日期：</label>
+          <input id="eventDate" type="date" />
+        </div>
+        <div class="field-row">
+          <label>圖示：</label>
+          <select id="eventIcon">
+            <option value="✈️">✈️ 飛機</option>
+            <option value="🚄">🚄 新幹線／高鐵</option>
+            <option value="🚆">🚆 火車</option>
+            <option value="🚌">🚌 巴士</option>
+            <option value="🚗">🚗 自駕</option>
+            <option value="🛏️">🛏️ 換飯店</option>
+            <option value="🍣">🍣 吃飯／餐廳</option>
+            <option value="🛍">🛍 逛街</option>
+            <option value="📍">📍 其他</option>
+          </select>
+          <input id="eventNote" type="text" placeholder="例如：TPE → CTS 夜航" />
+          <button id="btnAddEvent" class="btn secondary" type="button">加入事件</button>
+        </div>
+        <div class="field-row">
+          <small>你要跨日睡飛機，就自己加兩筆：13 ✈️、14 ✈️。系統只負責乖乖貼上圖示。</small>
+        </div>
+
+        <div id="eventList" class="list"></div>
+      </div>
+
+      <!-- 右側：日曆視圖 -->
+      <div class="calendar-shell">
+        <div class="calendar-header">
+          <h3>5 週日曆視圖</h3>
+          <span id="calendarRangeLabel"></span>
+        </div>
+
+        <div class="weekday-row">
+          <div class="weekday-cell">一</div>
+          <div class="weekday-cell">二</div>
+          <div class="weekday-cell">三</div>
+          <div class="weekday-cell">四</div>
+          <div class="weekday-cell">五</div>
+          <div class="weekday-cell">六</div>
+          <div class="weekday-cell">日</div>
+        </div>
+
+        <div id="calendarGrid" class="calendar-grid">
+          <!-- JS 動態產生日曆格子 -->
+        </div>
+      </div>
+    </div>
   </div>
-  <a class="btn ghost" href="index.html">🏠 回首頁</a>
-</header>
 
-<main class="wrap">
-  <!-- 左：編輯器 -->
-  <section class="card">
-    <h3>Markdown 編輯</h3>
-    <div class="body">
-      <textarea id="md" placeholder="在這裡寫文章。插入圖片語法的來源：先到右邊圖片區『產生 MD 語法』並『複製勾選圖片MD』，再按上方『插入圖片語法』。"></textarea>
-      <p class="tip" style="margin-top:8px">儲存與下載會優先使用系統存檔對話框（File System Access）。不支援時改用瀏覽器下載。</p>
-    </div>
-  </section>
+  <script>
+    // ===== 工具層：日期處理 =====
 
-  <!-- 右：圖片工具 -->
-  <aside class="card">
-    <h3>圖片區（壓縮、命名、勾選、ZIP）</h3>
-    <div class="body">
-      <div class="toolbar sticky">
-        <button class="btn" id="pickBtn">選擇照片</button>
-        <input id="file" type="file" accept="image/*" multiple hidden />
-        <button class="btn" id="genMdBtn">產生MD語法（鎖檔名）</button>
-        <button class="btn ghost" id="clearBatchBtn">清空此批</button>
-      </div>
-      <div class="toolbar sticky">
-        <button class="btn ghost" id="checkAllBtn">全部勾選</button>
-        <button class="btn ghost" id="uncheckAllBtn">取消勾選</button>
-        <button class="btn" id="copySelectedBtn">複製勾選圖片MD</button>
-        <button class="btn" id="saveZipBtn">下載ZIP圖片</button>
-      </div>
-      <div class="toolbar">
-        <label class="tip">圖片最長邊（px）
-          <input id="maxDim" type="number" value="1200" min="640" step="80" style="width:120px; margin-left:6px; padding:6px; border:1px solid var(--line); border-radius:8px" />
-        </label>
-        <span class="tip">ZIP 目錄固定為 <code>images/</code>，圖檔格式 <code>{prefix}-nnn.jpg</code>，去 EXIF。</span>
-      </div>
+    /**
+     * 將 "YYYY-MM-DD" 字串轉成 Date（鎖在當地 00:00，避免時區亂飄）
+     */
+    function parseDate(value) {
+      if (!value) return null;
+      // 加上 T00:00:00，避免被當成 UTC
+      return new Date(value + 'T00:00:00');
+    }
 
-      <div id="grid" class="grid"></div>
-    </div>
-  </aside>
-  
-  
-</main>
+    /**
+     * 將 Date 轉成 "YYYY-MM-DD"
+     */
+    function formatDateISO(date) {
+      if (!date) return '';
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
 
-<div id="toast" class="toast"></div>
+    /**
+     * 把 Date 複製一份，並加上指定天數
+     */
+    function addDays(date, days) {
+      const d = new Date(date);
+      d.setDate(d.getDate() + days);
+      return d;
+    }
 
-<!-- 依賴套件（CDN） -->
-<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+    /**
+     * 取得 JS getDay() 轉成以「週一為 0」的索引
+     * JS: 0=週日,1=週一,... → 轉成 0=週一,...,6=週日
+     */
+    function getMondayIndex(date) {
+      const jsDay = date.getDay(); // 0~6
+      return (jsDay + 6) % 7;
+    }
 
-<script>
-/* ===========================================================
-   合併版核心邏輯
-   - 編輯器：開啟 / 儲存 / 複製 / 清空 / 插入圖片語法
-   - 圖片區：選圖(壓縮去EXIF) / 產生MD(鎖檔名) / 勾選管理 / ZIP / 清空
-   =========================================================== */
+    /**
+     * 判斷 date 是否介於 [start, end] 之間（含邊界）
+     */
+    function isWithin(date, start, end) {
+      if (!start || !end) return false;
+      const t = date.getTime();
+      return t >= start.getTime() && t <= end.getTime();
+    }
 
-/* ---------- 小工具：提示 ---------- */
-const toastEl = document.getElementById('toast');
-function toast(msg){
-  toastEl.textContent = msg;
-  toastEl.classList.add('show');
-  setTimeout(()=>toastEl.classList.remove('show'), 1600);
-}
+    // ===== 狀態儲存 =====
 
-/* ---------- 編輯器 DOM ---------- */
-const mdEl = document.getElementById('md');
-const openMdBtn = document.getElementById('openMdBtn');
-const openMdFile = document.getElementById('openMdFile');
-const saveMdBtn = document.getElementById('saveMdBtn');
-const copyMdBtn = document.getElementById('copyMdBtn');
-const clearMdBtn = document.getElementById('clearMdBtn');
-const insertFromImageBtn = document.getElementById('insertFromImageBtn');
+    /** 視圖起始日期（一定是星期一） */
+    let viewStartDate = null;
 
-/* ---------- 圖片區 DOM ---------- */
-const pickBtn = document.getElementById('pickBtn');
-const fileEl = document.getElementById('file');
-const genMdBtn = document.getElementById('genMdBtn');
-const clearBatchBtn = document.getElementById('clearBatchBtn');
-const gridEl = document.getElementById('grid');
-const checkAllBtn = document.getElementById('checkAllBtn');
-const uncheckAllBtn = document.getElementById('uncheckAllBtn');
-const copySelectedBtn = document.getElementById('copySelectedBtn');
-const saveZipBtn = document.getElementById('saveZipBtn');
-const maxDimEl = document.getElementById('maxDim');
+    /** 區間資料：{id, name, color, start, end} */
+    const ranges = [];
 
-/* ---------- 狀態 ---------- */
-let items = []; // { file, blob, url, w, h, _finalName?, _selected }
-let namePrefix = null; // 一批唯一前綴
-let mdCache = '';      // 使用者剛剛在圖片區「複製勾選圖片MD」時，同步快取到這裡，供「插入圖片語法」使用
+    /** 單日事件資料：{id, date, icon, note} */
+    const events = [];
 
-function makePrefix(){
-  const t = Date.now().toString(36);
-  const r = Math.floor(Math.random()*1e6).toString(36);
-  return (t.slice(-3) + r).slice(0,5);
-}
-function pad3(n){ return String(n).padStart(3,'0'); }
+    let idCounter = 1;
+    function nextId() {
+      return idCounter++;
+    }
 
-/* ===========================================================
-   編輯器功能
-   =========================================================== */
+    // ===== DOM 取得 =====
 
-/* 開啟（iCloud 可用系統對話框） */
-openMdBtn.addEventListener('click', ()=> openMdFile.click());
-openMdFile.addEventListener('change', async e=>{
-  const f = e.target.files[0]; if(!f) return;
-  const txt = await f.text();
-  mdEl.value = txt;
-  toast('已載入 Markdown');
-});
+    const anchorInput = document.getElementById('anchorDate');
+    const btnToday = document.getElementById('btnToday');
+    const btnGenerate = document.getElementById('btnGenerate');
 
-/* 儲存（優先使用 File System Access，否則使用 FileSaver 備援） */
-saveMdBtn.addEventListener('click', async ()=>{
-  try{
-    const blob = new Blob([mdEl.value], {type:'text/markdown;charset=utf-8'});
-    if(window.showSaveFilePicker){
-      const handle = await showSaveFilePicker({
-        suggestedName: 'note.md',
-        types: [{ description: 'Markdown', accept: { 'text/markdown':['.md','.markdown'], 'text/plain':['.md'] } }]
+    const summaryBox = document.getElementById('summary');
+    const calendarGrid = document.getElementById('calendarGrid');
+    const calendarRangeLabel = document.getElementById('calendarRangeLabel');
+
+    const rangeNameInput = document.getElementById('rangeName');
+    const rangeColorInput = document.getElementById('rangeColor');
+    const rangeStartInput = document.getElementById('rangeStart');
+    const rangeEndInput = document.getElementById('rangeEnd');
+    const btnAddRange = document.getElementById('btnAddRange');
+    const rangeList = document.getElementById('rangeList');
+
+    const eventDateInput = document.getElementById('eventDate');
+    const eventIconSelect = document.getElementById('eventIcon');
+    const eventNoteInput = document.getElementById('eventNote');
+    const btnAddEvent = document.getElementById('btnAddEvent');
+    const eventList = document.getElementById('eventList');
+
+    // ===== 視圖初始化：預設抓今天所在週 =====
+
+    (function initDefaults() {
+      const today = new Date();
+      const iso = formatDateISO(today);
+      anchorInput.value = iso;
+      eventDateInput.value = iso;
+      rangeStartInput.value = iso;
+      rangeEndInput.value = iso;
+
+      setViewStartFromAnchor(today);
+      renderCalendar();
+      updateSummary();
+    })();
+
+    /**
+     * 根據「任意日期」計算本週星期一，更新 viewStartDate
+     */
+    function setViewStartFromAnchor(date) {
+      if (!date) return;
+      const mondayOffset = getMondayIndex(date); // 0~6
+      viewStartDate = addDays(date, -mondayOffset);
+    }
+
+    // ===== 事件監聽：視圖控制 =====
+
+    btnToday.addEventListener('click', () => {
+      const today = new Date();
+      anchorInput.value = formatDateISO(today);
+      setViewStartFromAnchor(today);
+      renderCalendar();
+      updateSummary();
+    });
+
+    btnGenerate.addEventListener('click', () => {
+      const d = parseDate(anchorInput.value);
+      if (!d) {
+        alert('請先選擇一個日期。');
+        return;
+      }
+      setViewStartFromAnchor(d);
+      renderCalendar();
+      updateSummary();
+    });
+
+    // ===== 區間操作 =====
+
+    btnAddRange.addEventListener('click', () => {
+      const name = rangeNameInput.value.trim();
+      const color = rangeColorInput.value || '#4f8cff';
+      const start = parseDate(rangeStartInput.value);
+      const end = parseDate(rangeEndInput.value);
+
+      if (!name) {
+        alert('請輸入區間名稱（城市或飯店）。');
+        return;
+      }
+      if (!start || !end) {
+        alert('請設定起訖日期。');
+        return;
+      }
+      if (end < start) {
+        alert('結束日期不能早於開始日期。');
+        return;
+      }
+
+      ranges.push({
+        id: nextId(),
+        name,
+        color,
+        start,
+        end
       });
-      const writable = await handle.createWritable();
-      await writable.write(blob);
-      await writable.close();
-    }else{
-      saveAs(blob, 'note.md');
+
+      rangeNameInput.value = '';
+      renderRangesList();
+      renderCalendar();
+      updateSummary();
+    });
+
+    function removeRange(id) {
+      const idx = ranges.findIndex(r => r.id === id);
+      if (idx >= 0) {
+        ranges.splice(idx, 1);
+        renderRangesList();
+        renderCalendar();
+        updateSummary();
+      }
     }
-    toast('MD 已儲存');
-  }catch(e){
-    console.error(e);
-    toast('儲存失敗或取消');
-  }
-});
 
-/* 複製整份 MD */
-copyMdBtn.addEventListener('click', async ()=>{
-  try{
-    await navigator.clipboard.writeText(mdEl.value);
-    toast('已複製 MD');
-  }catch{
-    toast('無法存取剪貼簿');
-  }
-});
+    function renderRangesList() {
+      rangeList.innerHTML = '';
+      if (!ranges.length) {
+        rangeList.innerHTML = '<div style="font-size:.85rem; color:var(--muted);">尚未加入任何區間。</div>';
+        return;
+      }
 
-/* 清空 */
-clearMdBtn.addEventListener('click', ()=>{
-  mdEl.value = '';
-  toast('已清空編輯器');
-});
+      for (const r of ranges) {
+        const chip = document.createElement('div');
+        chip.className = 'chip';
 
-/* 從圖片區插入（用快取，不強制要剪貼簿權限） */
-insertFromImageBtn.addEventListener('click', async ()=>{
-  let text = mdCache;
-  if(!text){
-    // 次選：嘗試從剪貼簿讀
-    try{ text = await navigator.clipboard.readText(); }catch(_){}
-  }
-  if(!text){
-    toast('沒有可插入的圖片 Markdown。請先在右側「複製勾選圖片MD」。');
-    return;
-  }
-  insertAtCursor(mdEl, text.endsWith('\n') ? text : text + '\n');
-  toast('已插入圖片 Markdown');
-});
-function insertAtCursor(textarea, text){
-  const start = textarea.selectionStart ?? textarea.value.length;
-  const end   = textarea.selectionEnd ?? textarea.value.length;
-  const before = textarea.value.slice(0, start);
-  const after  = textarea.value.slice(end);
-  textarea.value = before + text + after;
-  const pos = (before + text).length;
-  textarea.setSelectionRange(pos, pos);
-  textarea.focus();
-}
+        const main = document.createElement('div');
+        main.className = 'chip-main';
 
-/* ===========================================================
-   圖片區：選圖→壓縮去EXIF→顯示縮圖
-   =========================================================== */
+        const title = document.createElement('div');
+        title.className = 'chip-title';
+        title.textContent = r.name;
 
-pickBtn.addEventListener('click', ()=> fileEl.click());
-fileEl.addEventListener('change', async e=>{
-  const files = Array.from(e.target.files || []).filter(f=>f.type.startsWith('image/'));
-  if(!files.length) return;
-  const maxDim = Math.max(640, Number(maxDimEl.value || 1200));
-  for(const f of files){
-    const it = await readAndCompress(f, maxDim);
-    items.push(it);
-    addThumb(it);
-  }
-  toast(`已載入 ${files.length} 張圖片`);
-});
+        const meta = document.createElement('div');
+        meta.className = 'chip-meta';
+        meta.textContent = `${formatDateISO(r.start)} ～ ${formatDateISO(r.end)}`;
 
-/* 讀檔 + re-encode 去 EXIF */
-function readFileAsDataURL(file){
-  return new Promise((res, rej)=>{
-    const fr = new FileReader();
-    fr.onload = ()=> res(fr.result);
-    fr.onerror = rej;
-    fr.readAsDataURL(file);
-  });
-}
-function loadImage(src){
-  return new Promise((res, rej)=>{
-    const img = new Image();
-    img.onload = ()=> res(img);
-    img.onerror = rej;
-    img.src = src;
-  });
-}
-async function readAndCompress(file, maxDim){
-  const dataURL = await readFileAsDataURL(file);
-  const img = await loadImage(dataURL);
-  let w = img.width, h = img.height;
-  const r = w / h;
-  if(w > h && w > maxDim){ w = maxDim; h = Math.round(maxDim / r); }
-  else if(h >= w && h > maxDim){ h = maxDim; w = Math.round(maxDim * r); }
-  const c = document.createElement('canvas');
-  c.width = w; c.height = h;
-  const ctx = c.getContext('2d');
-  ctx.drawImage(img, 0, 0, w, h);
-  const blob = await new Promise(res => c.toBlob(res, 'image/jpeg', 0.7));
-  const url = URL.createObjectURL(blob);
-  return { file, blob, url, w, h, _selected:false };
-}
+        main.appendChild(title);
+        main.appendChild(meta);
 
-function bindSelectable(div, it){
-  // 讓整張縮圖能切換勾選，同時避免滑動誤觸
-  const THRESHOLD_PX = 8;     // 位移門檻
-  const THRESHOLD_MS = 250;   // 時長門檻
-  let startX=0, startY=0, startT=0, moved=false, pointer=-1;
+        const colorBox = document.createElement('div');
+        colorBox.className = 'chip-color';
+        colorBox.style.background = r.color;
 
-  const onDown = (e) => {
-    if (pointer !== -1) return; // 已有指標
-    const p = e.touches ? e.touches[0] : e;
-    if (!p) return;
-    pointer = p.identifier ?? p.pointerId ?? 0;
-    startX = p.clientX; startY = p.clientY; startT = Date.now();
-    moved  = false;
-  };
+        const btnDel = document.createElement('button');
+        btnDel.type = 'button';
+        btnDel.textContent = '刪除';
+        btnDel.addEventListener('click', () => removeRange(r.id));
 
-  const onMove = (e) => {
-    if (pointer === -1) return;
-    const p = e.touches ? e.touches[0] : e;
-    if (!p) return;
-    const dx = p.clientX - startX, dy = p.clientY - startY;
-    if (dx*dx + dy*dy > THRESHOLD_PX*THRESHOLD_PX) moved = true;
-  };
+        chip.appendChild(colorBox);
+        chip.appendChild(main);
+        chip.appendChild(btnDel);
 
-  const onUp = (e) => {
-    // 重置指標
-    pointer = -1;
-    const dur = Date.now() - startT;
-
-    // 只在「短且沒移動」時當作點擊
-    const isTap = !moved && dur < THRESHOLD_MS;
-    if (!isTap) return;
-
-    // 切換勾選狀態
-    it._selected = !it._selected;
-    if (it._chkEl) it._chkEl.checked = it._selected;
-    div.classList.toggle('selected', it._selected);
-  };
-
-  // 綁定 Pointer/Touch/Mouse（被動監聽避免卡捲動）
-  div.addEventListener('pointerdown', onDown, { passive: true });
-  div.addEventListener('pointermove', onMove, { passive: true });
-  div.addEventListener('pointerup',   onUp,   { passive: true });
-  div.addEventListener('pointercancel', ()=> { pointer = -1; });
-
-  // 鍵盤可用性（Tab 到縮圖按空白/Enter 也能切換）
-  div.tabIndex = 0;
-  div.setAttribute('role', 'checkbox');
-  div.setAttribute('aria-checked', 'false');
-  div.addEventListener('keydown', (e)=>{
-    if (e.key === ' ' || e.key === 'Enter'){
-      e.preventDefault();
-      it._selected = !it._selected;
-      if (it._chkEl) it._chkEl.checked = it._selected;
-      div.classList.toggle('selected', it._selected);
-      div.setAttribute('aria-checked', it._selected ? 'true' : 'false');
+        rangeList.appendChild(chip);
+      }
     }
-  });
-}
 
+    // ===== 單日事件操作 =====
 
-/* 縮圖元件（刪除在右上角 / 勾選分開） */
-/* 縮圖元件（刪除在右上角 / 勾選分開 / 整張可點選） */
-function addThumb(it){
-  const div = document.createElement('div');
-  div.className = 'thumb';
+    btnAddEvent.addEventListener('click', () => {
+      const date = parseDate(eventDateInput.value);
+      const icon = eventIconSelect.value || '📍';
+      const note = eventNoteInput.value.trim();
 
-  // 圖片
-  const img = document.createElement('img');
-  img.src = it.url;
+      if (!date) {
+        alert('請先選擇事件日期。');
+        return;
+      }
 
-  // 右上角 ❌ 刪除
-  const close = document.createElement('button');
-  close.className = 'x';
-  close.type = 'button';
-  close.textContent = '✕';
-  close.title = '刪除此張';
-  close.addEventListener('click', (e)=>{
-    e.stopPropagation();               // 避免同時觸發點擊切換
-    const i = items.indexOf(it);
-    if (i >= 0) items.splice(i, 1);
-    URL.revokeObjectURL(it.url);
-    div.remove();
-  });
-
-  // 左上角勾選框
-  const chkWrap = document.createElement('label');
-  chkWrap.className = 'chk';
-  const chk = document.createElement('input');
-  chk.type = 'checkbox';
-  chk.addEventListener('change', ()=>{
-    it._selected = chk.checked;
-    div.classList.toggle('selected', it._selected);
-    div.setAttribute('aria-checked', it._selected ? 'true' : 'false');
-  });
-  chkWrap.append(chk);
-
-  // 下方檔名列
-  const meta = document.createElement('div');
-  meta.className = 'meta';
-  const name = document.createElement('span');
-  name.className = 'name';
-  name.textContent = it._finalName || '(未命名)';
-  meta.append(name);
-
-  // 組裝
-  div.append(img, close, chkWrap, meta);
-  gridEl.append(div);
-
-  // 狀態引用
-  it._el = div;
-  it._chkEl = chk;
-  it._nameEl = name;
-
-  // 讓整張縮圖可點選，但滑動不誤觸
-  bindSelectable(div, it);
-}
-
-
-
-/* 一鍵清空此批 */
-clearBatchBtn.addEventListener('click', ()=>{
-  items.forEach(it=> URL.revokeObjectURL(it.url));
-  items = [];
-  gridEl.innerHTML = '';
-  namePrefix = null;
-  mdCache = '';
-  toast('已清空此批圖片');
-});
-
-/* 產生 MD 語法：此刻固定檔名，不再因順序變動（這版沒有拖曳） */
-genMdBtn.addEventListener('click', ()=>{
-  if(!items.length){ toast('沒有圖片可以命名'); return; }
-  if(!namePrefix) namePrefix = makePrefix();
-  let n = 1;
-  for(const it of items){
-    if(!it._finalName){
-      it._finalName = `${namePrefix}-${pad3(n++)}.jpg`;
-      it._path = `images/${it._finalName}`;
-      if(it._nameEl) it._nameEl.textContent = it._finalName;
-    }
-  }
-  toast('檔名已固定，可勾選並複製 MD');
-});
-
-/* 勾選管理 */
-checkAllBtn.addEventListener('click', ()=>{
-  items.forEach(it=>{ it._selected = true; it._chkEl && (it._chkEl.checked = true); });
-});
-uncheckAllBtn.addEventListener('click', ()=>{
-  items.forEach(it=>{ it._selected = false; it._chkEl && (it._chkEl.checked = false); });
-});
-
-/* 複製勾選圖片的 MD（並快取，供左側「插入圖片語法」用） */
-copySelectedBtn.addEventListener('click', async ()=>{
-  const hadName = items.every(it=> !!it._finalName);
-  if(!hadName){ toast('請先按「產生MD語法」鎖定檔名'); return; }
-  const picked = items.filter(it=> it._selected);
-  if(!picked.length){ toast('請先勾選要插入的圖片'); return; }
-
-  // 逐張獨立行，中間空一行，觸發你的自動圖牆規則
-  const lines = [];
-  for(const it of picked){
-    lines.push(`![](${it._path})`, '');
-  }
-  const out = lines.join('\n');
-
-  try{
-    await navigator.clipboard.writeText(out);
-    mdCache = out;
-    toast('已複製勾選圖片的 Markdown');
-  }catch{
-    mdCache = out; // 就算沒有權限，還是保留在快取供「插入圖片語法」
-    toast('已準備 MD（剪貼簿權限被擋，請用「插入圖片語法」貼入）');
-  }
-});
-
-/* 下載 ZIP（images/ 裡面塞固定檔名的 blob） */
-saveZipBtn.addEventListener('click', async ()=>{
-  const named = items.filter(it=> it._finalName);
-  if(!named.length){ toast('請先「產生MD語法」固定檔名'); return; }
-  const zip = new JSZip();
-  const folder = zip.folder('images');
-  for(const it of named){
-    const arrbuf = await it.blob.arrayBuffer();
-    folder.file(it._finalName, arrbuf);
-  }
-  const blob = await zip.generateAsync({type:'blob'});
-  try{
-    if(window.showSaveFilePicker){
-      const handle = await showSaveFilePicker({
-        suggestedName: 'images.zip',
-        types: [{ description:'ZIP 檔', accept:{ 'application/zip':['.zip'] } }]
+      events.push({
+        id: nextId(),
+        date,
+        icon,
+        note
       });
-      const w = await handle.createWritable();
-      await w.write(blob); await w.close();
-    }else{
-      saveAs(blob, 'images.zip');
+
+      eventNoteInput.value = '';
+      renderEventsList();
+      renderCalendar();
+      updateSummary();
+    });
+
+    function removeEvent(id) {
+      const idx = events.findIndex(e => e.id === id);
+      if (idx >= 0) {
+        events.splice(idx, 1);
+        renderEventsList();
+        renderCalendar();
+        updateSummary();
+      }
     }
-    toast('ZIP 已下載/儲存');
-  }catch(e){
-    console.error(e);
-    toast('已取消或失敗');
-  }
-});
-</script>
 
+    function renderEventsList() {
+      eventList.innerHTML = '';
+      if (!events.length) {
+        eventList.innerHTML = '<div style="font-size:.85rem; color:var(--muted);">尚未加入任何事件。</div>';
+        return;
+      }
 
+      // 依日期排序，方便你自己看
+      const sorted = [...events].sort((a, b) => a.date - b.date);
 
+      for (const e of sorted) {
+        const chip = document.createElement('div');
+        chip.className = 'chip';
 
+        const main = document.createElement('div');
+        main.className = 'chip-main';
 
+        const title = document.createElement('div');
+        title.className = 'chip-title';
+        title.textContent = `${e.icon} ${e.note || '(無備註)'}`;
 
+        const meta = document.createElement('div');
+        meta.className = 'chip-meta';
+        meta.textContent = formatDateISO(e.date);
 
+        main.appendChild(title);
+        main.appendChild(meta);
 
+        const btnDel = document.createElement('button');
+        btnDel.type = 'button';
+        btnDel.textContent = '刪除';
+        btnDel.addEventListener('click', () => removeEvent(e.id));
 
+        chip.appendChild(main);
+        chip.appendChild(btnDel);
 
+        eventList.appendChild(chip);
+      }
+    }
 
+    // ===== 日曆渲染 =====
 
-</script>
+    function renderCalendar() {
+      calendarGrid.innerHTML = '';
+
+      if (!viewStartDate) return;
+
+      const days = [];
+      for (let i = 0; i < 35; i++) {
+        days.push(addDays(viewStartDate, i));
+      }
+
+      // 日曆範圍文字（左上小字）
+      const first = days[0];
+      const last = days[days.length - 1];
+      const label = `${formatDateISO(first)} ～ ${formatDateISO(last)}`;
+      calendarRangeLabel.textContent = label;
+
+      const todayISO = formatDateISO(new Date());
+
+      for (const day of days) {
+        const cell = document.createElement('div');
+        cell.className = 'day-cell';
+
+        const dateISO = formatDateISO(day);
+        const dayNum = day.getDate();
+        const month = day.getMonth() + 1;
+
+        // 日期＋月標籤（每月 1 號顯示）
+        const topRow = document.createElement('div');
+        topRow.style.display = 'flex';
+        topRow.style.alignItems = 'baseline';
+        const numSpan = document.createElement('span');
+        numSpan.className = 'day-number';
+        numSpan.textContent = dayNum;
+
+        topRow.appendChild(numSpan);
+
+        if (dayNum === 1) {
+          const monthTag = document.createElement('span');
+          monthTag.className = 'day-month-tag';
+          monthTag.textContent = `${month} 月`;
+          topRow.appendChild(monthTag);
+        }
+
+        cell.appendChild(topRow);
+
+        // 今天的小圈圈
+        if (dateISO === todayISO) {
+          const ring = document.createElement('div');
+          ring.className = 'today-ring';
+          cell.appendChild(ring);
+        }
+
+        // 找出這天有哪些區間命中
+        const hitRanges = ranges.filter(r => isWithin(day, r.start, r.end));
+
+        if (hitRanges.length) {
+          cell.classList.add('has-range');
+
+          // 目前只取第一個區間的顏色做底色與側邊條（一般情況也只會有一個）
+          const primary = hitRanges[0];
+
+          const strip = document.createElement('div');
+          strip.className = 'range-strip';
+          strip.style.background = primary.color;
+          cell.appendChild(strip);
+
+          // 如果是這個區間的第一天，就顯示名稱
+          for (const r of hitRanges) {
+            if (formatDateISO(day) === formatDateISO(r.start)) {
+              const labelDiv = document.createElement('div');
+              labelDiv.className = 'range-label';
+              labelDiv.textContent = r.name;
+              labelDiv.style.color = r.color;
+              cell.appendChild(labelDiv);
+            }
+          }
+        }
+
+        // 單日事件
+        const dayEvents = events.filter(e => formatDateISO(e.date) === dateISO);
+        if (dayEvents.length) {
+          const eventsBox = document.createElement('div');
+          eventsBox.className = 'events';
+
+          const sorted = dayEvents.sort((a, b) => a.id - b.id);
+          for (const e of sorted) {
+            const item = document.createElement('div');
+            item.className = 'event-item';
+
+            const iconSpan = document.createElement('span');
+            iconSpan.className = 'event-icon';
+            iconSpan.textContent = e.icon;
+
+            const textSpan = document.createElement('span');
+            textSpan.className = 'event-text';
+            textSpan.textContent = e.note || '';
+
+            item.appendChild(iconSpan);
+            if (e.note) item.appendChild(textSpan);
+
+            eventsBox.appendChild(item);
+          }
+
+          cell.appendChild(eventsBox);
+        }
+
+        calendarGrid.appendChild(cell);
+      }
+    }
+
+    // ===== 總覽資訊 =====
+
+    function updateSummary() {
+      if (!viewStartDate) {
+        summaryBox.textContent = '尚未建立日曆。請先選一個日期。';
+        return;
+      }
+      const first = viewStartDate;
+      const last = addDays(viewStartDate, 34);
+
+      const rangeCount = ranges.length;
+      const eventCount = events.length;
+
+      summaryBox.innerHTML = `
+        📅 目前視圖範圍：<strong>${formatDateISO(first)}</strong> ～ <strong>${formatDateISO(last)}</strong><br/>
+        🏨 區間（城市／飯店）共：<strong>${rangeCount}</strong> 筆<br/>
+        📌 單日事件共：<strong>${eventCount}</strong> 筆<br/>
+        ✏️ 區間只會在起始日顯示名稱，其餘靠顏色辨識。事件採「單日一筆」邏輯，跨日移動就自己加兩筆。
+      `;
+    }
+  </script>
 </body>
 </html>
