@@ -1022,7 +1022,7 @@
         const meta = document.createElement('div');
         meta.className = 'chip-meta';
         const datePart   = `${formatDateISO(s.start)} ～ ${formatDateISO(s.end)}`;
-        const amountPart = `${s.currency}${s.amountInput}${s.unitType}｜NTD ${formatTwdK(s.twdAmount)}`;
+        const amountPart = `${s.currency}${s.amountInput}${s.unitType}｜NT ${formatTwdK(s.twdAmount)}`;
         meta.textContent = `${datePart}｜${amountPart}`;
 
         main.appendChild(title);
@@ -1240,7 +1240,7 @@
             const hotelAmount = document.createElement('div');
             hotelAmount.className = 'hotel-amount';
             hotelAmount.textContent =
-              `${primaryStay.currency} ${primaryStay.amountInput}${primaryStay.unitType} / NTD ${formatTwdK(primaryStay.twdAmount)}`;
+              `${primaryStay.currency} ${primaryStay.amountInput}${primaryStay.unitType} / NT ${formatTwdK(primaryStay.twdAmount)}`;
             cell.appendChild(hotelAmount);
           }
         }
@@ -1354,7 +1354,7 @@
           const s = coveringStays[0];
           if (iso === formatDateISO(s.start)) {
             amountSummary =
-              `${s.currency} ${s.amountInput}${s.unitType} / NTD ${formatTwdK(s.twdAmount)}`;
+              `${s.currency} ${s.amountInput}${s.unitType} / NT ${formatTwdK(s.twdAmount)}`;
           }
         }
 
