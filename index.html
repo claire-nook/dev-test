@@ -403,7 +403,114 @@
       box-shadow:0 0 0 1px rgba(79,140,255,0.45);
       background:#f0f4ff;
     }
+            /* Markdown 預覽用 Modal */
+            .modal-backdrop {
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.35);
+                display: none; /* 預設關閉，打開時改為 flex */
+                align-items: center;
+                justify-content: center;
+                z-index: 99;
+            }
 
+            .modal-dialog {
+                background: var(--card-bg);
+                border-radius: var(--radius);
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+                max-width: 900px;
+                width: 92%;
+                max-height: 80vh;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+            }
+
+            .modal-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 10px 14px;
+                border-bottom: 1px solid #e5e5ea;
+                background: #f9fafb;
+            }
+
+            .modal-header-title {
+                font-size: 0.98rem;
+                font-weight: 600;
+            }
+
+            .modal-close-btn {
+                border: none;
+                background: transparent;
+                font-size: 1.1rem;
+                cursor: pointer;
+                padding: 4px 8px;
+                border-radius: 999px;
+            }
+
+            .modal-close-btn:hover {
+                background: #e5e5ea;
+            }
+
+            .modal-body {
+                padding: 12px 16px 14px;
+                overflow: auto;
+                font-size: 0.95rem;
+                line-height: 1.6;
+            }
+
+            .modal-body h2 {
+                font-size: 1.05rem;
+                margin: 0.4rem 0 0.3rem;
+            }
+
+            .modal-body p {
+                margin: 0.2rem 0 0.3rem;
+            }
+
+            .modal-body blockquote {
+                margin: 6px 0;
+                padding: 6px 10px;
+                border-left: 4px solid var(--accent);
+                background: var(--soft);
+                border-radius: 6px;
+            }
+
+            .modal-body table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 8px;
+                font-size: 0.9rem;
+            }
+
+            .modal-body th,
+            .modal-body td {
+                border: 1px solid #ddd;
+                padding: 4px 6px;
+                text-align: left;
+            }
+
+            .modal-body thead {
+                background: #f3f4f6;
+            }
+
+            .modal-footer {
+                padding: 8px 14px;
+                border-top: 1px solid #e5e5ea;
+                display: flex;
+                justify-content: flex-end;
+                gap: 8px;
+                background: #fafafa;
+            }
+
+            @media (max-width: 767px) {
+                /* 你原本的 @media 已經存在，記得只要在裡面多加 modal 的調整 */
+                .modal-dialog {
+                    max-height: 88vh;
+                    width: 96%;
+                }
+            }
     @media (max-width: 767px) {
       .wrap { padding:16px 10px 28px; }
       header { padding:0.75rem 1rem; }
@@ -432,9 +539,10 @@
         <button id="btnGenerate" class="btn" type="button">更新 5 週視圖</button>
       </div>
 
-      <div class="toolbar-group">
-        <button id="btnCopyMd" class="btn secondary" type="button">複製 Markdown 表格</button>
-      </div>
+<div class="toolbar-group">
+    <button id="btnCopyMd" class="btn secondary" type="button">複製 Markdown</button>
+    <button id="btnPreviewMd" class="btn ghost" type="button">預覽行程</button>
+</div>
 
       <div class="toolbar-group">
         <button id="btnImportJson" class="btn ghost" type="button">匯入 JSON</button>
@@ -582,8 +690,24 @@
         <div id="eventList" class="list"></div>
       </div>
     </div>
+        <!-- Markdown 預覽 Modal -->
+        <div id="mdPreviewModal" class="modal-backdrop">
+            <div class="modal-dialog">
+                <div class="modal-header">
+                    <div class="modal-header-title">📖 行程預覽</div>
+                    <button id="btnClosePreview" class="modal-close-btn" type="button">✕</button>
+                </div>
+                <div id="mdPreviewContent" class="modal-body">
+                    <!-- 由 JS 將 Markdown 渲染成 HTML 塞進來 -->
+                </div>
+                <div class="modal-footer">
+                    <button id="btnCopyFromPreview" class="btn secondary" type="button">複製 Markdown</button>
+                </div>
+            </div>
+        </div>
   </div>
-
+        <!-- 使用 CDN 載入 marked.js，提供 Markdown -> HTML 渲染 -->
+        <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <!-- 下面整段 JS 跟上一版一樣：資料結構＋匯率計算＋JSON＋Markdown -->
   <script>
     /* 日期工具：解析、格式化、加天數、判斷是否在區間內 */
@@ -637,7 +761,13 @@
       if (s.indexOf('.') !== -1) s = s.replace(/\.0$/, '');
       return s + 'K';
     }
-
+            /* 計算住宿晚數（目前以「包含起訖日」的天數當晚數） */
+            function computeStayNights(startDate, endDate) {
+                if (!startDate || !endDate) return 0;
+                const MS = 24 * 60 * 60 * 1000;
+                const diff = endDate.getTime() - startDate.getTime();
+                return Math.round(diff / MS) + 1;
+            }
     /* 全域資料 */
     let viewStartDate = null;
     const ranges = [];
@@ -689,6 +819,14 @@ const eventExtraRow     = document.getElementById('eventExtraRow'); // ✈️ �
 const btnAddEvent       = document.getElementById('btnAddEvent');
 const btnCancelEventEdit= document.getElementById('btnCancelEventEdit');
 const eventList         = document.getElementById('eventList');      
+
+            const btnPreviewMd = document.getElementById("btnPreviewMd");
+
+            // Modal 元件：Markdown 預覽
+            const mdPreviewModal = document.getElementById("mdPreviewModal");
+            const mdPreviewContent = document.getElementById("mdPreviewContent");
+            const btnClosePreview = document.getElementById("btnClosePreview");
+            const btnCopyFromPreview = document.getElementById("btnCopyFromPreview");
 
 
 // 控制「第二行（時間）」是否顯示：只有 ✈️ 才顯示
@@ -1348,28 +1486,51 @@ textSpan.textContent = text;
       return { first, last, days };
     }
 
-    function updateSummary() {
-      if (!viewStartDate) {
-        summaryBox.textContent = '尚未建立日曆。請先選一個日期。';
-        return;
-      }
-      const first = viewStartDate;
-      const last  = addDays(viewStartDate, 34);
+            function updateSummary() {
+                if (!viewStartDate) {
+                    summaryBox.textContent = "尚未建立日曆。請先選一個日期。";
+                    return;
+                }
+                const firstView = viewStartDate;
+                const lastView = addDays(viewStartDate, 34);
 
-      const span = getTripSpan();
-      let tripLine = '🧭 旅程天數：目前尚未設定任何區間或事件。';
-      if (span) {
-        tripLine = `🧭 旅程天數：<strong>${span.days}</strong> 天（${formatDateISO(span.first)} ～ ${formatDateISO(span.last)}）`;
-      }
+                const span = getTripSpan();
+                let tripLine = "🧭 旅程天數：目前尚未設定任何區間或事件。";
+                if (span) {
+                    tripLine = `🧭 旅程天數：<strong>${span.days}</strong> 天（${formatDateISO(
+                        span.first
+                    )} ～ ${formatDateISO(span.last)}）`;
+                }
 
-      summaryBox.innerHTML = `
-        📅 目前視圖範圍：<strong>${formatDateISO(first)}</strong> ～ <strong>${formatDateISO(last)}</strong><br/>
+                // 住宿摘要：每間飯店 + 總台幣金額
+                let hotelSummaryHtml = "💤 住宿摘要：尚未設定任何住宿。";
+                if (stays.length) {
+                    const sortedStays = [...stays].sort((a, b) => a.start - b.start);
+                    let totalTwd = 0;
+                    const lines = [];
+                    for (const s of sortedStays) {
+                        const nights = computeStayNights(s.start, s.end);
+                        totalTwd += s.twdAmount || 0;
+                        const name = s.name || "(未命名住宿)";
+                        const origAmount = `${s.currency} ${s.amountInput}${s.unitType}`;
+                        const twdStr = `NT ${formatTwdK(s.twdAmount)}`;
+                        lines.push(`・${name}：${nights} 晚，${origAmount}，${twdStr}`);
+                    }
+                    hotelSummaryHtml =
+                        "💤 住宿摘要：<br/>" +
+                        lines.join("<br/>") +
+                        `<br/>合計：約 <strong>NT ${formatTwdK(totalTwd)}</strong>`;
+                }
+
+                summaryBox.innerHTML = `
+        📅 目前視圖範圍：<strong>${formatDateISO(firstView)}</strong> ～ <strong>${formatDateISO(lastView)}</strong><br/>
         🏨 區間（城市／飯店）共：<strong>${ranges.length}</strong> 筆<br/>
         🛏️ 住宿紀錄共：<strong>${stays.length}</strong> 筆<br/>
         📌 單日事件共：<strong>${events.length}</strong> 筆<br/>
         ${tripLine}<br/>
+        ${hotelSummaryHtml}
       `;
-    }
+            }
 
     function buildMarkdownTable() {
       if (!viewStartDate) return '';
