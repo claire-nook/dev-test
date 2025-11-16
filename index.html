@@ -703,23 +703,28 @@ function updateEventExtraVisibility() {
 
 eventIconSelect.addEventListener('change', updateEventExtraVisibility);
 
-    (function initDefaults() {
-      const today = new Date();
-      const iso = formatDateISO(today);
+(function initDefaults() {
+  const today = new Date();
+  const iso = formatDateISO(today);
 
-      anchorInput.value = iso;
-      eventDateInput.value = iso;
-      rangeStartInput.value = iso;
-      rangeEndInput.value = iso;
+  anchorInput.value = iso;
+  eventDateInput.value = iso;
+  rangeStartInput.value = iso;
+  rangeEndInput.value = iso;
 
-      setViewStartFromAnchor(today);
-      renderRangesList();
-      renderEventsList();
-      clearHotelForm();
-      renderHotelList();
-      renderCalendar();
-      updateSummary();
-    })();
+  // 預設單日事件是「📍 景點」，順便關掉第二行
+  if (eventIconSelect) eventIconSelect.value = '📍';
+  if (eventNote2Input) eventNote2Input.value = '';
+  updateEventExtraVisibility();
+
+  setViewStartFromAnchor(today);
+  renderRangesList();
+  renderEventsList();
+  clearHotelForm();
+  renderHotelList();
+  renderCalendar();
+  updateSummary();
+})();
 
     function setViewStartFromAnchor(date) {
       if (!date) return;
