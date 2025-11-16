@@ -281,6 +281,10 @@
       text-overflow:ellipsis;
       overflow:hidden;
     }
+/* ✈️ 航班：允許兩行顯示 */
+.event-text-multiline {
+  white-space: pre-line;
+}
 
 /* 下方輸入區塊：全部直向一列一欄 */
 .bottom-layout {
@@ -549,22 +553,28 @@
           <label>日期：</label>
           <input id="eventDate" type="date" />
         </div>
-        <div class="field-row">
-          <label>圖示：</label>
-          <select id="eventIcon">
-            <option value="✈️">✈️ 飛機</option>
-            <option value="🚆">🚆 火車</option>
-            <option value="🚌">🚌 巴士</option>
-            <option value="🚗">🚗 包車</option>
-            <option value="🚢">🚢 郵輪</option>
-            <option value="🍣">🍣 餐廳</option>
-            <option value="🛍">🛍 逛街</option>
-            <option value="📍">📍 景點</option>
-          </select>
-          <input id="eventNote" type="text" placeholder="例如：AC838、TPE → CTS 夜航" />
-          <button id="btnAddEvent" class="btn secondary" type="button">加入事件</button>
-          <button id="btnCancelEventEdit" class="btn secondary" type="button" style="display:none;">取消編輯</button>
-        </div>
+<div class="field-row">
+  <label>圖示：</label>
+  <select id="eventIcon">
+    <option value="✈️">✈️ 飛機</option>
+    <option value="🚆">🚆 火車</option>
+    <option value="🚌">🚌 巴士</option>
+    <option value="🚗">🚗 包車</option>
+    <option value="🚢">🚢 郵輪</option>
+    <option value="🍣">🍣 餐廳</option>
+    <option value="🛍">🛍 逛街</option>
+    <option value="📍">📍 景點</option>
+  </select>
+  <input id="eventNote" type="text" placeholder="例如：AC838、TPE → CTS 夜航" />
+  <button id="btnAddEvent" class="btn secondary" type="button">加入事件</button>
+  <button id="btnCancelEventEdit" class="btn secondary" type="button" style="display:none;">取消編輯</button>
+</div>
+<!-- ✈️ 專用第二行：起迄時間 -->
+<div class="field-row" id="eventExtraRow" style="display:none;">
+  <label style="visibility:hidden;">圖示：</label>
+  <input id="eventNote2" type="text" placeholder="例如：12:00-06:35（+1）" />
+</div>
+        
         <div class="field-row">
           <small>同一天可以有多個事件，日曆會全部顯示；匯出 Markdown 時會放進備註欄，用「；」分隔。</small>
         </div>
@@ -671,12 +681,27 @@
     const btnCancelHotelEdit= document.getElementById('btnCancelHotelEdit');
     const hotelList         = document.getElementById('hotelList');
 
-    const eventDateInput    = document.getElementById('eventDate');
-    const eventIconSelect   = document.getElementById('eventIcon');
-    const eventNoteInput    = document.getElementById('eventNote');
-    const btnAddEvent       = document.getElementById('btnAddEvent');
-    const btnCancelEventEdit= document.getElementById('btnCancelEventEdit');
-    const eventList         = document.getElementById('eventList');
+const eventDateInput    = document.getElementById('eventDate');
+const eventIconSelect   = document.getElementById('eventIcon');
+const eventNoteInput    = document.getElementById('eventNote');
+const eventNote2Input   = document.getElementById('eventNote2');   // ✈️ 第二行
+const eventExtraRow     = document.getElementById('eventExtraRow'); // ✈️ 第二行容器
+const btnAddEvent       = document.getElementById('btnAddEvent');
+const btnCancelEventEdit= document.getElementById('btnCancelEventEdit');
+const eventList         = document.getElementById('eventList');      = document.getElementById('eventList');
+
+
+// 控制「第二行（時間）」是否顯示：只有 ✈️ 才顯示
+function updateEventExtraVisibility() {
+  if (!eventExtraRow) return;
+  const isFlight = eventIconSelect.value === '✈️';
+  eventExtraRow.style.display = isFlight ? '' : 'none';
+  if (!isFlight && eventNote2Input) {
+    eventNote2Input.value = '';
+  }
+}
+
+eventIconSelect.addEventListener('change', updateEventExtraVisibility);
 
     (function initDefaults() {
       const today = new Date();
@@ -863,14 +888,16 @@
       renderRangesList();
     });
 
-    function clearEventForm() {
-      editingEventId = null;
-      eventDateInput.value = anchorInput.value || '';
-      eventIconSelect.value = '📍';
-      eventNoteInput.value = '';
-      btnAddEvent.textContent = '加入事件';
-      btnCancelEventEdit.style.display = 'none';
-    }
+function clearEventForm() {
+  editingEventId = null;
+  eventDateInput.value = anchorInput.value || '';
+  eventIconSelect.value = '📍';
+  eventNoteInput.value = '';
+  if (eventNote2Input) eventNote2Input.value = '';
+  btnAddEvent.textContent = '加入事件';
+  btnCancelEventEdit.style.display = 'none';
+  updateEventExtraVisibility();
+}
 
     function renderEventsList() {
       eventList.innerHTML = '';
@@ -889,9 +916,14 @@
         const main = document.createElement('div');
         main.className = 'chip-main';
 
-        const title = document.createElement('div');
-        title.className = 'chip-title';
-        title.textContent = `${e.icon} ${e.note || '(無備註)'}`;
+const title = document.createElement('div');
+title.className = 'chip-title';
+
+let mainText = e.note || '(無備註)';
+if (e.icon === '✈️' && e.note2) {
+  mainText = `${e.note || ''}【${e.note2}】`.trim();
+}
+title.textContent = `${e.icon} ${mainText}`;
 
         const meta = document.createElement('div');
         meta.className = 'chip-meta';
@@ -925,18 +957,20 @@
       }
     }
 
-    function startEditEvent(id) {
-      const e = events.find(x => x.id === id);
-      if (!e) return;
+function startEditEvent(id) {
+  const e = events.find(x => x.id === id);
+  if (!e) return;
 
-      editingEventId = id;
-      eventDateInput.value  = formatDateISO(e.date);
-      eventIconSelect.value = e.icon || '📍';
-      eventNoteInput.value  = e.note || '';
+  editingEventId = id;
+  eventDateInput.value  = formatDateISO(e.date);
+  eventIconSelect.value = e.icon || '📍';
+  eventNoteInput.value  = e.note || '';
+  if (eventNote2Input) eventNote2Input.value = e.note2 || '';
 
-      btnAddEvent.textContent = '儲存事件';
-      btnCancelEventEdit.style.display = 'inline-block';
-    }
+  btnAddEvent.textContent = '儲存事件';
+  btnCancelEventEdit.style.display = 'inline-block';
+  updateEventExtraVisibility();
+}
 
     function removeEvent(id) {
       const idx = events.findIndex(x => x.id === id);
@@ -948,37 +982,43 @@
       updateSummary();
     }
 
-    btnAddEvent.addEventListener('click', () => {
-      const date = parseDate(eventDateInput.value);
-      const icon = eventIconSelect.value || '📍';
-      const note = eventNoteInput.value.trim();
+btnAddEvent.addEventListener('click', () => {
+  const date = parseDate(eventDateInput.value);
+  const icon = eventIconSelect.value || '📍';
+  const note = eventNoteInput.value.trim();
+  const note2Raw = eventNote2Input ? eventNote2Input.value.trim() : '';
+  const isFlight = icon === '✈️';
+  const note2 = isFlight ? note2Raw : '';
 
-      if (!date) {
-        alert('請先選擇事件日期。');
-        return;
-      }
+  if (!date) {
+    alert('請先選擇事件日期。');
+    return;
+  }
 
-      if (editingEventId != null) {
-        const target = events.find(e => e.id === editingEventId);
-        if (target) {
-          target.date = date;
-          target.icon = icon;
-          target.note = note;
-        }
-      } else {
-        events.push({
-          id: nextId(),
-          date,
-          icon,
-          note
-        });
-      }
-
-      clearEventForm();
-      renderEventsList();
-      renderCalendar();
-      updateSummary();
+  if (editingEventId != null) {
+    const target = events.find(e => e.id === editingEventId);
+    if (target) {
+      target.date = date;
+      target.icon = icon;
+      target.note = note;
+      target.note2 = note2;
+    }
+  } else {
+    events.push({
+      id: nextId(),
+      date,
+      icon,
+      note,
+      note2
     });
+  }
+
+  clearEventForm();
+  renderEventsList();
+  renderCalendar();
+  updateSummary();
+});
+
 
     btnCancelEventEdit.addEventListener('click', () => {
       clearEventForm();
@@ -1259,9 +1299,15 @@
             iconSpan.className = 'event-icon';
             iconSpan.textContent = e.icon;
 
-            const textSpan = document.createElement('span');
-            textSpan.className = 'event-text';
-            textSpan.textContent = e.note || '';
+const textSpan = document.createElement('span');
+textSpan.className = 'event-text';
+
+let text = e.note || '';
+if (e.icon === '✈️' && e.note2) {
+  textSpan.classList.add('event-text-multiline');
+  text = `${e.note || ''}\n${e.note2}`.trim(); // 第一行：航班＋飛行時間；第二行：起迄時間
+}
+textSpan.textContent = text;
 
             item.appendChild(iconSpan);
             item.appendChild(textSpan);
@@ -1362,13 +1408,21 @@
           .filter(e => formatDateISO(e.date) === iso)
           .sort((a, b) => a.id - b.id);
 
-        const remark = dayEvents
-          .map(e => {
-            const base = e.icon || '';
-            const note = (e.note || '').trim();
-            return note ? `${base} ${note}` : base;
-          })
-          .join('；');
+const remark = dayEvents
+  .map(e => {
+    const base = e.icon || '';
+    const note = (e.note || '').trim();
+    const note2 = (e.note2 || '').trim();
+
+    if (e.icon === '✈️' && note && note2) {
+      // ✈️ BR72 12h35m【12:00-06:35（+1）】
+      return `${base} ${note}【${note2}】`;
+    }
+
+    if (note) return `${base} ${note}`;
+    return base;
+  })
+  .join('；');
 
         lines.push(`| ${dateStr} | ${location} | ${hotelName} | ${amountSummary} | ${remark} |`);
       }
@@ -1407,11 +1461,14 @@
           start: formatDateISO(r.start),
           end:   formatDateISO(r.end)
         })),
-        events: events.map(e => ({
-          date: formatDateISO(e.date),
-          icon: e.icon,
-          note: e.note
-        })),
+        
+events: events.map(e => ({
+  date: formatDateISO(e.date),
+  icon: e.icon,
+  note: e.note,
+  note2: e.note2 || ''
+})),
+        
         stays: stays.map(s => ({
           name: s.name,
           start: formatDateISO(s.start),
@@ -1502,7 +1559,8 @@
                 id: nextId(),
                 date,
                 icon: e.icon || '📍',
-                note: e.note || ''
+                note: e.note || '',
+                note2: e.note2 || ''
               });
             }
           }
