@@ -497,10 +497,10 @@
                 background: var(--soft);
                 border-radius: 6px;
             }
-/* 讓 modal 裡所有段落，都依照文字裡的 \n 換行顯示 */
-.modal-body p {
-    white-space: pre-line;
-}
+            /* 讓 modal 裡所有段落，都依照文字裡的 \n 換行顯示 */
+            .modal-body p {
+                white-space: pre-line;
+            }
             .modal-body table {
                 width: 100%;
                 border-collapse: collapse;
@@ -581,11 +581,12 @@
                     <button id="btnPreviewMd" class="btn ghost" type="button">預覽行程</button>
                 </div>
 
-                <div class="toolbar-group">
-                    <button id="btnImportJson" class="btn ghost" type="button">匯入 JSON</button>
-                    <button id="btnExportJson" class="btn ghost" type="button">匯出 JSON</button>
-                    <input id="importJsonInput" type="file" accept="application/json" style="display: none" />
-                </div>
+<div class="toolbar-group">
+    <button id="btnImportJson" class="btn ghost" type="button">匯入 JSON</button>
+    <button id="btnExportJson" class="btn ghost" type="button">匯出 JSON</button>
+    <button id="btnCopyJson" class="btn ghost" type="button">複製 JSON</button>
+    <input id="importJsonInput" type="file" accept="application/json" style="display: none" />
+</div>
             </div>
 
             <div id="summary">尚未建立日曆。請先選一個日期，並按「更新 5 週視圖」。</div>
@@ -834,8 +835,11 @@
             const btnGenerate = document.getElementById("btnGenerate");
             const btnCopyMd = document.getElementById("btnCopyMd");
             const btnImportJson = document.getElementById("btnImportJson");
-            const btnExportJson = document.getElementById("btnExportJson");
-            const importJsonInput = document.getElementById("importJsonInput");
+const btnExportJson = document.getElementById("btnExportJson");
+const btnCopyJson = document.getElementById("btnCopyJson");
+const importJsonInput = document.getElementById("importJsonInput");
+            
+
 
             const summaryBox = document.getElementById("summary");
             const calendarGrid = document.getElementById("calendarGrid");
@@ -1332,28 +1336,28 @@
                 }
 
                 const amountInputNum = Number(amountInputVal);
-if (!isFinite(amountInputNum) || amountInputNum <= 0) {
-    alert("請輸入正確的金額數字（可以用小數）。");
-    return;
-}
+                if (!isFinite(amountInputNum) || amountInputNum <= 0) {
+                    alert("請輸入正確的金額數字（可以用小數）。");
+                    return;
+                }
 
-const fxRateNum = Number(fxRateVal);
+                const fxRateNum = Number(fxRateVal);
 
-// 先擋怪值：NaN 或負數都不行
-if (!isFinite(fxRateNum) || fxRateNum < 0) {
-    alert("請輸入正確的概算匯率（1 原幣 ≈ 幾台幣）。");
-    return;
-}
+                // 先擋怪值：NaN 或負數都不行
+                if (!isFinite(fxRateNum) || fxRateNum < 0) {
+                    alert("請輸入正確的概算匯率（1 原幣 ≈ 幾台幣）。");
+                    return;
+                }
 
-// 除了「點數 PT」以外，匯率必須 > 0；PT 可以是 0（表示當作零成本）
-if (currency !== "PT" && fxRateNum === 0) {
-    alert("請輸入正確的概算匯率（1 原幣 ≈ 幾台幣）。");
-    return;
-}
+                // 除了「點數 PT」以外，匯率必須 > 0；PT 可以是 0（表示當作零成本）
+                if (currency !== "PT" && fxRateNum === 0) {
+                    alert("請輸入正確的概算匯率（1 原幣 ≈ 幾台幣）。");
+                    return;
+                }
 
-const amountBase = computeAmountBase(amountInputNum, unitType);
-// 不分幣別，台幣金額一律用匯率計算；PT 若匯率=0 就自然算出 0
-const twdAmount = amountBase * fxRateNum;
+                const amountBase = computeAmountBase(amountInputNum, unitType);
+                // 不分幣別，台幣金額一律用匯率計算；PT 若匯率=0 就自然算出 0
+                const twdAmount = amountBase * fxRateNum;
 
                 if (editingHotelId != null) {
                     const target = stays.find((s) => s.id === editingHotelId);
@@ -1588,7 +1592,7 @@ const twdAmount = amountBase * fxRateNum;
       `;
             }
 
-              function buildMarkdownDocument() {
+            function buildMarkdownDocument() {
                 const span = getTripSpan();
                 if (!span) return "";
 
@@ -1596,9 +1600,7 @@ const twdAmount = amountBase * fxRateNum;
 
                 /* 行程摘要 */
                 lines.push("## 行程摘要");
-                lines.push(
-                    `行程區間：${formatDateISO(span.first)} ～ ${formatDateISO(span.last)}`
-                );
+                lines.push(`行程區間：${formatDateISO(span.first)} ～ ${formatDateISO(span.last)}`);
                 lines.push(`行程天數：${span.days} 天`);
 
                 lines.push("飯店資訊：");
@@ -1613,9 +1615,7 @@ const twdAmount = amountBase * fxRateNum;
                         const origAmount = `${s.currency} ${s.amountInput}${s.unitType}`;
                         const twdStr = `NT ${formatTwdK(s.twdAmount)}`;
                         totalTwd += s.twdAmount || 0;
-                        lines.push(
-                            `> ${name}：${nights} 晚，${origAmount}，${twdStr}。`
-                        );
+                        lines.push(`> ${name}：${nights} 晚，${origAmount}，${twdStr}。`);
                     }
                     lines.push(`> 住宿總金額：約 NT ${formatTwdK(totalTwd)}。`);
                 }
@@ -1658,9 +1658,7 @@ const twdAmount = amountBase * fxRateNum;
                         }
                     }
 
-                    const dayEvents = events
-                        .filter((e) => formatDateISO(e.date) === iso)
-                        .sort((a, b) => a.id - b.id);
+                    const dayEvents = events.filter((e) => formatDateISO(e.date) === iso).sort((a, b) => a.id - b.id);
 
                     const remark = dayEvents
                         .map((e) => {
@@ -1677,16 +1675,14 @@ const twdAmount = amountBase * fxRateNum;
                         })
                         .join("；");
 
-                    lines.push(
-                        `| ${dateStr} | ${location} | ${hotelName} | ${amountSummary} | ${remark} |`
-                    );
+                    lines.push(`| ${dateStr} | ${location} | ${hotelName} | ${amountSummary} | ${remark} |`);
 
                     cur = addDays(cur, 1);
                 }
 
                 return lines.join("\n");
-            }        
-                    
+            }
+
             btnCopyMd.addEventListener("click", async () => {
                 const md = buildMarkdownDocument();
                 if (!md) {
@@ -1702,7 +1698,7 @@ const twdAmount = amountBase * fxRateNum;
                     alert("複製失敗，可能是瀏覽器權限問題。請手動選取複製。");
                 }
             });
-            
+
             /* Markdown 預覽：用 marked.js 渲染成 HTML，打開 Modal */
             function openPreviewModal() {
                 const md = buildMarkdownDocument();
@@ -1750,8 +1746,7 @@ const twdAmount = amountBase * fxRateNum;
                     alert("複製失敗，可能是瀏覽器權限問題。請手動選取複製。");
                 }
             });
-            
-            
+
             function buildJsonSnapshot() {
                 return {
                     version: 2,
@@ -1806,6 +1801,26 @@ const twdAmount = amountBase * fxRateNum;
                 const fileName = `trip_${base.replace(/-/g, "")}.json`;
                 triggerDownloadBlob(blob, fileName);
             });
+            
+            btnCopyJson.addEventListener("click", async () => {
+    const snapshot = buildJsonSnapshot();
+    const jsonStr = JSON.stringify(snapshot, null, 2);
+
+    if (!jsonStr) {
+        alert("目前沒有可複製的 JSON 內容。");
+        return;
+    }
+
+    try {
+        await navigator.clipboard.writeText(jsonStr);
+        alert("JSON 已複製到剪貼簿。");
+    } catch (err) {
+        console.error(err);
+        alert("複製失敗，可能是瀏覽器權限或裝置限制。請改用匯出檔案或手動選取複製。");
+    }
+});
+            
+            
 
             btnImportJson.addEventListener("click", () => {
                 importJsonInput.click();
