@@ -1332,18 +1332,28 @@
                 }
 
                 const amountInputNum = Number(amountInputVal);
-                if (!isFinite(amountInputNum) || amountInputNum <= 0) {
-                    alert("請輸入正確的金額數字（可以用小數）。");
-                    return;
-                }
-                const fxRateNum = Number(fxRateVal);
-                if (!isFinite(fxRateNum) || fxRateNum <= 0) {
-                    alert("請輸入正確的概算匯率（1 原幣 ≈ 幾台幣）。");
-                    return;
-                }
+if (!isFinite(amountInputNum) || amountInputNum <= 0) {
+    alert("請輸入正確的金額數字（可以用小數）。");
+    return;
+}
 
-                const amountBase = computeAmountBase(amountInputNum, unitType);
-                const twdAmount = amountBase * fxRateNum;
+const fxRateNum = Number(fxRateVal);
+
+// 先擋怪值：NaN 或負數都不行
+if (!isFinite(fxRateNum) || fxRateNum < 0) {
+    alert("請輸入正確的概算匯率（1 原幣 ≈ 幾台幣）。");
+    return;
+}
+
+// 除了「點數 PT」以外，匯率必須 > 0；PT 可以是 0（表示當作零成本）
+if (currency !== "PT" && fxRateNum === 0) {
+    alert("請輸入正確的概算匯率（1 原幣 ≈ 幾台幣）。");
+    return;
+}
+
+const amountBase = computeAmountBase(amountInputNum, unitType);
+// 不分幣別，台幣金額一律用匯率計算；PT 若匯率=0 就自然算出 0
+const twdAmount = amountBase * fxRateNum;
 
                 if (editingHotelId != null) {
                     const target = stays.find((s) => s.id === editingHotelId);
