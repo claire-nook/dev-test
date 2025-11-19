@@ -581,12 +581,12 @@
                     <button id="btnPreviewMd" class="btn ghost" type="button">預覽行程</button>
                 </div>
 
-<div class="toolbar-group">
-    <button id="btnImportJson" class="btn ghost" type="button">匯入 JSON</button>
-    <button id="btnExportJson" class="btn ghost" type="button">匯出 JSON</button>
-    <button id="btnCopyJson" class="btn ghost" type="button">複製 JSON</button>
-    <input id="importJsonInput" type="file" accept="application/json" style="display: none" />
-</div>
+                <div class="toolbar-group">
+                    <button id="btnImportJson" class="btn ghost" type="button">匯入 JSON</button>
+                    <button id="btnExportJson" class="btn ghost" type="button">匯出 JSON</button>
+                    <button id="btnCopyJson" class="btn ghost" type="button">複製 JSON</button>
+                    <input id="importJsonInput" type="file" accept="application/json" style="display: none" />
+                </div>
             </div>
 
             <div id="summary">尚未建立日曆。請先選一個日期，並按「更新 5 週視圖」。</div>
@@ -835,11 +835,9 @@
             const btnGenerate = document.getElementById("btnGenerate");
             const btnCopyMd = document.getElementById("btnCopyMd");
             const btnImportJson = document.getElementById("btnImportJson");
-const btnExportJson = document.getElementById("btnExportJson");
-const btnCopyJson = document.getElementById("btnCopyJson");
-const importJsonInput = document.getElementById("importJsonInput");
-            
-
+            const btnExportJson = document.getElementById("btnExportJson");
+            const btnCopyJson = document.getElementById("btnCopyJson");
+            const importJsonInput = document.getElementById("importJsonInput");
 
             const summaryBox = document.getElementById("summary");
             const calendarGrid = document.getElementById("calendarGrid");
@@ -1801,26 +1799,24 @@ const importJsonInput = document.getElementById("importJsonInput");
                 const fileName = `trip_${base.replace(/-/g, "")}.json`;
                 triggerDownloadBlob(blob, fileName);
             });
-            
+
             btnCopyJson.addEventListener("click", async () => {
-    const snapshot = buildJsonSnapshot();
-    const jsonStr = JSON.stringify(snapshot, null, 2);
+                const snapshot = buildJsonSnapshot();
+                const jsonStr = JSON.stringify(snapshot, null, 2);
 
-    if (!jsonStr) {
-        alert("目前沒有可複製的 JSON 內容。");
-        return;
-    }
+                if (!jsonStr) {
+                    alert("目前沒有可複製的 JSON 內容。");
+                    return;
+                }
 
-    try {
-        await navigator.clipboard.writeText(jsonStr);
-        alert("JSON 已複製到剪貼簿。");
-    } catch (err) {
-        console.error(err);
-        alert("複製失敗，可能是瀏覽器權限或裝置限制。請改用匯出檔案或手動選取複製。");
-    }
-});
-            
-            
+                try {
+                    await navigator.clipboard.writeText(jsonStr);
+                    alert("JSON 已複製到剪貼簿。");
+                } catch (err) {
+                    console.error(err);
+                    alert("複製失敗，可能是瀏覽器權限或裝置限制。請改用匯出檔案或手動選取複製。");
+                }
+            });
 
             btnImportJson.addEventListener("click", () => {
                 importJsonInput.click();
