@@ -418,8 +418,6 @@
 				<label>晚數</label>
 				<input id="mDays" type="number" min="1" step="1" placeholder="8" />
 
-				<label>郵輪目的</label>
-				<input id="mRouteName" type="text" list="dlRouteNames" placeholder="阿拉斯加 / 大溪地 / 移航..." />
 
 				<label>出發日期</label>
 				<input id="mSdate" type="date" />
@@ -432,6 +430,9 @@
 
 				<label>抵達城市</label>
 				<input id="mEcity" type="text" list="dlCities" placeholder="（中文）" />
+				
+				<label>郵輪目的</label>
+				<input id="mRouteName" type="text" list="dlRouteNames" placeholder="阿拉斯加 / 大溪地 / 移航..." />
 
 				<div class="full hint" id="mIdPreview">ID：—</div>
 
@@ -557,7 +558,7 @@
 			if (!s || !Number.isFinite(d) || d <= 0) return "";
 			const dt = new Date(s + "T00:00:00");
 			if (Number.isNaN(dt.getTime())) return "";
-			dt.setDate(dt.getDate() + (d - 1));
+			dt.setDate(dt.getDate() + d);
 			const pad = (n) => String(n).padStart(2, "0");
 			return `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}`;
 		}
