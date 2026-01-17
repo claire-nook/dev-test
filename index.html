@@ -1029,7 +1029,7 @@
 				const sailings = groups.get(routeName).sort((a, b) => (a.sdate || "").localeCompare(b.sdate || ""));
 
 				sailings.forEach(s => {
-					const line1 = `${s.sdate||"?"} ~ ${s.edate||"?"}（${s.days||"?"}晚） · ${s.ship||"?"}`;
+					const line1 = `📅${s.sdate||"?"} ~ ${s.edate||"?"}（${s.days||"?"}晚） ·🚢 ${s.ship||"?"}`;
 					out.push(`### ${line1}`);
 
 					const cityLine = `${clampText(s.scity)||"?"} → ${clampText(s.ecity)||"?"}`;
@@ -1086,6 +1086,8 @@
 					});
 
 					out.push("");
+					out.push("---");
+					
 				});
 				out.push("");
 				
