@@ -90,6 +90,81 @@
 			align-items: center
 		}
 
+		/* 匯出/預覽（MD） */
+		.export-layout {
+			display: grid;
+			grid-template-columns: 1fr;
+			gap: 12px
+		}
+
+		.export-list {
+			border: 1px solid var(--border);
+			border-radius: 12px;
+			padding: 10px;
+			max-height: 320px;
+			overflow: auto;
+			background: #fafafa
+		}
+
+		.export-item {
+			display: flex;
+			gap: 10px;
+			align-items: flex-start;
+			padding: 8px 6px;
+			border-bottom: 1px dashed #e0e0e0
+		}
+
+		.export-item:last-child {
+			border-bottom: none
+		}
+
+		.export-item input {
+			margin-top: 3px
+		}
+
+		.export-item .t1 {
+			font-weight: 650
+		}
+
+		.export-item .t2 {
+			font-size: .82rem;
+			color: var(--muted)
+		}
+
+		.export-controls {
+			display: flex;
+			gap: 8px;
+			align-items: center;
+			flex-wrap: wrap
+		}
+
+		.export-preview {
+			border: 1px solid var(--border);
+			border-radius: 12px;
+			padding: 10px;
+			background: #fff;
+			max-height: 45vh;
+			overflow: auto
+		}
+
+		.export-preview table {
+			width: 100%;
+			border-collapse: collapse;
+			margin-top: 8px;
+			font-size: .9rem
+		}
+
+		.export-preview th,
+		.export-preview td {
+			border: 1px solid #ddd;
+			padding: 4px 6px;
+			text-align: left
+		}
+
+		.export-preview thead {
+			background: #f3f4f6
+		}
+
 		.badge {
 			display: inline-flex;
 			align-items: center;
@@ -365,6 +440,7 @@
 
 			<div class="toolbar-group">
 				<button class="btn" id="btnNewSailing">新增航程</button>
+				<button class="btn ghost" id="btnExportPreview">預覽匯出</button>
 				<span class="badge" title="你已經決定了，別再折磨自己">
 					<span class="badge-dot"></span>
 					幣別：USD
@@ -383,7 +459,7 @@
 
 		<section class="panel">
 			<h3>價格快照（倒序）</h3>
-			<p class="hint">點上面某條航程的「檢視價格」後，快照會出現在這裡。每筆都可以編輯或刪除。</p>
+			<p class="hint">選取上方航程的「檢視價格」，價格快照會出現在這裡。</p>
 			<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
 				<span class="mono" id="previewTitle">尚未選擇航程</span>
 				<button class="btn ghost" id="btnNewSnapshot" disabled>新增快照</button>
@@ -418,7 +494,6 @@
 				<label>晚數</label>
 				<input id="mDays" type="number" min="1" step="1" placeholder="8" />
 
-
 				<label>出發日期</label>
 				<input id="mSdate" type="date" />
 
@@ -430,8 +505,8 @@
 
 				<label>抵達城市</label>
 				<input id="mEcity" type="text" list="dlCities" placeholder="（中文）" />
-				
-				<label>郵輪目的</label>
+
+				<label>郵輪航程</label>
 				<input id="mRouteName" type="text" list="dlRouteNames" placeholder="阿拉斯加 / 大溪地 / 移航..." />
 
 				<div class="full hint" id="mIdPreview">ID：—</div>
@@ -443,13 +518,13 @@
 				</div>
 
 				<div class="full">
-					<label>停靠港口</label>
+					<label>停靠</label>
 					<textarea id="mVisiting" placeholder="例如：橫濱 > 海上 > 溫哥華..."></textarea>
 				</div>
 
 				<div class="full">
 					<label>備註</label>
-					<textarea id="mRemark" placeholder="船名、OBC、促銷、你的碎念，通通塞這裡。"></textarea>
+					<textarea id="mRemark" placeholder="船名、OBC、促銷"></textarea>
 				</div>
 			</div>
 		</div>
@@ -484,11 +559,48 @@
 
 				<div class="full">
 					<label>備註</label>
-					<textarea id="mSnapRemark" placeholder="例如：黑五/flash sale；OBC:200"></textarea>
+					<textarea id="mSnapRemark" placeholder="例如：黑五/flash sale；OBC: 陽台200/Aqua300；含稅... "></textarea>
 				</div>
 			</div>
 		</div>
 	</div>
+
+	<!-- Export / Preview Modal -->
+	<div class="modal-backdrop" id="modalExport">
+		<div class="modal" role="dialog" aria-modal="true">
+			<div class="modal-header">
+				<h3>📄 預覽匯出（Markdown）</h3>
+				<div class="modal-actions">
+					<button class="btn ghost" id="btnExportClose">關閉</button>
+				</div>
+			</div>
+
+			<div class="export-layout">
+				<div>
+					<p class="hint">勾選要輸出的航程</p>
+					<div class="export-controls">
+						<button class="btn ghost" id="btnSelectAll" type="button">全選</button>
+						<button class="btn ghost" id="btnClearAll" type="button">清空</button>
+						<span class="badge" id="exportCount"><span class="badge-dot"></span>已選 0</span>
+						<button class="btn" id="btnBuildPreview" type="button">預覽 MD</button>
+						<button class="btn secondary" id="btnCopyMd" type="button">複製 MD</button>
+					</div>
+					<div class="export-list" id="exportChecklist"></div>
+				</div>
+
+				<div>
+					<div class="badge" title="HTML 預覽>
+						<span class="badge-dot" style="border-color:#2f855a"></span>
+						預覽
+					</div>
+					<div class="export-preview" id="exportPreview">（按「預覽 MD」後才會出現內容）</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Markdown -> HTML（參考 trip_calendar 的做法） -->
+	<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
 	<script>
 		"use strict";
@@ -614,6 +726,8 @@
 			btnExport: document.getElementById("btnExport"),
 			btnCopy: document.getElementById("btnCopy"),
 
+			btnExportPreview: document.getElementById("btnExportPreview"),
+
 			btnNewSailing: document.getElementById("btnNewSailing"),
 			badgeSelected: document.getElementById("badgeSelected"),
 
@@ -650,7 +764,18 @@
 			mSnapVeranda: document.getElementById("mSnapVeranda"),
 			mSnapAqua: document.getElementById("mSnapAqua"),
 			mSnapSuite: document.getElementById("mSnapSuite"),
-			mSnapRemark: document.getElementById("mSnapRemark")
+			mSnapRemark: document.getElementById("mSnapRemark"),
+
+			// Export
+			modalExport: document.getElementById("modalExport"),
+			btnExportClose: document.getElementById("btnExportClose"),
+			btnSelectAll: document.getElementById("btnSelectAll"),
+			btnClearAll: document.getElementById("btnClearAll"),
+			exportChecklist: document.getElementById("exportChecklist"),
+			exportCount: document.getElementById("exportCount"),
+			btnBuildPreview: document.getElementById("btnBuildPreview"),
+			btnCopyMd: document.getElementById("btnCopyMd"),
+			exportPreview: document.getElementById("exportPreview")
 		};
 
 		// ===== UI state =====
@@ -679,7 +804,7 @@
 		}
 
 		// Close modal when clicking backdrop
-		[el.modalSailing, el.modalSnapshot].forEach(bd => {
+		[el.modalSailing, el.modalSnapshot, el.modalExport].forEach(bd => {
 			bd.addEventListener("click", (e) => {
 				if (e.target === bd) closeModal(bd);
 			});
@@ -689,6 +814,7 @@
 			if (e.key === "Escape") {
 				closeModal(el.modalSailing);
 				closeModal(el.modalSnapshot);
+				closeModal(el.modalExport);
 			}
 		});
 
@@ -709,7 +835,7 @@
 				chip.className = "chip";
 
 				const title = `${s.route_name || "（未分類）"}  ·  ${s.id}`;
-				const meta = `${s.sdate || "?"}～${s.edate || "?"} · ${s.days || "?"}晚 · ${s.scity || "?"}～${s.ecity || "?"}`;
+				const meta = `${s.sdate || "?"}~${s.edate || "?"} · ${s.days || "?"}晚 · ${s.scity || "?"}～${s.ecity || "?"}`;
 
 				chip.innerHTML = `
           <div class="chip-main">
@@ -788,6 +914,239 @@
 			});
 		}
 
+		// ===== Export / Preview (Markdown) =====
+		function getSailingLabel(s) {
+			const rn = clampText(s.route_name) || "（未分類）";
+			const sd = clampText(s.sdate) || "?";
+			return `${rn} · ${sd}`;
+		}
+
+		function setExportCount(n) {
+			el.exportCount.innerHTML = `<span class="badge-dot"></span>已選 ${n}`;
+		}
+
+		function renderExportChecklist() {
+			el.exportChecklist.innerHTML = "";
+
+			const sorted = [...DATA.sailings].sort((a, b) => {
+				const ra = (a.route_name || "");
+				const rb = (b.route_name || "");
+				const r = ra.localeCompare(rb, "zh-Hant");
+				if (r !== 0) return r;
+				return (a.sdate || "").localeCompare(b.sdate || "");
+			});
+
+			if (sorted.length === 0) {
+				el.exportChecklist.innerHTML = `<div class="hint">（沒有航程可以匯出，你要我變魔術嗎）</div>`;
+				setExportCount(0);
+				return;
+			}
+
+			sorted.forEach(s => {
+				const row = document.createElement("div");
+				row.className = "export-item";
+				row.innerHTML = `
+          <input type="checkbox" data-id="${escapeHtml(s.id)}" />
+          <div style="min-width:0">
+            <div class="t1">${escapeHtml(getSailingLabel(s))}</div>
+            <div class="t2 mono">${escapeHtml(s.id)}</div>
+          </div>
+        `;
+				el.exportChecklist.appendChild(row);
+			});
+
+			// default: keep previous selection if any, else select none
+			setExportCount(0);
+		}
+
+		function getCheckedExportIds() {
+			const boxes = el.exportChecklist.querySelectorAll("input[type='checkbox'][data-id]");
+			const ids = [];
+			boxes.forEach(b => { if (b.checked) ids.push(b.getAttribute("data-id")); });
+			return ids;
+		}
+
+		function setAllExportChecks(checked) {
+			const boxes = el.exportChecklist.querySelectorAll("input[type='checkbox'][data-id]");
+			boxes.forEach(b => { b.checked = !!checked; });
+			setExportCount(getCheckedExportIds().length);
+		}
+
+		function parseYmdToDate(ymd) {
+			const s = clampText(ymd);
+			if (!s) return null;
+			const d = new Date(s + "T00:00:00");
+			if (Number.isNaN(d.getTime())) return null;
+			return d;
+		}
+
+		function diffDays(fromYmd, toYmd) {
+			// return (to - from) in days
+			const a = parseYmdToDate(fromYmd);
+			const b = parseYmdToDate(toYmd);
+			if (!a || !b) return null;
+			const MS = 24 * 60 * 60 * 1000;
+			return Math.round((b.getTime() - a.getTime()) / MS);
+		}
+
+		function mdEscapePipes(s) {
+			return (s ?? "").toString().replaceAll("|", "\\|");
+		}
+
+		function normalizeMultilineForList(text) {
+			const t = clampText(text);
+			if (!t) return "";
+			const lines = t.split(/\r?\n/).map(x => x.trim()).filter(Boolean);
+			if (lines.length === 0) return "";
+			// keep it readable in markdown
+			return lines.join(" / ");
+		}
+
+		function buildCruiseMarkdown(selectedIds) {
+			const ids = Array.isArray(selectedIds) ? selectedIds : [];
+			const chosen = DATA.sailings.filter(s => ids.includes(s.id));
+
+			if (chosen.length === 0) return "";
+
+			// group by route_name
+			const groups = new Map();
+			chosen.forEach(s => {
+				const key = clampText(s.route_name) || "（未分類）";
+				if (!groups.has(key)) groups.set(key, []);
+				groups.get(key).push(s);
+			});
+
+			const routeNames = Array.from(groups.keys()).sort((a, b) => a.localeCompare(b, "zh-Hant"));
+
+			const today = nowISO().slice(0, 10);
+			const out = [];
+			//out.push(`# Cruise Tracker 匯出`);
+			out.push(`匯出日期：${today}`);
+			out.push("");
+
+			routeNames.forEach(routeName => {
+				out.push(`## ${routeName}`);
+				const sailings = groups.get(routeName).sort((a, b) => (a.sdate || "").localeCompare(b.sdate || ""));
+
+				sailings.forEach(s => {
+					const line1 = `${s.sdate||"?"} ~ ${s.edate||"?"}（${s.days||"?"}晚） · ${s.ship||"?"}`;
+					out.push(`### ${line1}`);
+
+					const cityLine = `${clampText(s.scity)||"?"} → ${clampText(s.ecity)||"?"}`;
+					out.push(`- **城市**：${cityLine}`);
+
+					const visiting = normalizeMultilineForList(s.visiting);
+					if (visiting) out.push(`- **停靠**：${visiting}`);
+
+					const remark = clampText(s.remark);
+					if (remark) out.push(`- **備註**：${remark}`);
+
+					out.push("");
+
+					const snaps = DATA.price_snapshots
+						.filter(p => p.sailing_id === s.id)
+						.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+
+					if (snaps.length === 0) {
+						out.push("> （尚無快照）");
+						out.push("");
+						return;
+					}
+
+					// veranda 前 3 低價（含同價一併粗體）
+					const verandaValues = snaps
+						.map(p => Number(p.veranda))
+						.filter(v => Number.isFinite(v))
+						.sort((a, b) => a - b);
+
+					let threshold = null;
+					if (verandaValues.length > 0) {
+						threshold = verandaValues[Math.min(2, verandaValues.length - 1)];
+					}
+
+					out.push(`| 巡價日期 | 倒數天 | 陽台艙 | 水療艙 | 套房 | 備註 |`);
+					out.push(`| ---- | ---- | ---- | ---- | ---- | ---- |`);
+
+					snaps.forEach(p => {
+						const date = p.date || "";
+						const countdown = diffDays(date, s.sdate); // sdate -巡價日
+						const cd = (countdown === null) ? "-" : String(countdown);
+
+						let veranda = p.veranda;
+						let verandaStr = veranda === null || veranda === undefined ? "-" : String(Math.round(veranda));
+						if (threshold !== null && verandaStr !== "-" && Number(p.veranda) <= threshold) {
+							verandaStr = `**${verandaStr}**`;
+						}
+
+						const aquaStr = p.aqua === null || p.aqua === undefined ? "-" : String(Math.round(p.aqua));
+						const suiteStr = p.suite === null || p.suite === undefined ? "-" : String(Math.round(p.suite));
+
+						const rmk = mdEscapePipes(clampText(p.remark));
+						out.push(`| ${date} | ${cd} | ${verandaStr} | ${aquaStr} | ${suiteStr} | ${rmk} |`);
+					});
+
+					out.push("");
+				});
+				out.push("");
+				
+			});
+
+			return out.join("\n");
+		}
+
+		function openExportModal() {
+			renderExportChecklist();
+			// bind checkbox change events (delegation)
+			el.exportChecklist.onchange = () => setExportCount(getCheckedExportIds().length);
+			el.exportPreview.innerHTML = "（按「預覽 MD」後才會出現內容）";
+			setExportCount(getCheckedExportIds().length);
+			openModal(el.modalExport);
+		}
+
+		function closeExportModal() {
+			closeModal(el.modalExport);
+		}
+
+		function renderExportPreviewFromSelection() {
+			const ids = getCheckedExportIds();
+			if (ids.length === 0) {
+				alert("先勾幾條航程，不然我只能預覽虛無。");
+				return;
+			}
+			const md = buildCruiseMarkdown(ids);
+			if (!md) {
+				alert("匯出失敗：沒有可用資料。");
+				return;
+			}
+			try {
+				const html = (typeof marked !== "undefined") ? marked.parse(md) : `<pre>${escapeHtml(md)}</pre>`;
+				el.exportPreview.innerHTML = html;
+			} catch (err) {
+				console.error(err);
+				el.exportPreview.innerHTML = `<pre>${escapeHtml(md)}</pre>`;
+			}
+		}
+
+		async function copyExportMarkdown() {
+			const ids = getCheckedExportIds();
+			if (ids.length === 0) {
+				alert("先勾幾條航程，不然要我複製什麼？");
+				return;
+			}
+			const md = buildCruiseMarkdown(ids);
+			if (!md) {
+				alert("沒有可複製的內容。");
+				return;
+			}
+			try {
+				await navigator.clipboard.writeText(md);
+				alert("已複製 Markdown");
+			} catch (err) {
+				console.error(err);
+				alert("複製失敗（iOS 偶爾會裝死），你可以改用手動選取預覽內容。 ");
+			}
+		}
+
 		// ===== Sailing modal =====
 		function syncSailingIdPreview() {
 			const id = genSailingId(el.mShip.value, el.mSdate.value);
@@ -844,7 +1203,7 @@
 			const routeName = clampText(el.mRouteName.value);
 
 			if (!ship) return alert("Ship 沒選到，是要追蹤幽靈郵輪？");
-			if (!sdate) return alert("請填出發日期");
+			if (!sdate) return alert("請填 SDate（出發日）。");
 			if (!days || days <= 0) return alert("Days 請填正整數。");
 
 			if (!edateManuallyEdited || !clampText(el.mEdate.value)) {
@@ -853,7 +1212,7 @@
 			}
 
 			const id = genSailingId(ship, sdate);
-			if (!id) return alert("ID 產生失敗。");
+			if (!id) return alert("ID 產生失敗（你可能把日期玩壞了）。");
 
 			// dict
 			upsertDictValue(DATA.dict.cities, el.mScity.value);
@@ -968,7 +1327,7 @@
 			if (!sailing_id) return alert("航程不見了，這不應該發生。");
 
 			const date = clampText(el.mSnapDate.value);
-			if (!date) return alert("巡價日期不能空。");
+			if (!date) return alert("快照 Date 不能空。");
 
 			const veranda = toNumOrNull(el.mSnapVeranda.value);
 			const aqua = toNumOrNull(el.mSnapAqua.value);
@@ -1093,6 +1452,14 @@
 
 		el.btnNewSailing.onclick = () => openSailingModal(null);
 
+		// Export / Preview (MD)
+		el.btnExportPreview.onclick = openExportModal;
+		el.btnExportClose.onclick = closeExportModal;
+		el.btnSelectAll.onclick = () => setAllExportChecks(true);
+		el.btnClearAll.onclick = () => setAllExportChecks(false);
+		el.btnBuildPreview.onclick = renderExportPreviewFromSelection;
+		el.btnCopyMd.onclick = copyExportMarkdown;
+
 		el.btnNewSnapshot.onclick = () => {
 			if (!selectedSailingId) return;
 			openSnapshotModal(null, selectedSailingId);
@@ -1107,14 +1474,22 @@
 		el.btnOpenUrl.onclick = openUrlFromModal;
 
 		// modal sailing live calc
-		el.mShip.addEventListener("change", () => { edateManuallyEdited = false;
-			sailingModalRecalc(); });
-		el.mSdate.addEventListener("input", () => { edateManuallyEdited = false;
-			sailingModalRecalc(); });
-		el.mDays.addEventListener("input", () => { edateManuallyEdited = false;
-			sailingModalRecalc(); });
-		el.mEdate.addEventListener("input", () => { edateManuallyEdited = true;
-			syncSailingIdPreview(); });
+		el.mShip.addEventListener("change", () => {
+			edateManuallyEdited = false;
+			sailingModalRecalc();
+		});
+		el.mSdate.addEventListener("input", () => {
+			edateManuallyEdited = false;
+			sailingModalRecalc();
+		});
+		el.mDays.addEventListener("input", () => {
+			edateManuallyEdited = false;
+			sailingModalRecalc();
+		});
+		el.mEdate.addEventListener("input", () => {
+			edateManuallyEdited = true;
+			syncSailingIdPreview();
+		});
 
 		// ===== Init =====
 		(function init() {
@@ -1124,6 +1499,10 @@
 			touchUpdated();
 		})();
 	</script>
+	<footer style="margin-top: 32px; padding: 12px 0; font-size: 12px; color: #aaa; text-align: center">
+		© Claire Huang · 個人實驗工具
+	</footer>
+	
 </body>
 
 </html>
