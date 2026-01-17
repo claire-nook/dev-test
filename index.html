@@ -5,27 +5,25 @@
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<title>Cruise Tracker</title>
-
 	<style>
 		:root {
 			--card-bg: #fff;
-			--soft: #f5f5f7;
 			--ink: #222;
 			--muted: #666;
-			--accent: #888;
 			--radius: 12px;
 			--border: #e3e3e6;
+			--shadow: 0 2px 10px rgba(0, 0, 0, .06);
 		}
 
 		* {
-			box-sizing: border-box;
+			box-sizing: border-box
 		}
 
 		body {
 			margin: 0;
 			font-family: system-ui, -apple-system, "Segoe UI", Arial, "Noto Sans TC", sans-serif;
 			background: #fafafa;
-			color: var(--ink);
+			color: var(--ink)
 		}
 
 		header {
@@ -34,43 +32,43 @@
 			align-items: center;
 			padding: 1rem 1.5rem;
 			background: #fff;
-			box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+			box-shadow: 0 2px 5px rgba(0, 0, 0, .05);
 			position: sticky;
 			top: 0;
-			z-index: 10;
+			z-index: 10
 		}
 
 		header h2 {
 			margin: 0;
-			font-size: 1.25rem;
+			font-size: 1.25rem
 		}
 
 		header a {
 			text-decoration: none;
-			font-size: 0.95rem;
-			padding: 0.45rem 0.85rem;
+			font-size: .95rem;
+			padding: .45rem .85rem;
 			border-radius: 6px;
 			background: #eee;
 			color: #333;
-			box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-			white-space: nowrap;
+			box-shadow: 0 1px 4px rgba(0, 0, 0, .1);
+			white-space: nowrap
 		}
 
 		.wrap {
 			max-width: 1080px;
 			margin: 0 auto;
-			padding: 20px 16px 40px;
+			padding: 20px 16px 40px
 		}
 
 		h3 {
 			margin: 0 0 8px;
-			font-size: 1.05rem;
+			font-size: 1.05rem
 		}
 
 		p {
 			margin: 0 0 10px;
-			font-size: 0.95rem;
-			color: var(--muted);
+			font-size: .95rem;
+			color: var(--muted)
 		}
 
 		.toolbar {
@@ -81,15 +79,15 @@
 			background: var(--card-bg);
 			padding: 14px;
 			border-radius: var(--radius);
-			box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
-			margin-bottom: 16px;
+			box-shadow: var(--shadow);
+			margin-bottom: 16px
 		}
 
 		.toolbar-group {
 			display: flex;
 			flex-wrap: wrap;
 			gap: 8px;
-			align-items: center;
+			align-items: center
 		}
 
 		.badge {
@@ -99,16 +97,16 @@
 			padding: 3px 8px;
 			border-radius: 999px;
 			background: #f4f4ff;
-			font-size: 0.82rem;
+			font-size: .82rem;
 			color: #555;
-			white-space: nowrap;
+			white-space: nowrap
 		}
 
 		.badge-dot {
 			width: 8px;
 			height: 8px;
 			border-radius: 50%;
-			border: 2px solid #4f8cff;
+			border: 2px solid #4f8cff
 		}
 
 		input[type="date"],
@@ -117,103 +115,58 @@
 		input[type="url"],
 		select,
 		textarea {
-			font-size: 0.95rem;
-			padding: 6px 8px;
+			font-size: .95rem;
+			padding: 8px 10px;
 			border: 1px solid var(--border);
-			border-radius: 8px;
-			background: #fff;
+			border-radius: 10px;
+			background: #fff
 		}
 
 		textarea {
 			width: 100%;
-			min-height: 92px;
+			min-height: 96px;
 			resize: vertical;
-			line-height: 1.4;
+			line-height: 1.4
 		}
 
 		.btn {
 			border: none;
 			background: #2f855a;
 			color: #fff;
-			padding: 8px 12px;
-			border-radius: 10px;
+			padding: 9px 14px;
+			border-radius: 12px;
 			cursor: pointer;
-			font-size: 0.95rem;
+			font-size: .98rem;
 			display: inline-flex;
 			align-items: center;
 			gap: 6px;
-			white-space: nowrap;
+			white-space: nowrap
 		}
 
 		.btn.secondary {
-			background: #4f8cff;
+			background: #4f8cff
 		}
 
 		.btn.ghost {
 			background: #e0e7ff;
-			color: #333;
+			color: #333
 		}
 
 		.btn.danger {
-			background: #c62828;
+			background: #c62828
 		}
 
 		.btn[disabled] {
 			background: #bdbdbd;
-			cursor: not-allowed;
+			cursor: not-allowed
 		}
 
 		.panel {
 			background: var(--card-bg);
 			border-radius: var(--radius);
 			padding: 12px 12px 16px;
-			box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
-			margin-bottom: 18px;
-		}
-
-		.field-row {
-			display: flex;
-			flex-wrap: wrap;
-			gap: 8px;
-			align-items: center;
-			margin-bottom: 8px;
-		}
-
-		.field-row .grow {
-			flex: 1 1 240px;
-			min-width: 0;
-		}
-
-		.field-row .mini {
-			width: 120px;
-		}
-
-		.field-row .mid {
-			width: 180px;
-		}
-
-		/* iPad / 桌面：不要隨便換行，版面固定 */
-		@media (min-width: 820px) {
-			.field-row {
-				flex-wrap: nowrap;
-				align-items: center;
-			}
-		}
-
-		label {
-			font-size: 0.9rem;
-			color: var(--muted);
-			min-width: 88px;
-			text-align: left;
-		}
-
-		/* 避免 label 跟輸入元件在同一列時縱向不齊 */
-		.field-row {
-			align-items: flex-start;
-		}
-
-		.field-row>label {
-			margin-top: 6px;
+			box-shadow: var(--shadow);
+			margin-bottom: 18px
 		}
 
 		.list {
@@ -221,131 +174,176 @@
 			padding-top: 8px;
 			margin-top: 6px;
 			max-height: 360px;
-			overflow: auto;
+			overflow: auto
 		}
 
 		.chip {
 			border-radius: 999px;
 			border: 1px solid #e0e0e0;
-			padding: 6px 10px;
-			margin-bottom: 6px;
+			padding: 10px 12px;
+			margin-bottom: 8px;
 			display: flex;
-			align-items: center;
-			justify-content: flex-start;
-			gap: 8px;
+			align-items: flex-start;
+			gap: 10px;
 			background: #fafafa;
-			font-size: 0.85rem;
+			font-size: .9rem
 		}
 
 		.chip-main {
 			display: flex;
 			flex-direction: column;
 			min-width: 0;
+			flex: 1 1 auto
 		}
 
 		.chip-title {
-			font-weight: 600;
+			font-weight: 650;
 			display: -webkit-box;
 			-webkit-line-clamp: 2;
-			/* 最多兩行 */
 			-webkit-box-orient: vertical;
-			overflow: hidden;
+			overflow: hidden
 		}
 
 		.chip-meta {
-			font-size: 0.78rem;
+			font-size: .82rem;
 			color: var(--muted);
 			white-space: nowrap;
 			text-overflow: ellipsis;
-			overflow: hidden;
+			overflow: hidden
 		}
 
 		.chip-actions {
 			display: flex;
-			gap: 4px;
+			gap: 6px;
 			flex-shrink: 0;
 			margin-left: auto;
-		}
-
-		.chip.snapshot .chip-actions {
-			margin-left: 8px;
+			align-self: center
 		}
 
 		.chip button {
 			border: none;
 			border-radius: 999px;
-			padding: 7px 14px;
-			font-size: 0.95rem;
-			cursor: pointer;
+			padding: 7px 12px;
+			font-size: .92rem;
+			cursor: pointer
 		}
 
-		.chip button.select {
+		.chip button.view {
 			background: #e8f5e9;
-			color: #1b5e20;
+			color: #1b5e20
+		}
+
+		.chip button.add {
+			background: #f3e5f5;
+			color: #6a1b9a
 		}
 
 		.chip button.edit {
 			background: #e3f2fd;
-			color: #1565c0;
+			color: #1565c0
 		}
 
 		.chip button.delete {
 			background: #ffebee;
-			color: #c62828;
+			color: #c62828
 		}
 
-		.chip button.preview {
-			background: #f4f4ff;
-			color: #3949ab;
-		}
-
-		.chip.selected {
-			border-color: #2f855a;
-			box-shadow: 0 0 0 1px rgba(47, 133, 90, 0.35);
-			background: #f1fbf5;
-		}
-
-		.chip.editing {
-			border-color: #4f8cff;
-			box-shadow: 0 0 0 1px rgba(79, 140, 255, 0.45);
-			background: #f0f4ff;
-		}
-
-		/* iPad/窄螢幕：chip 允許換行，按鈕不要被擠出畫面 */
+		/* iPad/窄螢幕：chip 允許換行，避免按鈕被擠出畫面 */
 		@media (max-width: 900px) {
 			.chip {
-				flex-wrap: wrap;
-				align-items: flex-start;
-			}
-
-			.chip-main {
-				flex: 1 1 100%;
+				flex-wrap: wrap
 			}
 
 			.chip-actions {
-				margin-left: 0;
 				width: 100%;
-				justify-content: flex-end;
+				margin-left: 0;
+				justify-content: flex-end
+			}
+
+			.chip-meta {
+				white-space: normal
 			}
 		}
 
 		.mono {
-			font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-			font-size: 0.9rem;
+			font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace
 		}
 
 		.hint {
-			font-size: 0.85rem;
+			font-size: .85rem;
 			color: var(--muted);
-			line-height: 1.4;
+			line-height: 1.4
 		}
 
-		.view {
+		/* Modal */
+		.modal-backdrop {
+			position: fixed;
+			inset: 0;
+			background: rgba(0, 0, 0, .35);
 			display: none;
+			align-items: center;
+			justify-content: center;
+			z-index: 50;
+			padding: 18px
 		}
 
-		.view.active {
-			display: block;
+		.modal-backdrop.active {
+			display: flex
+		}
+
+		.modal {
+			width: min(900px, 100%);
+			max-height: 92vh;
+			overflow: auto;
+			background: #fff;
+			border-radius: 16px;
+			box-shadow: 0 20px 60px rgba(0, 0, 0, .25);
+			padding: 14px 14px 16px
+		}
+
+		.modal-header {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 10px;
+			margin-bottom: 10px
+		}
+
+		.modal-header h3 {
+			margin: 0
+		}
+
+		.modal-actions {
+			display: flex;
+			gap: 8px;
+			flex-wrap: wrap
+		}
+
+		.grid {
+			display: grid;
+			grid-template-columns: 120px 1fr 120px 1fr;
+			gap: 10px;
+			align-items: center
+		}
+
+		.grid label {
+			color: var(--muted);
+			font-size: .9rem;
+			text-align: left
+		}
+
+		.grid .full {
+			grid-column: 1 / -1
+		}
+
+		@media (max-width: 820px) {
+			.grid {
+				grid-template-columns: 1fr
+			}
+
+			.grid label {
+				margin-top: 4px
+			}
 		}
 	</style>
 </head>
@@ -366,154 +364,135 @@
 			</div>
 
 			<div class="toolbar-group">
-				<button class="btn" id="btnGoSailings" type="button">① 航程主檔</button>
-				<button class="btn ghost" id="btnGoSnapshots" type="button" disabled>② 價格快照</button>
+				<button class="btn" id="btnNewSailing">新增航程</button>
+				<span class="badge" title="你已經決定了，別再折磨自己">
+					<span class="badge-dot"></span>
+					幣別：USD
+				</span>
+				<span class="badge" id="badgeSelected" title="先檢視一條航程，才會有快照清單">
+					<span class="badge-dot" style="border-color:#2f855a"></span>
+					目前未選航程
+				</span>
 			</div>
-
-			<span class="badge" title="幣別固定">
-				<span class="badge-dot"></span>
-				幣別：USD
-			</span>
-
-			<span class="badge" id="badgeSelected" title="先選航程，再編輯價格快照。">
-				<span class="badge-dot" style="border-color:#2f855a"></span>
-				目前未選航程
-			</span>
 		</div>
 
-		<!-- View: Sailings -->
-		<section class="panel view active" id="viewSailings">
-			<h3>① 航程主檔</h3>
-			<p>上面輸入，下面列表。</p>
+		<section class="panel">
+			<h3>航程清單（航程 → 時間正序）</h3>
+			<div class="list" id="sailingList"></div>
+		</section>
 
-			<div class="field-row">
+		<section class="panel">
+			<h3>價格快照（倒序）</h3>
+			<p class="hint">點上面某條航程的「檢視價格」後，快照會出現在這裡。每筆都可以編輯或刪除。</p>
+			<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+				<span class="mono" id="previewTitle">尚未選擇航程</span>
+				<button class="btn ghost" id="btnNewSnapshot" disabled>新增快照</button>
+			</div>
+			<div class="list" id="snapshotList"></div>
+		</section>
+	</div>
+
+	<!-- datalists -->
+	<datalist id="dlCities"></datalist>
+	<datalist id="dlRouteNames"></datalist>
+
+	<!-- Sailing Modal -->
+	<div class="modal-backdrop" id="modalSailing">
+		<div class="modal" role="dialog" aria-modal="true">
+			<div class="modal-header">
+				<h3 id="modalSailingTitle">新增航程</h3>
+				<div class="modal-actions">
+					<button class="btn ghost" id="btnSailingCancel">取消</button>
+					<button class="btn" id="btnSailingSave">儲存</button>
+				</div>
+			</div>
+
+			<div class="grid">
 				<label>郵輪名稱</label>
-				<select id="ship" class="grow">
+				<select id="mShip">
 					<option value="X_EDGE">X_EDGE</option>
 					<option value="X_SOLSTICE">X_SOLSTICE</option>
 					<option value="X_SILHOUETTE">X_SILHOUETTE</option>
 				</select>
 
 				<label>晚數</label>
-				<input id="days" class="mini" type="number" min="1" step="1" placeholder="16" />
-			</div>
-			<div class="field-row">
-				<label>郵輪航程</label>
-				<input id="routeName" class="grow" type="text" list="dlRouteNames" placeholder="大溪地 / 阿拉斯加 / 移航..." />
-				<datalist id="dlRouteNames"></datalist>
-			</div>
+				<input id="mDays" type="number" min="1" step="1" placeholder="8" />
 
-			<div class="field-row">
+				<label>郵輪目的</label>
+				<input id="mRouteName" type="text" list="dlRouteNames" placeholder="阿拉斯加 / 大溪地 / 移航..." />
+
 				<label>出發日期</label>
-				<input id="sdate" class="grow" type="date" />
+				<input id="mSdate" type="date" />
 
 				<label>抵達日期</label>
-				<input id="edate" class="grow" type="date" />
+				<input id="mEdate" type="date" />
 
-			</div>
-
-			<div class="field-row">
 				<label>出發城市</label>
-				<input id="scity" class="grow" type="text" list="dlCities" placeholder="（中文）" />
+				<input id="mScity" type="text" list="dlCities" placeholder="（中文）" />
 
 				<label>抵達城市</label>
-				<input id="ecity" class="grow" type="text" list="dlCities" placeholder="（中文）" />
+				<input id="mEcity" type="text" list="dlCities" placeholder="（中文）" />
 
-				<datalist id="dlCities"></datalist>
-			</div>
+				<div class="full hint" id="mIdPreview">ID：—</div>
 
-			<div class="field-row">
-				<label class="mid">官網 URL</label>
-			</div>
-			<div class="field-row">
-				<input id="url" class="grow" type="url" placeholder="https://..." />
-				<button class="btn ghost" id="btnOpenUrl" type="button">開啟官網</button>
-			</div>
-
-			<div class="field-row">
-				<label class="grow">航程資訊</label>
-			</div>
-			<div class="field-row">
-				<textarea id="visiting" placeholder="例如：橫濱 > 仙台 > 海上 > 溫哥華..."></textarea>
-			</div>
-
-			<div class="field-row">
-				<label class="grow">備註</label>
-			</div>
-			<div class="field-row">
-				<textarea id="sailingRemark" placeholder="其他補充"></textarea>
-			</div>
-
-			<div class="field-row">
-				<button class="btn" id="btnSaveSailing" type="button">新增航程</button>
-				<button class="btn ghost" id="btnResetSailing" type="button">清空</button>
-				<span class="hint mono" id="idPreview">ID：—</span>
-			</div>
-
-			<div class="list" id="sailingList"></div>
-			<div class="list" style="margin-top:14px" id="previewWrap">
-				<div class="hint" style="margin-bottom:8px">
-					<strong>快照快速檢視</strong>（倒序）：
-					<span class="mono" id="previewTitle">尚未選擇航程</span>
+				<div class="full" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+					<label style="min-width:120px">官網 URL</label>
+					<input id="mUrl" type="url" style="flex:1 1 420px;min-width:0" placeholder="https://..." />
+					<button class="btn ghost" id="btnOpenUrl" type="button">開啟官網</button>
 				</div>
-				<div id="previewList"></div>
+
+				<div class="full">
+					<label>停靠港口</label>
+					<textarea id="mVisiting" placeholder="例如：橫濱 > 海上 > 溫哥華..."></textarea>
+				</div>
+
+				<div class="full">
+					<label>備註</label>
+					<textarea id="mRemark" placeholder="船名、OBC、促銷、你的碎念，通通塞這裡。"></textarea>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Snapshot Modal -->
+	<div class="modal-backdrop" id="modalSnapshot">
+		<div class="modal" role="dialog" aria-modal="true">
+			<div class="modal-header">
+				<h3 id="modalSnapshotTitle">新增快照</h3>
+				<div class="modal-actions">
+					<button class="btn ghost" id="btnSnapshotCancel">取消</button>
+					<button class="btn" id="btnSnapshotSave">儲存</button>
+				</div>
 			</div>
 
-		</section>
+			<div class="grid">
+				<label>航程</label>
+				<input id="mSnapSailing" type="text" class="mono" readonly />
 
-		<!-- View: Snapshots -->
-		<section class="panel view" id="viewSnapshots">
-			<h3>② 價格快照</h3>
-			<p>先選航程，再新增價格快照。</p>
-
-			<div class="field-row">
-				<label>目前航程</label>
-				<input id="selectedSailingId" class="grow mono" type="text" readonly placeholder="請先到 ① 選取航程" />
-
-			</div>
-
-			<div class="field-row">
 				<label>巡價日期</label>
-				<input id="pDate" class="grow" type="date" />
-			</div>
+				<input id="mSnapDate" type="date" />
 
-			<div class="field-row">
 				<label>Veranda</label>
-				<input id="pVeranda" class="grow" type="number" min="0" step="1" placeholder="2949" />
+				<input id="mSnapVeranda" type="number" min="0" step="1" placeholder="2949" />
 
 				<label>Aqua</label>
-				<input id="pAqua" class="grow" type="number" min="0" step="1" placeholder="（可空）" />
+				<input id="mSnapAqua" type="number" min="0" step="1" placeholder="（可空）" />
 
 				<label>Suite</label>
-				<input id="pSuite" class="grow" type="number" min="0" step="1" placeholder="（可空）" />
+				<input id="mSnapSuite" type="number" min="0" step="1" placeholder="（可空）" />
+
+				<div class="full">
+					<label>備註</label>
+					<textarea id="mSnapRemark" placeholder="例如：黑五/flash sale；OBC:200"></textarea>
+				</div>
 			</div>
-
-			<div class="field-row">
-				<label class="grow">備註</label>
-			</div>
-			<div class="field-row">
-				<textarea id="pRemark" placeholder="例如：黑五 / flash sale；OBC:200"></textarea>
-			</div>
-
-			<div class="field-row">
-				<button class="btn" id="btnSaveSnapshot" type="button" disabled>新增快照</button>
-				<button class="btn ghost" id="btnResetSnapshot" type="button">清空</button>
-				<button class="btn ghost" id="btnBackToSailings" type="button">回①</button>
-				<span class="hint mono" id="snapshotHint">未選航程</span>
-			</div>
-
-			<div class="list" id="snapshotList"></div>
-
-		</section>
-
+		</div>
 	</div>
 
 	<script>
 		"use strict";
 
-		let previewSailingId = null;
-		let editingSnapshotId = null;
-
+		// ===== Data =====
 		const DATA = {
 			meta: { schema_version: 1, updated_at: "" },
 			dict: { cities: [], route_names: [] },
@@ -521,59 +500,13 @@
 			price_snapshots: []
 		};
 
-		let selectedSailingId = null;
-		let editingSailingId = null;
+		let selectedSailingId = null; // currently previewing snapshots for this sailing
+		let editingSailingId = null; // modal sailing edit target
+		let editingSnapshotId = null; // modal snapshot edit target
 		let edateManuallyEdited = false;
 
-		const el = {
-			fileInput: document.getElementById("fileInput"),
-			btnImport: document.getElementById("btnImport"),
-			btnExport: document.getElementById("btnExport"),
-			btnCopy: document.getElementById("btnCopy"),
-
-			previewTitle: document.getElementById("previewTitle"),
-			previewList: document.getElementById("previewList"),
-
-			btnGoSailings: document.getElementById("btnGoSailings"),
-			btnGoSnapshots: document.getElementById("btnGoSnapshots"),
-
-			badgeSelected: document.getElementById("badgeSelected"),
-			viewSailings: document.getElementById("viewSailings"),
-			viewSnapshots: document.getElementById("viewSnapshots"),
-
-			ship: document.getElementById("ship"),
-			days: document.getElementById("days"),
-			routeName: document.getElementById("routeName"),
-			sdate: document.getElementById("sdate"),
-			edate: document.getElementById("edate"),
-			scity: document.getElementById("scity"),
-			ecity: document.getElementById("ecity"),
-			visiting: document.getElementById("visiting"),
-			url: document.getElementById("url"),
-			btnOpenUrl: document.getElementById("btnOpenUrl"),
-			sailingRemark: document.getElementById("sailingRemark"),
-			btnSaveSailing: document.getElementById("btnSaveSailing"),
-			btnResetSailing: document.getElementById("btnResetSailing"),
-			sailingList: document.getElementById("sailingList"),
-			idPreview: document.getElementById("idPreview"),
-
-			dlCities: document.getElementById("dlCities"),
-			dlRouteNames: document.getElementById("dlRouteNames"),
-
-			selectedSailingIdInput: document.getElementById("selectedSailingId"),
-			btnBackToSailings: document.getElementById("btnBackToSailings"),
-
-			pDate: document.getElementById("pDate"),
-			pVeranda: document.getElementById("pVeranda"),
-			pAqua: document.getElementById("pAqua"),
-			pSuite: document.getElementById("pSuite"),
-			pRemark: document.getElementById("pRemark"),
-			btnSaveSnapshot: document.getElementById("btnSaveSnapshot"),
-			btnResetSnapshot: document.getElementById("btnResetSnapshot"),
-			snapshotList: document.getElementById("snapshotList"),
-			snapshotHint: document.getElementById("snapshotHint")
-
-		};
+		// ===== Helpers =====
+		const clampText = (s) => (s ?? "").toString().trim();
 
 		function nowISO() {
 			const d = new Date();
@@ -589,10 +522,6 @@
 			const tzh = pad(Math.floor(Math.abs(tz) / 60));
 			const tzm = pad(Math.abs(tz) % 60);
 			return `${yyyy}-${mm}-${dd}T${hh}:${mi}:${ss}${sign}${tzh}:${tzm}`;
-		}
-
-		function clampText(s) {
-			return (s ?? "").toString().trim();
 		}
 
 		function toNumOrNull(v) {
@@ -628,270 +557,15 @@
 			if (!s || !Number.isFinite(d) || d <= 0) return "";
 			const dt = new Date(s + "T00:00:00");
 			if (Number.isNaN(dt.getTime())) return "";
-
-			// 直覺版：第 1 天 = 出發日，所以 + (days - 1)
-			dt.setDate(dt.getDate() + d);
-
+			dt.setDate(dt.getDate() + (d - 1));
 			const pad = (n) => String(n).padStart(2, "0");
-			const yyyy = dt.getFullYear();
-			const mm = pad(dt.getMonth() + 1);
-			const dd = pad(dt.getDate());
-			return `${yyyy}-${mm}-${dd}`;
+			return `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}`;
 		}
 
-		function showView(name) {
-			const isSailings = name === "sailings";
-			el.viewSailings.classList.toggle("active", isSailings);
-			el.viewSnapshots.classList.toggle("active", !isSailings);
-
-			// toolbar button styles
-			el.btnGoSailings.classList.toggle("ghost", !isSailings);
-			el.btnGoSnapshots.classList.toggle("ghost", isSailings);
-		}
-
-		function syncIdPreview() {
-			const id = genSailingId(el.ship.value, el.sdate.value);
-			el.idPreview.textContent = id ? `ID：${id}` : "ID：—";
-		}
-
-		function upsertDictValue(arr, value) {
-			const v = clampText(value);
-			if (!v) return;
-			if (!arr.includes(v)) arr.push(v);
-		}
-
-		function renderDatalists() {
-			// Cities
-			el.dlCities.innerHTML = "";
-			DATA.dict.cities.forEach(c => {
-				const opt = document.createElement("option");
-				opt.value = c;
-				el.dlCities.appendChild(opt);
-			});
-
-			// Route Names
-			el.dlRouteNames.innerHTML = "";
-			DATA.dict.route_names.forEach(r => {
-				const opt = document.createElement("option");
-				opt.value = r;
-				el.dlRouteNames.appendChild(opt);
-			});
-		}
-
-		function updateMetaAndJsonView() {
-			DATA.meta.updated_at = nowISO();
-		}
-
-		function setSelectedSailing(id) {
-			selectedSailingId = id;
-
-			if (!id) {
-				el.badgeSelected.innerHTML = `<span class="badge-dot" style="border-color:#2f855a"></span>目前未選航程`;
-				el.btnGoSnapshots.disabled = true;
-				el.btnSaveSnapshot.disabled = true;
-				el.snapshotHint.textContent = "未選航程";
-				el.selectedSailingIdInput.value = "";
-			} else {
-				el.badgeSelected.innerHTML = `<span class="badge-dot" style="border-color:#2f855a"></span>目前航程：${id}`;
-				el.btnGoSnapshots.disabled = false;
-				el.btnSaveSnapshot.disabled = false;
-				el.snapshotHint.textContent = `sailing_id = ${id}`;
-				el.selectedSailingIdInput.value = id;
-			}
-
-			renderSailingList();
-			renderSnapshotList();
-			updateMetaAndJsonView();
-		}
-
-		function resetSailingForm() {
-			editingSailingId = null;
-			edateManuallyEdited = false;
-
-			el.ship.value = "X_EDGE";
-			el.days.value = "";
-			el.routeName.value = "";
-			el.sdate.value = "";
-			el.edate.value = "";
-			el.scity.value = "";
-			el.ecity.value = "";
-			el.visiting.value = "";
-			el.url.value = "";
-			el.sailingRemark.value = "";
-
-			el.btnSaveSailing.textContent = "新增航程";
-			syncIdPreview();
-		}
-
-		function resetSnapshotForm() {
-			el.pDate.value = "";
-			el.pVeranda.value = "";
-			el.pAqua.value = "";
-			el.pSuite.value = "";
-			el.pRemark.value = "";
-			editingSnapshotId = null;
-			el.btnSaveSnapshot.textContent = "新增快照";
-		}
-
-		function renderSailingList() {
-			el.sailingList.innerHTML = "";
-
-			const sorted = [...DATA.sailings].sort((a, b) => {
-				const routeA = a.route_name || "";
-				const routeB = b.route_name || "";
-
-				// ① 先比航程名稱（字串正序）
-				const r = routeA.localeCompare(routeB, "zh-Hant");
-				if (r !== 0) return r;
-
-				// ② 同航程，再比出發日（時間正序）
-				return (a.sdate || "").localeCompare(b.sdate || "");
-			});
-
-			sorted.forEach(s => {
-				const chip = document.createElement("div");
-				chip.className = "chip";
-				if (s.id === selectedSailingId) chip.classList.add("selected");
-				if (s.id === editingSailingId) chip.classList.add("editing");
-
-				const title = `${s.route_name || "（未分類）"}  ·  ${s.id}`;
-				const meta = `${s.sdate || "?"}~${s.edate || "?"} · ${s.days || "?"}晚 · ${s.scity || "?"}～${s.ecity || "?"}`;
-
-				chip.innerHTML = `
-          <div class="chip-main">
-            <div class="chip-title">${escapeHtml(title)}</div>
-            <div class="chip-meta mono">${escapeHtml(meta)}</div>
-          </div>
-			<div class="chip-actions">
-			  <button class="preview" type="button">檢視價格</button>
-			  <button class="select" type="button">編輯價格</button>
-			  <button class="edit" type="button">編輯航程</button>
-			  <button class="delete" type="button">刪除航程</button>
-			</div>
-		  `;
-
-				const [btnView, btnSelect, btnEdit, btnDelete] = chip.querySelectorAll("button");
-
-				btnSelect.onclick = () => {
-					setSelectedSailing(s.id);
-					// 選了航程通常就是要記快照，順便幫你切過去
-					showView("snapshots");
-				};
-
-				btnView.onclick = () => {
-					setPreviewSailing(s.id);
-				};
-
-				btnEdit.onclick = () => {
-					editingSailingId = s.id;
-
-					el.ship.value = s.ship || "X_EDGE";
-					el.days.value = s.days ?? "";
-					el.routeName.value = s.route_name ?? "";
-					el.sdate.value = s.sdate ?? "";
-					el.edate.value = s.edate ?? "";
-					el.scity.value = s.scity ?? "";
-					el.ecity.value = s.ecity ?? "";
-					el.visiting.value = s.visiting ?? "";
-					el.url.value = s.url ?? "";
-					el.sailingRemark.value = s.remark ?? "";
-
-					el.btnSaveSailing.textContent = "儲存變更";
-					syncIdPreview();
-					renderSailingList();
-					updateMetaAndJsonView();
-				};
-
-				btnDelete.onclick = () => deleteSailingCascade(s.id);
-
-				el.sailingList.appendChild(chip);
-			});
-		}
-
-		function setPreviewSailing(id) {
-			previewSailingId = id;
-			renderSnapshotPreview();
-		}
-
-		function renderSnapshotPreview() {
-			if (!el.previewTitle || !el.previewList) return;
-
-			el.previewList.innerHTML = "";
-
-			if (!previewSailingId) {
-				el.previewTitle.textContent = "尚未選擇航程";
-				return;
-			}
-
-			el.previewTitle.textContent = previewSailingId;
-
-			const list = DATA.price_snapshots
-				.filter(p => p.sailing_id === previewSailingId)
-				.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
-
-			if (list.length === 0) {
-				el.previewList.innerHTML = `<div class="hint">（這條航程還沒有快照）</div>`;
-				return;
-			}
-
-			list.forEach(p => {
-				const div = document.createElement("div");
-				div.className = "chip snapshot";
-				const title = `${p.date || "（未填日期）"}`;
-				const meta = `Veranda ${formatMoney(p.veranda)} | Aqua ${formatMoney(p.aqua)} | Suite ${formatMoney(p.suite)}`;
-				div.innerHTML = `
-      <div class="chip-main">
-        <div class="chip-title">${escapeHtml(title)}</div>
-        <div class="chip-meta">${escapeHtml(meta)}${p.remark ? " · " + escapeHtml(p.remark) : ""}</div>
-      </div>
-    `;
-				el.previewList.appendChild(div);
-			});
-		}
-
-		function renderSnapshotList() {
-			el.snapshotList.innerHTML = "";
-
-			if (!selectedSailingId) return;
-
-			const list = DATA.price_snapshots
-				.filter(p => p.sailing_id === selectedSailingId)
-				.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
-
-			list.forEach(p => {
-				const chip = document.createElement("div");
-				chip.className = "chip snapshot";
-
-				const title = `${p.date || "（未填日期）"}`;
-				const meta = `Veranda ${formatMoney(p.veranda)} | Aqua ${formatMoney(p.aqua)} | Suite ${formatMoney(p.suite)}`;
-
-				chip.innerHTML = `
-          <div class="chip-main">
-            <div class="chip-title">${escapeHtml(title)}</div>
-            <div class="chip-meta">${escapeHtml(meta)}${p.remark ? " · " + escapeHtml(p.remark) : ""}</div>
-          </div>
-          <div class="chip-actions">
-            <button class="edit" type="button">編輯</button>
-		  	<button class="delete" type="button">刪除</button>
-          </div>
-        `;
-
-				const [btnEdit, btnDelete] = chip.querySelectorAll("button");
-
-				btnEdit.onclick = () => {
-					editingSnapshotId = p._id;
-					el.pDate.value = p.date || "";
-					el.pVeranda.value = p.veranda ?? "";
-					el.pAqua.value = p.aqua ?? "";
-					el.pSuite.value = p.suite ?? "";
-					el.pRemark.value = p.remark ?? "";
-					el.btnSaveSnapshot.textContent = "儲存變更";
-				};
-
-				btnDelete.onclick = () => deleteSnapshot(p._id);
-
-				el.snapshotList.appendChild(chip);
-			});
+		function cryptoId() {
+			const a = new Uint8Array(6);
+			crypto.getRandomValues(a);
+			return Array.from(a).map(x => x.toString(16).padStart(2, "0")).join("");
 		}
 
 		function escapeHtml(str) {
@@ -903,30 +577,287 @@
 				.replaceAll("'", "&#039;");
 		}
 
-		function saveSailing() {
-			const ship = clampText(el.ship.value);
-			const sdate = clampText(el.sdate.value);
-			const days = toNumOrNull(el.days.value);
-			const routeName = clampText(el.routeName.value);
+		function upsertDictValue(arr, value) {
+			const v = clampText(value);
+			if (!v) return;
+			if (!arr.includes(v)) arr.push(v);
+		}
+
+		function renderDatalists() {
+			const dlCities = document.getElementById("dlCities");
+			const dlRouteNames = document.getElementById("dlRouteNames");
+
+			dlCities.innerHTML = "";
+			DATA.dict.cities.forEach(c => {
+				const opt = document.createElement("option");
+				opt.value = c;
+				dlCities.appendChild(opt);
+			});
+
+			dlRouteNames.innerHTML = "";
+			DATA.dict.route_names.forEach(r => {
+				const opt = document.createElement("option");
+				opt.value = r;
+				dlRouteNames.appendChild(opt);
+			});
+		}
+
+		function touchUpdated() {
+			DATA.meta.updated_at = nowISO();
+		}
+
+		// ===== DOM =====
+		const el = {
+			fileInput: document.getElementById("fileInput"),
+			btnImport: document.getElementById("btnImport"),
+			btnExport: document.getElementById("btnExport"),
+			btnCopy: document.getElementById("btnCopy"),
+
+			btnNewSailing: document.getElementById("btnNewSailing"),
+			badgeSelected: document.getElementById("badgeSelected"),
+
+			sailingList: document.getElementById("sailingList"),
+			previewTitle: document.getElementById("previewTitle"),
+			btnNewSnapshot: document.getElementById("btnNewSnapshot"),
+			snapshotList: document.getElementById("snapshotList"),
+
+			modalSailing: document.getElementById("modalSailing"),
+			modalSailingTitle: document.getElementById("modalSailingTitle"),
+			btnSailingCancel: document.getElementById("btnSailingCancel"),
+			btnSailingSave: document.getElementById("btnSailingSave"),
+
+			mShip: document.getElementById("mShip"),
+			mDays: document.getElementById("mDays"),
+			mRouteName: document.getElementById("mRouteName"),
+			mSdate: document.getElementById("mSdate"),
+			mEdate: document.getElementById("mEdate"),
+			mScity: document.getElementById("mScity"),
+			mEcity: document.getElementById("mEcity"),
+			mIdPreview: document.getElementById("mIdPreview"),
+			mUrl: document.getElementById("mUrl"),
+			btnOpenUrl: document.getElementById("btnOpenUrl"),
+			mVisiting: document.getElementById("mVisiting"),
+			mRemark: document.getElementById("mRemark"),
+
+			modalSnapshot: document.getElementById("modalSnapshot"),
+			modalSnapshotTitle: document.getElementById("modalSnapshotTitle"),
+			btnSnapshotCancel: document.getElementById("btnSnapshotCancel"),
+			btnSnapshotSave: document.getElementById("btnSnapshotSave"),
+
+			mSnapSailing: document.getElementById("mSnapSailing"),
+			mSnapDate: document.getElementById("mSnapDate"),
+			mSnapVeranda: document.getElementById("mSnapVeranda"),
+			mSnapAqua: document.getElementById("mSnapAqua"),
+			mSnapSuite: document.getElementById("mSnapSuite"),
+			mSnapRemark: document.getElementById("mSnapRemark")
+		};
+
+		// ===== UI state =====
+		function setSelectedSailing(id) {
+			selectedSailingId = id;
+
+			if (!id) {
+				el.badgeSelected.innerHTML = `<span class="badge-dot" style="border-color:#2f855a"></span>目前未選航程`;
+				el.previewTitle.textContent = "尚未選擇航程";
+				el.btnNewSnapshot.disabled = true;
+			} else {
+				el.badgeSelected.innerHTML = `<span class="badge-dot" style="border-color:#2f855a"></span>目前航程：${id}`;
+				el.previewTitle.textContent = id;
+				el.btnNewSnapshot.disabled = false;
+			}
+
+			renderSnapshotList();
+		}
+
+		function openModal(backdrop) {
+			backdrop.classList.add("active");
+		}
+
+		function closeModal(backdrop) {
+			backdrop.classList.remove("active");
+		}
+
+		// Close modal when clicking backdrop
+		[el.modalSailing, el.modalSnapshot].forEach(bd => {
+			bd.addEventListener("click", (e) => {
+				if (e.target === bd) closeModal(bd);
+			});
+		});
+
+		document.addEventListener("keydown", (e) => {
+			if (e.key === "Escape") {
+				closeModal(el.modalSailing);
+				closeModal(el.modalSnapshot);
+			}
+		});
+
+		// ===== Render =====
+		function renderSailingList() {
+			el.sailingList.innerHTML = "";
+
+			const sorted = [...DATA.sailings].sort((a, b) => {
+				const ra = (a.route_name || "");
+				const rb = (b.route_name || "");
+				const r = ra.localeCompare(rb, "zh-Hant");
+				if (r !== 0) return r;
+				return (a.sdate || "").localeCompare(b.sdate || "");
+			});
+
+			sorted.forEach(s => {
+				const chip = document.createElement("div");
+				chip.className = "chip";
+
+				const title = `${s.route_name || "（未分類）"}  ·  ${s.id}`;
+				const meta = `${s.sdate || "?"}～${s.edate || "?"} · ${s.days || "?"}晚 · ${s.scity || "?"}～${s.ecity || "?"}`;
+
+				chip.innerHTML = `
+          <div class="chip-main">
+            <div class="chip-title">${escapeHtml(title)}</div>
+            <div class="chip-meta mono">${escapeHtml(meta)}</div>
+          </div>
+          <div class="chip-actions">
+            <button class="view" type="button">檢視價格</button>
+            <button class="add" type="button">＋價格</button>
+            <button class="edit" type="button">編輯</button>
+            <button class="delete" type="button">刪除</button>
+          </div>
+        `;
+
+				const [btnView, btnAdd, btnEdit, btnDelete] = chip.querySelectorAll("button");
+
+				btnView.onclick = () => {
+					setSelectedSailing(s.id);
+					// 捲動快照區回頂
+					el.snapshotList.scrollTop = 0;
+				};
+
+				btnAdd.onclick = () => {
+					setSelectedSailing(s.id);
+					openSnapshotModal(null, s.id);
+				};
+
+				btnEdit.onclick = () => {
+					openSailingModal(s.id);
+				};
+
+				btnDelete.onclick = () => {
+					deleteSailingCascade(s.id);
+				};
+
+				el.sailingList.appendChild(chip);
+			});
+		}
+
+		function renderSnapshotList() {
+			el.snapshotList.innerHTML = "";
+			if (!selectedSailingId) return;
+
+			const list = DATA.price_snapshots
+				.filter(p => p.sailing_id === selectedSailingId)
+				.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+
+			if (list.length === 0) {
+				el.snapshotList.innerHTML = `<div class="hint">（這條航程還沒有快照）</div>`;
+				return;
+			}
+
+			list.forEach(p => {
+				const chip = document.createElement("div");
+				chip.className = "chip";
+
+				const title = `${p.date || "（未填日期）"}`;
+				const meta = `Veranda ${formatMoney(p.veranda)} | Aqua ${formatMoney(p.aqua)} | Suite ${formatMoney(p.suite)}`;
+
+				chip.innerHTML = `
+          <div class="chip-main">
+            <div class="chip-title">${escapeHtml(title)}</div>
+            <div class="chip-meta">${escapeHtml(meta)}${p.remark ? " · " + escapeHtml(p.remark) : ""}</div>
+          </div>
+          <div class="chip-actions">
+            <button class="edit" type="button">編輯</button>
+            <button class="delete" type="button">刪除</button>
+          </div>
+        `;
+
+				const [btnEdit, btnDelete] = chip.querySelectorAll("button");
+				btnEdit.onclick = () => openSnapshotModal(p._id, p.sailing_id);
+				btnDelete.onclick = () => deleteSnapshot(p._id);
+
+				el.snapshotList.appendChild(chip);
+			});
+		}
+
+		// ===== Sailing modal =====
+		function syncSailingIdPreview() {
+			const id = genSailingId(el.mShip.value, el.mSdate.value);
+			el.mIdPreview.textContent = id ? `ID：${id}` : "ID：—";
+		}
+
+		function resetSailingModal() {
+			editingSailingId = null;
+			edateManuallyEdited = false;
+			el.modalSailingTitle.textContent = "新增航程";
+			el.mShip.value = "X_EDGE";
+			el.mDays.value = "";
+			el.mRouteName.value = "";
+			el.mSdate.value = "";
+			el.mEdate.value = "";
+			el.mScity.value = "";
+			el.mEcity.value = "";
+			el.mUrl.value = "";
+			el.mVisiting.value = "";
+			el.mRemark.value = "";
+			syncSailingIdPreview();
+		}
+
+		function openSailingModal(id) {
+			resetSailingModal();
+
+			if (id) {
+				const s = DATA.sailings.find(x => x.id === id);
+				if (!s) return;
+				editingSailingId = id;
+				el.modalSailingTitle.textContent = "編輯航程";
+
+				el.mShip.value = s.ship || "X_EDGE";
+				el.mDays.value = s.days ?? "";
+				el.mRouteName.value = s.route_name ?? "";
+				el.mSdate.value = s.sdate ?? "";
+				el.mEdate.value = s.edate ?? "";
+				el.mScity.value = s.scity ?? "";
+				el.mEcity.value = s.ecity ?? "";
+				el.mUrl.value = s.url ?? "";
+				el.mVisiting.value = s.visiting ?? "";
+				el.mRemark.value = s.remark ?? "";
+
+				syncSailingIdPreview();
+			}
+
+			openModal(el.modalSailing);
+		}
+
+		function saveSailingFromModal() {
+			const ship = clampText(el.mShip.value);
+			const sdate = clampText(el.mSdate.value);
+			const days = toNumOrNull(el.mDays.value);
+			const routeName = clampText(el.mRouteName.value);
 
 			if (!ship) return alert("Ship 沒選到，是要追蹤幽靈郵輪？");
-			if (!sdate) return alert("請填 SDate（出發日）。");
+			if (!sdate) return alert("請填出發日期");
 			if (!days || days <= 0) return alert("Days 請填正整數。");
 
-			// Auto EDate only if user didn't manually edit
-			if (!edateManuallyEdited || !clampText(el.edate.value)) {
+			if (!edateManuallyEdited || !clampText(el.mEdate.value)) {
 				const auto = dateAddDaysInclusive(sdate, days);
-				if (auto) el.edate.value = auto;
+				if (auto) el.mEdate.value = auto;
 			}
 
 			const id = genSailingId(ship, sdate);
-			if (!id) return alert("ID 產生失敗（這很難發生，除非你把日期格式玩壞）。");
+			if (!id) return alert("ID 產生失敗。");
 
-			// 更新字典（同檔內長大）
-			upsertDictValue(DATA.dict.cities, el.scity.value);
-			upsertDictValue(DATA.dict.cities, el.ecity.value);
+			// dict
+			upsertDictValue(DATA.dict.cities, el.mScity.value);
+			upsertDictValue(DATA.dict.cities, el.mEcity.value);
 			upsertDictValue(DATA.dict.route_names, routeName);
-
 			renderDatalists();
 
 			const sailing = {
@@ -935,16 +866,15 @@
 				days,
 				route_name: routeName,
 				sdate,
-				edate: clampText(el.edate.value),
-				scity: clampText(el.scity.value),
-				ecity: clampText(el.ecity.value),
-				visiting: clampText(el.visiting.value),
-				url: clampText(el.url.value),
-				remark: clampText(el.sailingRemark.value)
+				edate: clampText(el.mEdate.value),
+				scity: clampText(el.mScity.value),
+				ecity: clampText(el.mEcity.value),
+				visiting: clampText(el.mVisiting.value),
+				url: clampText(el.mUrl.value),
+				remark: clampText(el.mRemark.value)
 			};
 
 			if (editingSailingId && editingSailingId !== id) {
-				// 編輯時若 ID 改變（例如改了 ship 或 sdate），要問你要不要級聯搬家快照
 				const ok = confirm(
 					`你改了 ship 或 sdate，ID 會從\n${editingSailingId}\n變成\n${id}\n\n要把舊 ID 的價格快照一起搬到新 ID 嗎？\n（不搬就會變成孤兒資料）`
 				);
@@ -953,33 +883,137 @@
 						if (p.sailing_id === editingSailingId) p.sailing_id = id;
 					});
 				}
-				// 不管搬不搬，舊主檔要移除（避免兩筆同內容）
 				DATA.sailings = DATA.sailings.filter(s => s.id !== editingSailingId);
+
+				if (selectedSailingId === editingSailingId) {
+					selectedSailingId = id;
+				}
 			}
 
 			const idx = DATA.sailings.findIndex(s => s.id === id);
 			if (idx >= 0) DATA.sailings[idx] = sailing;
 			else DATA.sailings.push(sailing);
 
-			editingSailingId = null;
-			el.btnSaveSailing.textContent = "新增航程";
-
-			// 自動選取這筆
-			setSelectedSailing(id);
-
-			// 讓你輸入順一點
-			// （你要回主檔繼續新增也行，但通常新增完會想記快照）
-			// showView("snapshots");
-
+			touchUpdated();
 			renderSailingList();
-			updateMetaAndJsonView();
-			syncIdPreview();
+
+			// if this is the current preview, refresh
+			if (selectedSailingId === id) {
+				setSelectedSailing(id);
+			} else if (!selectedSailingId) {
+				// optional: auto select the newly created one
+				setSelectedSailing(id);
+			} else {
+				// still update badge if we migrated
+				setSelectedSailing(selectedSailingId);
+			}
+
+			closeModal(el.modalSailing);
+		}
+
+		function openUrlFromModal() {
+			const u = clampText(el.mUrl.value);
+			if (!u) return alert("URL 還是空的，你要我打開什麼？");
+			window.open(u, "_blank");
+		}
+
+		// auto EDate & ID preview
+		function sailingModalRecalc() {
+			syncSailingIdPreview();
+			const days = toNumOrNull(el.mDays.value);
+			if (!edateManuallyEdited && clampText(el.mSdate.value) && days) {
+				const auto = dateAddDaysInclusive(el.mSdate.value, days);
+				if (auto) el.mEdate.value = auto;
+			}
+		}
+
+		// ===== Snapshot modal =====
+		function resetSnapshotModal() {
+			editingSnapshotId = null;
+			el.modalSnapshotTitle.textContent = "新增快照";
+			el.mSnapSailing.value = selectedSailingId || "";
+			el.mSnapDate.value = "";
+			el.mSnapVeranda.value = "";
+			el.mSnapAqua.value = "";
+			el.mSnapSuite.value = "";
+			el.mSnapRemark.value = "";
+		}
+
+		function openSnapshotModal(snapshotId, sailingId) {
+			if (!sailingId) sailingId = selectedSailingId;
+			if (!sailingId) return alert("請先選航程。");
+
+			resetSnapshotModal();
+			el.mSnapSailing.value = sailingId;
+
+			if (snapshotId) {
+				const p = DATA.price_snapshots.find(x => x._id === snapshotId);
+				if (!p) return;
+				editingSnapshotId = snapshotId;
+				el.modalSnapshotTitle.textContent = "編輯快照";
+
+				el.mSnapDate.value = p.date || "";
+				el.mSnapVeranda.value = p.veranda ?? "";
+				el.mSnapAqua.value = p.aqua ?? "";
+				el.mSnapSuite.value = p.suite ?? "";
+				el.mSnapRemark.value = p.remark ?? "";
+			}
+
+			openModal(el.modalSnapshot);
+		}
+
+		function saveSnapshotFromModal() {
+			const sailing_id = clampText(el.mSnapSailing.value);
+			if (!sailing_id) return alert("航程不見了，這不應該發生。");
+
+			const date = clampText(el.mSnapDate.value);
+			if (!date) return alert("巡價日期不能空。");
+
+			const veranda = toNumOrNull(el.mSnapVeranda.value);
+			const aqua = toNumOrNull(el.mSnapAqua.value);
+			const suite = toNumOrNull(el.mSnapSuite.value);
+
+			if (veranda === null && aqua === null && suite === null) {
+				return alert("至少填一個價格（Veranda/Aqua/Suite）。");
+			}
+
+			const payload = {
+				sailing_id,
+				date,
+				veranda,
+				aqua,
+				suite,
+				remark: clampText(el.mSnapRemark.value)
+			};
+
+			if (editingSnapshotId) {
+				const idx = DATA.price_snapshots.findIndex(p => p._id === editingSnapshotId);
+				if (idx >= 0) {
+					DATA.price_snapshots[idx] = { ...DATA.price_snapshots[idx], ...payload };
+				}
+			} else {
+				DATA.price_snapshots.push({ _id: cryptoId(), ...payload });
+			}
+
+			touchUpdated();
+
+			// make sure preview points to this sailing
+			setSelectedSailing(sailing_id);
+
+			closeModal(el.modalSnapshot);
+		}
+
+		function deleteSnapshot(snapshotId) {
+			const ok = confirm("刪除這筆快照？（不可復原）");
+			if (!ok) return;
+			DATA.price_snapshots = DATA.price_snapshots.filter(p => p._id !== snapshotId);
+			touchUpdated();
+			renderSnapshotList();
 		}
 
 		function deleteSailingCascade(id) {
 			const s = DATA.sailings.find(x => x.id === id);
 			const title = s ? `${s.route_name || "（未分類）"} / ${s.ship} / ${s.sdate}` : id;
-
 			const ok = confirm(`確定刪除這條航程？\n${title}\n\n將一併刪除所有價格快照（不可復原）。`);
 			if (!ok) return;
 
@@ -987,92 +1021,15 @@
 			DATA.price_snapshots = DATA.price_snapshots.filter(p => p.sailing_id !== id);
 
 			if (selectedSailingId === id) setSelectedSailing(null);
-			if (editingSailingId === id) resetSailingForm();
 
+			touchUpdated();
 			renderSailingList();
 			renderSnapshotList();
-			updateMetaAndJsonView();
-
-			// 刪完就回主檔視圖，避免你在快照頁看著空空發呆
-			showView("sailings");
 		}
 
-		function openUrl() {
-			const u = clampText(el.url.value);
-			if (!u) return alert("URL 還是空的，你要我打開什麼？");
-			window.open(u, "_blank");
-		}
-
-		function saveSnapshot() {
-			if (!selectedSailingId) return alert("請先選航程。");
-
-			const date = clampText(el.pDate.value);
-			if (!date) return alert("快照 Date 不能空。");
-
-			const veranda = toNumOrNull(el.pVeranda.value);
-			const aqua = toNumOrNull(el.pAqua.value);
-			const suite = toNumOrNull(el.pSuite.value);
-
-			if (veranda === null && aqua === null && suite === null) {
-				return alert("至少填一個價格（Veranda/Aqua/Suite），不然你是在記空氣。");
-			}
-
-			const payload = {
-				date,
-				veranda,
-				aqua,
-				suite,
-				remark: clampText(el.pRemark.value)
-			};
-
-			// ★ 有 editingSnapshotId：更新既有快照
-			if (editingSnapshotId) {
-				const idx = DATA.price_snapshots.findIndex(p => p._id === editingSnapshotId);
-				if (idx >= 0) {
-					DATA.price_snapshots[idx] = {
-						...DATA.price_snapshots[idx],
-						...payload
-					};
-				}
-
-				editingSnapshotId = null;
-				el.btnSaveSnapshot.textContent = "新增快照";
-			}
-			// ★ 沒有 editingSnapshotId：新增快照
-			else {
-				DATA.price_snapshots.push({
-					_id: cryptoId(),
-					sailing_id: selectedSailingId,
-					...payload
-				});
-			}
-
-			renderSnapshotList();
-			// 若你想讓「檢視快照」區塊也跟著更新，可以順便補這行
-			// renderSnapshotPreview();
-
-			updateMetaAndJsonView();
-			resetSnapshotForm();
-		}
-
-		function deleteSnapshot(snapshotId) {
-			const ok = confirm("刪除這筆快照？（不可復原）");
-			if (!ok) return;
-
-			DATA.price_snapshots = DATA.price_snapshots.filter(p => p._id !== snapshotId);
-			renderSnapshotList();
-			updateMetaAndJsonView();
-		}
-
-		function cryptoId() {
-			// 很短的隨機 id，避免同日多筆快照刪除時不好精準定位
-			// 不拿來當主鍵給人看，只是內部刪除用
-			const a = new Uint8Array(6);
-			crypto.getRandomValues(a);
-			return Array.from(a).map(x => x.toString(16).padStart(2, "0")).join("");
-		}
-
+		// ===== Import/Export/Copy =====
 		function exportJson() {
+			touchUpdated();
 			const blob = new Blob([JSON.stringify(DATA, null, 2)], { type: "application/json" });
 			const a = document.createElement("a");
 			a.href = URL.createObjectURL(blob);
@@ -1083,6 +1040,7 @@
 
 		async function copyJson() {
 			try {
+				touchUpdated();
 				await navigator.clipboard.writeText(JSON.stringify(DATA, null, 2));
 				alert("已複製 JSON");
 			} catch {
@@ -1099,43 +1057,29 @@
 			reader.onload = () => {
 				try {
 					const obj = JSON.parse(reader.result);
-
-					// 最低限度驗證
 					if (!obj || typeof obj !== "object") throw new Error("bad json");
-					if (!Array.isArray(obj.sailings) || !Array.isArray(obj.price_snapshots)) {
-						throw new Error("missing arrays");
-					}
+					if (!Array.isArray(obj.sailings) || !Array.isArray(obj.price_snapshots)) throw new Error("missing arrays");
 
-					// 清空後覆蓋
 					DATA.meta = obj.meta || DATA.meta;
 					DATA.dict = obj.dict || { cities: [], route_names: [] };
 					DATA.sailings = obj.sailings || [];
 					DATA.price_snapshots = obj.price_snapshots || [];
 
-					// 修補 dict 不存在時的預設
 					if (!Array.isArray(DATA.dict.cities)) DATA.dict.cities = [];
 					if (!Array.isArray(DATA.dict.route_names)) DATA.dict.route_names = [];
 
-					selectedSailingId = null;
-					editingSailingId = null;
-
 					renderDatalists();
 					renderSailingList();
-					renderSnapshotList();
 					setSelectedSailing(null);
-					resetSailingForm();
-					resetSnapshotForm();
-					updateMetaAndJsonView();
-
-					showView("sailings");
-				} catch (e) {
+					touchUpdated();
+				} catch {
 					alert("匯入失敗：JSON 格式不對或不是 cruise_tracker 檔。");
 				}
 			};
 			reader.readAsText(file);
 		}
 
-		// Events
+		// ===== Events =====
 		el.btnImport.onclick = importJson;
 		el.btnExport.onclick = exportJson;
 		el.btnCopy.onclick = copyJson;
@@ -1146,61 +1090,37 @@
 			el.fileInput.value = "";
 		};
 
-		el.btnGoSailings.onclick = () => showView("sailings");
-		el.btnGoSnapshots.onclick = () => showView("snapshots");
+		el.btnNewSailing.onclick = () => openSailingModal(null);
 
-		el.btnBackToSailings.onclick = () => showView("sailings");
-
-		el.btnOpenUrl.onclick = openUrl;
-
-		el.btnSaveSailing.onclick = saveSailing;
-		el.btnResetSailing.onclick = () => {
-			editingSailingId = null;
-			resetSailingForm();
-			renderSailingList();
-			updateMetaAndJsonView();
+		el.btnNewSnapshot.onclick = () => {
+			if (!selectedSailingId) return;
+			openSnapshotModal(null, selectedSailingId);
 		};
 
-		el.btnSaveSnapshot.onclick = saveSnapshot;
-		el.btnResetSnapshot.onclick = resetSnapshotForm;
+		el.btnSailingCancel.onclick = () => closeModal(el.modalSailing);
+		el.btnSailingSave.onclick = saveSailingFromModal;
 
-		// Auto EDate preview
-		el.sdate.addEventListener("input", () => {
-			edateManuallyEdited = false;
-			syncIdPreview();
-			const days = toNumOrNull(el.days.value);
-			if (clampText(el.sdate.value) && days) {
-				const auto = dateAddDaysInclusive(el.sdate.value, days);
-				if (auto) el.edate.value = auto;
-			}
-		});
+		el.btnSnapshotCancel.onclick = () => closeModal(el.modalSnapshot);
+		el.btnSnapshotSave.onclick = saveSnapshotFromModal;
 
-		el.ship.addEventListener("change", syncIdPreview);
+		el.btnOpenUrl.onclick = openUrlFromModal;
 
-		el.days.addEventListener("input", () => {
-			edateManuallyEdited = false;
-			syncIdPreview();
-			const days = toNumOrNull(el.days.value);
-			if (clampText(el.sdate.value) && days) {
-				const auto = dateAddDaysInclusive(el.sdate.value, days);
-				if (auto) el.edate.value = auto;
-			}
-		});
+		// modal sailing live calc
+		el.mShip.addEventListener("change", () => { edateManuallyEdited = false;
+			sailingModalRecalc(); });
+		el.mSdate.addEventListener("input", () => { edateManuallyEdited = false;
+			sailingModalRecalc(); });
+		el.mDays.addEventListener("input", () => { edateManuallyEdited = false;
+			sailingModalRecalc(); });
+		el.mEdate.addEventListener("input", () => { edateManuallyEdited = true;
+			syncSailingIdPreview(); });
 
-		el.edate.addEventListener("input", () => {
-			edateManuallyEdited = true;
-		});
-
-		// Init
+		// ===== Init =====
 		(function init() {
 			renderDatalists();
-			resetSailingForm();
-			resetSnapshotForm();
-			setSelectedSailing(null);
 			renderSailingList();
-			renderSnapshotList();
-			updateMetaAndJsonView();
-			showView("sailings");
+			setSelectedSailing(null);
+			touchUpdated();
 		})();
 	</script>
 </body>
