@@ -274,8 +274,8 @@
 		.chip button {
 			border: none;
 			border-radius: 999px;
-			padding: 3px 7px;
-			font-size: 0.75rem;
+			padding: 7px 14px;
+			font-size: 0.95rem;
 			cursor: pointer;
 		}
 
@@ -372,7 +372,7 @@
 
 			<span class="badge" title="幣別固定">
 				<span class="badge-dot"></span>
-				價格預設 USD（官網）
+				幣別：USD
 			</span>
 
 			<span class="badge" id="badgeSelected" title="先選航程，再編輯價格快照。">
@@ -387,26 +387,27 @@
 			<p>上面輸入，下面列表。</p>
 
 			<div class="field-row">
-				<label>Ship</label>
+				<label>郵輪名稱</label>
 				<select id="ship" class="grow">
 					<option value="X_EDGE">X_EDGE</option>
 					<option value="X_SOLSTICE">X_SOLSTICE</option>
 					<option value="X_SILHOUETTE">X_SILHOUETTE</option>
 				</select>
 
-				<label>天數</label>
+				<label>晚數</label>
 				<input id="days" class="mini" type="number" min="1" step="1" placeholder="16" />
-
-				<label>分類</label>
+			</div>
+			<div class="field-row">
+				<label>郵輪航程</label>
 				<input id="routeName" class="grow" type="text" list="dlRouteNames" placeholder="大溪地 / 阿拉斯加 / 移航..." />
 				<datalist id="dlRouteNames"></datalist>
 			</div>
 
 			<div class="field-row">
-				<label>開始日期</label>
+				<label>出發日期</label>
 				<input id="sdate" class="grow" type="date" />
 
-				<label>結束日期</label>
+				<label>抵達日期</label>
 				<input id="edate" class="grow" type="date" />
 
 			</div>
@@ -415,7 +416,7 @@
 				<label>出發城市</label>
 				<input id="scity" class="grow" type="text" list="dlCities" placeholder="（中文）" />
 
-				<label>結束城市</label>
+				<label>抵達城市</label>
 				<input id="ecity" class="grow" type="text" list="dlCities" placeholder="（中文）" />
 
 				<datalist id="dlCities"></datalist>
@@ -423,6 +424,8 @@
 
 			<div class="field-row">
 				<label class="mid">官網 URL</label>
+			</div>
+			<div class="field-row">
 				<input id="url" class="grow" type="url" placeholder="https://..." />
 				<button class="btn ghost" id="btnOpenUrl" type="button">開啟官網</button>
 			</div>
@@ -464,9 +467,9 @@
 			<p>先選航程，再新增價格快照。</p>
 
 			<div class="field-row">
-				<label class="mid">目前航程</label>
+				<label>目前航程</label>
 				<input id="selectedSailingId" class="grow mono" type="text" readonly placeholder="請先到 ① 選取航程" />
-				<button class="btn ghost" id="btnBackToSailings" type="button">回①</button>
+
 			</div>
 
 			<div class="field-row">
@@ -495,6 +498,7 @@
 			<div class="field-row">
 				<button class="btn" id="btnSaveSnapshot" type="button" disabled>新增快照</button>
 				<button class="btn ghost" id="btnResetSnapshot" type="button">清空</button>
+				<button class="btn ghost" id="btnBackToSailings" type="button">回①</button>
 				<span class="hint mono" id="snapshotHint">未選航程</span>
 			</div>
 
@@ -626,7 +630,7 @@
 			if (Number.isNaN(dt.getTime())) return "";
 
 			// 直覺版：第 1 天 = 出發日，所以 + (days - 1)
-			dt.setDate(dt.getDate() + (d - 1));
+			dt.setDate(dt.getDate() + d);
 
 			const pad = (n) => String(n).padStart(2, "0");
 			const yyyy = dt.getFullYear();
@@ -732,7 +736,17 @@
 		function renderSailingList() {
 			el.sailingList.innerHTML = "";
 
-			const sorted = [...DATA.sailings].sort((a, b) => (a.sdate || "").localeCompare(b.sdate || ""));
+			const sorted = [...DATA.sailings].sort((a, b) => {
+				const routeA = a.route_name || "";
+				const routeB = b.route_name || "";
+
+				// ① 先比航程名稱（字串正序）
+				const r = routeA.localeCompare(routeB, "zh-Hant");
+				if (r !== 0) return r;
+
+				// ② 同航程，再比出發日（時間正序）
+				return (a.sdate || "").localeCompare(b.sdate || "");
+			});
 
 			sorted.forEach(s => {
 				const chip = document.createElement("div");
@@ -741,7 +755,7 @@
 				if (s.id === editingSailingId) chip.classList.add("editing");
 
 				const title = `${s.route_name || "（未分類）"}  ·  ${s.id}`;
-				const meta = `${s.sdate || "?"}~${s.edate || "?"} · ${s.days || "?"}天 · ${s.scity || "?"}～${s.ecity || "?"}`;
+				const meta = `${s.sdate || "?"}~${s.edate || "?"} · ${s.days || "?"}晚 · ${s.scity || "?"}～${s.ecity || "?"}`;
 
 				chip.innerHTML = `
           <div class="chip-main">
@@ -749,14 +763,14 @@
             <div class="chip-meta mono">${escapeHtml(meta)}</div>
           </div>
 			<div class="chip-actions">
-			  <button class="select" type="button">編輯快照</button>
-			  <button class="preview" type="button">檢視快照</button>
+			  <button class="preview" type="button">檢視價格</button>
+			  <button class="select" type="button">編輯價格</button>
 			  <button class="edit" type="button">編輯航程</button>
 			  <button class="delete" type="button">刪除航程</button>
 			</div>
 		  `;
 
-				const [btnSelect, btnView, btnEdit, btnDelete] = chip.querySelectorAll("button");
+				const [btnView, btnSelect, btnEdit, btnDelete] = chip.querySelectorAll("button");
 
 				btnSelect.onclick = () => {
 					setSelectedSailing(s.id);
